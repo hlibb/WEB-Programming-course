@@ -8,7 +8,7 @@
   <body>
     <h1>Accounterstellung</h1>
     <p>Bitte füllen Sie das Formular zur Accounterstellung aus.</p>
-    <form method="post" action='<!--asd-->'>
+    <form method="post" action='../registration/registration.php'>
       <fieldset>
         <label for="username">Wählen Sie ihren Nutzernamen: <input id="username" name="username" type="text" required /></label>
         <label for="email">Geben Sie ihre Email ein: <input id="email" name="email" type="email" required /></label>
@@ -20,7 +20,7 @@
         <label for="business-account"><input id="business-account" type="radio" name="account-type" class="inline" />Geschäftlich</label>
       </fieldset>
       <fieldset>
-        <label for="age">Wie alt sind Sie? <input id="age" type="number" name="age" min="13" max="120" /></label>
+        <label for="age">Wann sind Sie geboren? <input id="age" type="date" name="age"/></label>
         <label for="referrer">Wie haben Sie von uns erfahren?
           <select id="referrer" name="referrer">
             <option value="">(auswählen)</option>
@@ -35,9 +35,9 @@
         </label>
       </fieldset>
       <label for="geschäftsbedingungen">
-        <input class="inline" id="Geschäftsbedingungen" type="checkbox" required name="Geschäftsbedingungen" /> Ich habe die <a href="https://www.juraforum.de/lexikon/allgemeine-geschaeftsbedingungen">ABG's</a> gelesen und stimme ihnen zu.
+        <input class="inline" id="Geschäftsbedingungen" type="checkbox" required name="Geschäftsbedingungen" /> Ich habe die <a href="https://www.juraforum.de/lexikon/allgemeine-geschaeftsbedingungen">ABG's</a> gelesen und stimme ihnen zu. <!-- required could be avoided by changing html in browser: simply deleted -> possible to avoid checking AGB's -->
       </label>
-      <input type="submit" value="Account erstellen" />
+      <input type="submit" value="Account erstellen" onclick=""/>
     </form>
   </body>
 </html>
