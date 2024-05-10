@@ -8,7 +8,7 @@
   <body>
     <h1>Accounterstellung</h1>
     <p>Bitte füllen Sie das Formular zur Accounterstellung aus.</p>
-    <form method="post" action='../registration/registration.php'>
+    <form method="post" action='registration_process.php'>
       <fieldset>
         <label for="username">Wählen Sie ihren Nutzernamen: <input id="username" name="username" type="text" required /></label>
         <label for="email">Geben Sie ihre Email ein: <input id="email" name="email" type="email" required /></label>

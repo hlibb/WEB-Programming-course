@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
     <title>Login</title>
     <meta charset="UTF-8">
@@ -34,7 +34,7 @@
 
         </div>
         <div class="panel-footer">
-            <p class='text-info'>Don't have an account? <a href="signup.php">Register</a></p>
+            <p class='text-info'>Don't have an account? <a href="registration/registration.php">Register</a></p>
         </div>
     </div>
 
