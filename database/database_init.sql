@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS `users` (
     `username` VARCHAR(255) NOT NULL,
     `email` VARCHAR(255) NOT NULL,
     `password` VARCHAR(255) NOT NULL,
-    `address` TEXT
+    `address` VARCHAR(255)
 );
 
 -- Table for storing product information
