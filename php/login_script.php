@@ -16,15 +16,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty(trim($_POST["email"]))) {
         $email_err = "Please enter your email.";
     } else {
-        $email = trim($_POST["email"]);
+        $email = htmlspecialchars(trim($_POST["email"]));
     }
 
-    // Check if password is empty
-    if (empty(trim($_POST["password"]))) {
-        $password_err = "Please enter your password.";
-    } else {
-        $password = trim($_POST["password"]);
+// Validate password
+if (empty($_POST["password"])) {
+    $password_err = "Please enter your password.";
+} else {
+    $password = htmlspecialchars(trim($_POST["password"]));
+
+    // Validate password format
+    if (strlen($password) < 6 || !preg_match("/^[a-zA-Z0-9!@#$%^&*_]+$/", $password)) {
+        $password_err = "Password must be at least 6 characters long and contain letters, numbers, and special characters (!@#$%^&*_).";
     }
+}
 
     // Validate credentials
     if (empty($email_err) && empty($password_err)) {
