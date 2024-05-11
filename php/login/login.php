@@ -34,7 +34,7 @@
 
         </div>
         <div class="panel-footer">
-            <p class='text-info'>Don't have an account? <a href="registration/registration.php">Register</a></p>
+            <p class='text-info'>Don't have an account? <a href="../registration/registration.php">Register</a></p>
         </div>
     </div>
 
