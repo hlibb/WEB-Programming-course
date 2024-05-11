@@ -7,10 +7,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST["username"];
     $email = $_POST["email"];
     $password = $_POST["new-password"];
-    $accountType = $_POST["account-type"];
-    $age = $_POST["age"];
-    $referrer = $_POST["referrer"];
-    $additionalInfo = $_POST["addinfo"];
 
     // Hash the password
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
@@ -21,8 +17,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Prepare and execute the SQL query
-    $sql = "INSERT INTO users (username, email, password, account_type, age, referrer, additional_info)
-            VALUES ('$username', '$email', '$hashedPassword', '$accountType', '$age', '$referrer', '$additionalInfo')";
+    $sql = "INSERT INTO users (username, email, password)
+            VALUES ('$username', '$email', '$hashedPassword')";
 
     if ($link->query($sql) === TRUE) {
         echo "New record created successfully";
