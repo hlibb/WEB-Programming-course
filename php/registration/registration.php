@@ -14,26 +14,6 @@
         <label for="email">Geben Sie ihre Email ein: <input id="email" name="email" type="email" required /></label>
         <label for="new-password">Wählen Sie ein neues Passwort: <input id="new-password" name="new-password" type="password" pattern="[a-z0-9]{8,}" required /></label>
       </fieldset>
-      <fieldset>
-        <legend>Accountart</legend>
-        <label for="personal-account"><input id="personal-account" type="radio" name="account-type" class="inline" checked />Privat</label>
-        <label for="business-account"><input id="business-account" type="radio" name="account-type" class="inline" />Geschäftlich</label>
-      </fieldset>
-      <fieldset>
-        <label for="age">Wann sind Sie geboren? <input id="age" type="date" name="age"/></label>
-        <label for="referrer">Wie haben Sie von uns erfahren?
-          <select id="referrer" name="referrer">
-            <option value="">(auswählen)</option>
-            <option value="1">Zeitung</option>
-            <option value="2">Werbung</option>
-            <option value="3">Freunde</option>
-            <option value="4">Andere</option>
-          </select>
-        </label>
-        <label for="addinfo">Zusatzinformationen
-          <textarea id="addinfo" name="addinfo" rows="3" cols="30" placeholder="Gibt es besondere Lieferbedingungen oder Wünsche?"></textarea>
-        </label>
-      </fieldset>
       <label for="geschäftsbedingungen">
         <input class="inline" id="Geschäftsbedingungen" type="checkbox" required name="Geschäftsbedingungen" /> Ich habe die <a href="https://www.juraforum.de/lexikon/allgemeine-geschaeftsbedingungen">ABG's</a> gelesen und stimme ihnen zu. <!-- required could be avoided by changing html in browser: simply deleted -> possible to avoid checking AGB's -->
       </label>
