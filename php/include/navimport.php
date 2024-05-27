@@ -8,9 +8,9 @@
   <div class="collapse" id="navbarToggleExternalContent">
     <div class="bg-dark p-4">
     <ul class="list-unstyled">
-      <li><a href="index.php">Index</a></li>
-      <li><a href="index.php">Index</a></li>
-      <li><a href="index.php">Index</a></li>
+      <li><a href="../php/login/login.php">Login</a></li>
+      <li><a href="../php/registration/registration.php">Registrierung</a></li>
+      <li><a href="../index.html">Index</a></li>
     </ul>
     </div> 
   </div>

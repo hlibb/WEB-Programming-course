@@ -4,4 +4,6 @@
 <link href="../node_modules/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet">
 <!-- CSS -->
 <link rel="stylesheet" href="styles.css">
-
+<?php
+  include "../fetch_online_users.php"
+?>
