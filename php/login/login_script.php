@@ -3,7 +3,7 @@
 session_start();
 
 // Include config file
-require_once 'include/db_connection.php';
+require_once '../include/db_connection.php';
 
 // Define variables and initialize with empty values
 $email = $password = "";
@@ -63,7 +63,7 @@ if (empty($_POST["password"])) {
                             $_SESSION["email"] = $email;
 
                             // Redirect user to welcome page
-                            header("location: ../index.html");
+                            header("location: ../../html/eingeloggt.php");
                         } else {
                             // Display an error message if password is not valid
                             $password_err = "The password you entered is not valid.";
