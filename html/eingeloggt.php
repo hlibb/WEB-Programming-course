@@ -18,10 +18,10 @@
         <div id="carouselExample" class="carousel slide">
             <div class="carousel-inner">
               <div class="carousel-item active">
-                <img src="https://images.unsplash.com/photo-1716583731424-45c32c2ad63b?q=80&w=2938&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="d-block w-100" alt="1">
+                <a href="../php/products/artikel1.php"><img src="https://images.unsplash.com/photo-1716583731424-45c32c2ad63b?q=80&w=2938&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="d-block w-100" alt="1"></a>
               </div>
               <div class="carousel-item">
-                <img src="https://images.unsplash.com/photo-1716583731424-45c32c2ad63b?q=80&w=2938&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="d-block w-100" alt="2">
+                <a href="../php/products/Testestest.php"><img src="https://images.unsplash.com/photo-1716583731424-45c32c2ad63b?q=80&w=2938&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="d-block w-100" alt="2"></a>
               </div>
               <div class="carousel-item">
                 <img src="https://source.unsplash.com/CC_kzFrwqiA/1600x900" class="d-block w-100" alt="3">
@@ -56,11 +56,8 @@
           </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-  </body>
-  <footer>
 <?php  
     include '../php/include/footimport.php'
 ?>
-  </footer>
-  
+  </body>
 </html>
