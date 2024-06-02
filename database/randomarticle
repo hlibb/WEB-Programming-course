@@ -1,0 +1,2 @@
+INSERT INTO `products` (`name`, `price`, `quantity`, `image_url`, `description`) VALUES
+('Beispielprodukt', 19.99, 10, 'https://example.com/product_image.jpg', 'Dies ist ein Beispielprodukt für Testzwecke.');
