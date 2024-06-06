@@ -1,17 +1,11 @@
 <?php
 session_start();
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "webshop";
-
-// Verbindung zur Datenbank herstellen
-$conn = new mysqli($servername, $username, $password, $dbname);
+global $link; //um die sache zu standartisieren, wäre gut überall global $link (aus db_connection.php) haben statt immer neu code schreiben.
 
 // Verbindung überprüfen
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if ($link->connect_error) {
+    die("Connection failed: " . $link->connect_error);
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['user_id'])) {
@@ -20,15 +14,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['user_id'])) {
 
     $sql = "UPDATE users SET password = '$new_password', first_login = FALSE WHERE id = $user_id";
 
-    if ($conn->query($sql) === TRUE) {
+    if ($link->query($sql) === TRUE) {
         echo "Password changed successfully";
         session_unset();
         session_destroy();
     } else {
-        echo "Error updating record: " . $conn->error;
+        echo "Error updating record: " . $link->error;
     }
 
-    $conn->close();
+    $link->close();
+
 } else {
     echo "Unauthorized access";
 }

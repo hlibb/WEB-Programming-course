@@ -1,5 +1,6 @@
 <?php
 // Initialize the session
+global $link;
 session_start();
 
 // Include config file
@@ -19,35 +20,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $email = htmlspecialchars(trim($_POST["email"]));
     }
 
-// Validate password
-if (empty($_POST["password"])) {
-    $password_err = "Please enter your password.";
-} else {
-    $password = htmlspecialchars(trim($_POST["password"]));
+    // Validate password
+    if (empty($_POST["password"])) {
+        $password_err = "Please enter your password.";
+    } else {
+        $password = htmlspecialchars(trim($_POST["password"]));
 
-    // Validate password format
-    if (strlen($password) < 6 || !preg_match("/^[a-zA-Z0-9!@#$%^&*_]+$/", $password)) {
-        $password_err = "Password must be at least 6 characters long and contain letters, numbers, and special characters (!@#$%^&*_).";
+        // Validate password format
+        if (strlen($password) < 6 || !preg_match("/^[a-zA-Z0-9!@#$%^&*_]+$/", $password)) {
+            $password_err = "Password must be at least 6 characters long and contain letters, numbers, and special characters (!@#$%^&*_).";
+        }
     }
-}
+
+    echo "errors:";
+    echo $email_err;
+    echo $password_err;
 
     // Validate credentials
     if (empty($email_err) && empty($password_err)) {
         // Prepare a select statement
         $sql = "SELECT id, email, password FROM users WHERE email = ?";
 
+        // Set parameters
+        $param_email = $email;
+
         if ($stmt = mysqli_prepare($link, $sql)) {
             // Bind variables to the prepared statement as parameters
             mysqli_stmt_bind_param($stmt, "s", $param_email);
-
-            // Set parameters
-            $param_email = $email;
-
+echo $sql;
             // Attempt to execute the prepared statement
             if (mysqli_stmt_execute($stmt)) {
                 // Store result
                 mysqli_stmt_store_result($stmt);
 
+                echo mysqli_stmt_num_rows($stmt);
                 // Check if email exists, if yes then verify password
                 if (mysqli_stmt_num_rows($stmt) == 1) {
                     // Bind result variables
@@ -58,7 +64,7 @@ if (empty($_POST["password"])) {
                             session_start();
 
                             // Store data in session variables
-                            $_SESSION["loggedin"] = true;
+                            $_SESSION["loggedIn"] = true;
                             $_SESSION["id"] = $id;
                             $_SESSION["email"] = $email;
 

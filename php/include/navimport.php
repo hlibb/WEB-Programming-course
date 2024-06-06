@@ -14,6 +14,7 @@
       <li><a href="../php/login/login.php">Login</a></li>
       <li><a href="../php/registration/registration.php">Registrierung</a></li>
       <li><a href="../index.html">Index</a></li>
+        <li><a href="../php/about.php">About Us</a></li>
     </ul>
     </div> 
   </div>
