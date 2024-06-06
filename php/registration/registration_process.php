@@ -36,15 +36,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Email already exists.");
     }
 
-    $dateTime = date("Y-m-d H:i:s");
 
-    $stmt = $link->prepare("INSERT INTO users (username, email, password, screen_resolution, operating_system, login_timestamp) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt = $link->prepare("INSERT INTO users (username, email, password, screen_resolution, operating_system) VALUES (?, ?, ?, ?, ?)");
     if ($stmt === false) {
         die("Prepare failed: " . $link->error);
     }
 
     // Bind parameters, including the datetime value
-    $bind = $stmt->bind_param("ssssss", $username, $email, $hashedPassword, $screen_resolution, $operating_system, $datetime);
+    $bind = $stmt->bind_param("sssss", $username, $email, $hashedPassword, $screen_resolution, $operating_system);
     if ($bind === false) {
         die("Bind failed: " . $stmt->error);
     }
@@ -52,6 +51,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($exec === false) {
         die("Execute failed: " . $stmt->error);
     } else {
+        // Update login timestamp
+        $update_sql = "UPDATE users SET login_timestamp = NOW() WHERE id = ?";
+        if ($update_stmt = mysqli_prepare($link, $update_sql)) {
+            // Bind variables to the prepared statement as parameters
+            mysqli_stmt_bind_param($update_stmt, "i", $id);
+            // Attempt to execute the prepared statement
+            if (!mysqli_stmt_execute($update_stmt)) {
+                echo "Oops! Something went wrong. Please try again later.";
+            }
+            // Close statement
+            mysqli_stmt_close($update_stmt);
+        }
         // Redirect after successful registration
         header("Location: ../../index.html");
         exit();  // Add exit after header redirection
