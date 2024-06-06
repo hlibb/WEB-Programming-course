@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS `users` (
     `password` VARCHAR(255) NOT NULL,
     `address` VARCHAR(255),
     `login_timestamp` DATETIME,
-    `screen_resolution` VARCHAR(20) NOT NULL,
-    `operating_system` VARCHAR(20) NOT NULL,
+    `screen_resolution` VARCHAR(255) NOT NULL,
+    `operating_system` VARCHAR(255) NOT NULL,
     `points_awarded` INT NOT NULL DEFAULT 100
 );
 
