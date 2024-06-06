@@ -32,9 +32,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    echo "errors:";
-    echo $email_err;
-    echo $password_err;
 
     // Validate credentials
     if (empty($email_err) && empty($password_err)) {
@@ -47,7 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($stmt = mysqli_prepare($link, $sql)) {
             // Bind variables to the prepared statement as parameters
             mysqli_stmt_bind_param($stmt, "s", $param_email);
-echo $sql;
+            echo $sql;
             // Attempt to execute the prepared statement
             if (mysqli_stmt_execute($stmt)) {
                 // Store result
@@ -67,6 +64,32 @@ echo $sql;
                             $_SESSION["loggedIn"] = true;
                             $_SESSION["id"] = $id;
                             $_SESSION["email"] = $email;
+
+                            // Update login timestamp
+                            $update_sql = "UPDATE users SET login_timestamp = NOW() WHERE id = ?";
+                            if ($update_stmt = mysqli_prepare($link, $update_sql)) {
+                                // Bind variables to the prepared statement as parameters
+                                mysqli_stmt_bind_param($update_stmt, "i", $id);
+                                // Attempt to execute the prepared statement
+                                if (!mysqli_stmt_execute($update_stmt)) {
+                                    echo "Oops! Something went wrong. Please try again later.";
+                                }
+                                // Close statement
+                                mysqli_stmt_close($update_stmt);
+                            }
+
+                            // Update user points
+                            $points_sql = "UPDATE users SET points_awarded = points_awarded + 5 WHERE id = ?";
+                            if ($points_stmt = mysqli_prepare($link, $points_sql)) {
+                                // Bind variables to the prepared statement as parameters
+                                mysqli_stmt_bind_param($points_stmt, "i", $id);
+                                // Attempt to execute the prepared statement
+                                if (!mysqli_stmt_execute($points_stmt)) {
+                                    echo "Oops! Something went wrong. Please try again later.";
+                                }
+                                // Close statement
+                                mysqli_stmt_close($points_stmt);
+                            }
 
                             // Redirect user to welcome page
                             header("location: ../../html/eingeloggt.php");
