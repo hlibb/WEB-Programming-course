@@ -5,8 +5,8 @@ include_once '../include/db_connection.php';
 // Check if the form was submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Retrieve form data
-    $vorname = $_POST['vorname'];
     $name = $_POST['name'];
+    $surname = $_POST['surname'];
     $username = $_POST["username"];
     $email = $_POST["email"];
     $password = $_POST["new-password"];
@@ -14,8 +14,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $operating_system = $_POST["operating_system"];
 
     // Sanitize input data
-    $vorname = htmlspecialchars($vorname);
     $name = htmlspecialchars($name);
+    $surname = htmlspecialchars($surname);
     $username = htmlspecialchars($username);
     $email = filter_var($email, FILTER_SANITIZE_EMAIL);
     // You can add further sanitization here
@@ -42,13 +42,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
 
-    $stmt = $link->prepare("INSERT INTO users (username, email, password, screen_resolution, operating_system) VALUES (?, ?, ?, ?, ?)");
+    $stmt = $link->prepare("INSERT INTO users (name, surname, username, email, password, screen_resolution, operating_system) VALUES (?, ?, ?, ?, ?, ?, ?)");
     if ($stmt === false) {
         die("Prepare failed: " . $link->error);
     }
 
     // Bind parameters, including the datetime value
-    $bind = $stmt->bind_param("sssss", $username, $email, $hashedPassword, $screen_resolution, $operating_system);
+    $bind = $stmt->bind_param("sssssss", $name, $surname, $username, $email, $hashedPassword, $screen_resolution, $operating_system);
     if ($bind === false) {
         die("Bind failed: " . $stmt->error);
     }
@@ -66,10 +66,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 echo "Oops! Something went wrong. Please try again later.";
             }
             // Close statement
-            mysqli_stmt_close($update_stmt);
+            mysqli_stmt_close($update_stmt); //TODO: last login is the login that was just now
         }
         // Redirect after successful registration
-        header("Location: ../../index.html");
+        header("Location: ../../start_page.html");
         // Close the statement
         $stmt->close();
         // Close the database connection
