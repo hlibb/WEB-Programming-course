@@ -10,6 +10,12 @@
 <p>Bitte füllen Sie das Formular zur Accounterstellung aus.</p>
 <form id="registrationForm" method="post" action='registration_process.php'>
     <fieldset>
+        <label for="vorname">Vorname:
+            <input id="name" name="name" type="text" required/>
+        </label>
+         <label for="nachname">Nachname:
+            <input id="surname" name="surname" type="text" required/>
+        </label>
         <label for="username">Wählen Sie ihren Nutzernamen:
             <input id="username" name="username" type="text" required/>
         </label>

@@ -7,10 +7,12 @@ USE `web-programming`;
 -- Table for storing user information
 CREATE TABLE IF NOT EXISTS `users` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(255) NOT NULL,
+    `surname` VARCHAR(255) NOT NULL,
     `username` VARCHAR(255) NOT NULL,
     `email` VARCHAR(255) NOT NULL,
     `password` VARCHAR(255) NOT NULL,
-    `address` VARCHAR(255),
+-- `address` VARCHAR(255),
     `login_timestamp` DATETIME,
     `screen_resolution` VARCHAR(255) NOT NULL,
     `operating_system` VARCHAR(255) NOT NULL,

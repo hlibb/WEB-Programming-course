@@ -5,6 +5,8 @@ include_once '../include/db_connection.php';
 // Check if the form was submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Retrieve form data
+    $vorname = $_POST['vorname'];
+    $name = $_POST['name'];
     $username = $_POST["username"];
     $email = $_POST["email"];
     $password = $_POST["new-password"];
@@ -12,6 +14,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $operating_system = $_POST["operating_system"];
 
     // Sanitize input data
+    $vorname = htmlspecialchars($vorname);
+    $name = htmlspecialchars($name);
     $username = htmlspecialchars($username);
     $email = filter_var($email, FILTER_SANITIZE_EMAIL);
     // You can add further sanitization here
@@ -66,11 +70,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         // Redirect after successful registration
         header("Location: ../../index.html");
+        // Close the statement
+        $stmt->close();
+        // Close the database connection
+        $link->close();
         exit();  // Add exit after header redirection
     }
-
-    // Close the statement and the database connection
-    $stmt->close();
-    $link->close();
 }
-?>
