@@ -94,3 +94,10 @@ a {
   justify-content: center;
   align-items: center;
 }
+
+.carousel-inner img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  max-height: 500px; 
+}
