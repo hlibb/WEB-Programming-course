@@ -1,2 +1,26 @@
 INSERT INTO `products` (`name`, `price`, `quantity`, `image_url`, `description`) VALUES
-('Beispielprodukt', 19.99, 10, 'https://example.com/product_image.jpg', 'Dies ist ein Beispielprodukt für Testzwecke.');
+('Montblanc', 159, 10, 'https://th.bing.com/th/id/OIP.6rsxXGY0IcuwUeMiVHA8vgAAAA?rs=1&pid=ImgDetMain', 'Classic 420 Vintage');
+
+INSERT INTO `products` (`name`, `price`, `quantity`, `image_url`, `description`) VALUES
+('Kaweco', 114, 13, 'https://schreibundstil.de/cdn/shop/products/Kaweco-Fueller-DIA2-Gold_3_700x.jpg?v=1594895630', 'Füller Dia2 Gold');
+
+INSERT INTO `products` (`name`, `price`, `quantity`, `image_url`, `description`) VALUES
+('Lamy', 199, 24, 'https://schreibundstil.de/cdn/shop/products/Lamy-Fueller-2000-Schwarz-3.1_700x.jpg?v=1613996674', 'Füller 2000 Schwarz');
+
+INSERT INTO `products` (`name`, `price`, `quantity`, `image_url`, `description`) VALUES
+('Waldmann', 416, 4, 'https://schreibundstil.de/cdn/shop/products/Waldmann-Fueller-Xetra-Vienna-Lack-Schwarz-11_700x.jpg?v=1593538004', 'Füller Xetra Vienna Lack Schwarz');
+
+INSERT INTO `products` (`name`, `price`, `quantity`, `image_url`, `description`) VALUES
+('Cleo Skribent', 202, 7, 'https://schreibundstil.de/collections/fullfederhalter-von-cleo-skribent/products/cleo-skribent-kolbenfuller-classic-palladium-gold-schwarz-1', 'Kolbenfüller Classic Palladium Gold-Schwarz');
+
+INSERT INTO `products` (`name`, `price`, `quantity`, `image_url`, `description`) VALUES
+('Caran d'' Ache', 280, 63, 'https://schreibundstil.de/cdn/shop/products/Caran-d_Ache-Fueller-Ecridor-Retro_3_700x.jpg?v=1595308676', 'Füller Ecridor Retro');
+
+INSERT INTO `products` (`name`, `price`, `quantity`, `image_url`, `description`) VALUES
+('Diplomat', 208, 16, 'https://schreibundstil.de/cdn/shop/products/Diplomat_Fuller_ExcellenceA2_LackSchwarz_3_700x.jpg?v=1600063565', 'Füller Excellence A2 Lack Schwarz');
+
+INSERT INTO `products` (`name`, `price`, `quantity`, `image_url`, `description`) VALUES
+('Graf von Faber-Castell', 279, 2, 'https://schreibundstil.de/cdn/shop/products/Graf-von-Faber-Castell-Fueller-Guilloche-Olive-Green-02_700x.jpg?v=1594562957', 'Füller Guilloche Olivgrün');
+
+INSERT INTO `products` (`name`, `price`, `quantity`, `image_url`, `description`) VALUES
+('Faber-Castell', 110, 69, 'https://schreibundstil.de/collections/faber-castell-fullfederhalter/products/faber-castell-fuller-ambition-birnbaum', 'Füller Ambition Birnbaum');
