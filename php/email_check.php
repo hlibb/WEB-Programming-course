@@ -9,12 +9,12 @@ function jsonResponse($status, $message) {
 
 header('Content-Type: application/json');
 
-if (isset($_POST['username'])) {
-    $username = trim($_POST['username']);
+if (isset($_POST['email'])) {
+    $email = trim($_POST['email']);
 
-    $sql = "SELECT * FROM users WHERE username = ?";
+    $sql = "SELECT * FROM users WHERE email = ?";
     if ($stmt = mysqli_prepare($link, $sql)) {
-        mysqli_stmt_bind_param($stmt, "s", $username);
+        mysqli_stmt_bind_param($stmt, "s", $email);
         if (mysqli_stmt_execute($stmt)) {
             mysqli_stmt_store_result($stmt);
             if (mysqli_stmt_num_rows($stmt) >= 1) {
@@ -33,4 +33,3 @@ if (isset($_POST['username'])) {
 } else {
     jsonResponse("error", "Invalid request");
 }
-?>
