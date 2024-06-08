@@ -11,9 +11,10 @@
 <form id="registrationForm" method="post" action='registration_process.php'>
     <fieldset>
         <label for="username">Wählen Sie ihren Nutzernamen: <input id="username" name="username" type="text" required/></label>
+        <span id="usernameFeedback" style="color: red; display: none;">Username already exists</span>
         <label for="email">Geben Sie ihre Email ein: <input id="email" name="email" type="email" required/></label>
         <label for="new-password">Wählen Sie ein neues Passwort: <input id="new-password" name="new-password"
-                                                                        type="password" pattern="[a-z0-9]{8,}"
+                                                                        type="password" pattern="[a-zA-Z0-9!§$%&#]{8,}"
                                                                         required/></label>
         <input type="hidden" id="screen_resolution" name="screen_resolution">
         <input type="hidden" id="operating_system" name="operating_system">
@@ -28,6 +29,29 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         var form = document.getElementById("registrationForm");
+        var usernameInput = document.getElementById("username");
+        var usernameFeedback = document.getElementById("usernameFeedback");
+
+        usernameInput.addEventListener("blur", function () {
+            var username = usernameInput.value.trim();
+            if (username) {
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "../username_check.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        if (response.exists) {
+                            usernameFeedback.style.display = "inline";
+                        } else {
+                            usernameFeedback.style.display = "none";
+                        }
+                    }
+                };
+                xhr.send("username=" + encodeURIComponent(username));
+            }
+        });
+
         form.addEventListener("submit", function () {
             document.getElementById("screen_resolution").value = window.screen.width + "x" + window.screen.height;
 
