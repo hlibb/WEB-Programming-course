@@ -61,8 +61,13 @@ $link->close();
         <div class="col-md-6">
             <h1 class="mb-4"><?php echo htmlspecialchars($productName); ?></h1>
             <p class="lead mb-4"><?php echo htmlspecialchars($productDescription); ?></p>
-            <p><strong>Preis:</strong> $<?php echo htmlspecialchars($productPrice); ?></p>
-            <button class="btn btn-primary">In den Warenkorb legen</button>
+            <p><strong>Preis:</strong><?php echo htmlspecialchars($productPrice); ?>€</p>
+            <form method="post" action="shopping_cart.php">
+                <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($id); ?>">
+                <label for="quantity">Menge:</label>
+                <input type="number" id="quantity" name="quantity" value="1" min="1" max="99" class="form-control mb-3">
+                <button type="submit" class="btn btn-primary">In den Warenkorb legen</button>
+            </form>
         </div>
     </div>
 </div>
