@@ -13,9 +13,9 @@ p {
   margin: 1em auto;
   text-align: center;
   font-family:
-    Apple Chancery,
-    sans-serif,
-    cursive;
+          Apple Chancery,
+          sans-serif,
+          cursive;
 }
 
 form {
@@ -99,5 +99,5 @@ a {
   width: 100%;
   height: auto;
   object-fit: cover;
-  max-height: 500px; 
+  max-height: 500px;
 }
