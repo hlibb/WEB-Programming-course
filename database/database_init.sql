@@ -5,7 +5,7 @@ CREATE DATABASE IF NOT EXISTS `web-programming`;
 USE `web-programming`;
 
 -- Table for storing user information
-CREATE TABLE IF NOT EXISTS `users` (
+CREATE TABLE IF NOT EXISTS `kunden` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(255) NOT NULL,
     `surname` VARCHAR(255) NOT NULL,
@@ -15,9 +15,25 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- `address` VARCHAR(255),
     `login_timestamp` DATETIME,
     `screen_resolution` VARCHAR(255) NOT NULL,
-    `operating_system` VARCHAR(255) NOT NULL,
-    `points_awarded` INT NOT NULL DEFAULT 100
+    `operating_system` VARCHAR(255) NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS `logs` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `kunden_id` INT NOT NULL,
+    `event_type` VARCHAR(255) NOT NULL,
+    `event_details` TEXT,
+    `timestamp` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`kunden_id`) REFERENCES `kunden`(`id`) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS `punkte` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `kunden_id` INT NOT NULL,
+    `points` INT NOT NULL DEFAULT 100,
+    FOREIGN KEY (`kunden_id`) REFERENCES `kunden`(`id`) ON DELETE CASCADE
+);
+
 
 -- Table for storing product information
 CREATE TABLE IF NOT EXISTS `products` (
@@ -32,23 +48,23 @@ CREATE TABLE IF NOT EXISTS `products` (
 -- Table for storing shopping cart items
 CREATE TABLE IF NOT EXISTS `shopping_cart` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `user_id` INT,
+    `kunden_id` INT,
     `product_id` INT,
     `quantity` INT,
-    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`),
+    FOREIGN KEY (`kunden_id`) REFERENCES `kunden`(`id`),
     FOREIGN KEY (`product_id`) REFERENCES `products`(`id`)
 );
 
 -- Table for storing orders
 CREATE TABLE IF NOT EXISTS `orders` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `user_id` INT,
+    `kunden_id` INT,
     `order_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `total_amount` DECIMAL(10, 2),
     `shipping_method` VARCHAR(50),
     `is_express_shipping` BOOLEAN,
     `is_paid` BOOLEAN,
-    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`)
+    FOREIGN KEY (`kunden_id`) REFERENCES `kunden`(`id`)
 );
 
 -- Table for storing order items

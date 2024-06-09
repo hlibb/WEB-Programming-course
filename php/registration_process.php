@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Check if the user already exists
-    $stmt = $link->prepare("SELECT * FROM users WHERE email = ?");
+    $stmt = $link->prepare("SELECT * FROM kunden WHERE email = ?");
     if ($stmt === false) {
         die("Prepare failed: " . $link->error);
     }
@@ -39,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
 
-    $stmt = $link->prepare("INSERT INTO users (name, surname, username, email, password, screen_resolution, operating_system) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt = $link->prepare("INSERT INTO kunden (name, surname, username, email, password, screen_resolution, operating_system) VALUES (?, ?, ?, ?, ?, ?, ?)");
     if ($stmt === false) {
         die("Prepare failed: " . $link->error);
     }
@@ -54,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Execute failed: " . $stmt->error);
     } else {
         // Update login timestamp
-        $update_sql = "UPDATE users SET login_timestamp = NOW() WHERE id = ?";
+        $update_sql = "UPDATE kunden SET login_timestamp = NOW() WHERE id = ?";
         if ($update_stmt = mysqli_prepare($link, $update_sql)) {
             // Bind variables to the prepared statement as parameters
             mysqli_stmt_bind_param($update_stmt, "i", $id);

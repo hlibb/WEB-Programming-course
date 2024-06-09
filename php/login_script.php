@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validate credentials
     if (empty($email_err) && empty($password_err)) {
         // Prepare a select statement
-        $sql = "SELECT id, email, password, login_timestamp FROM users WHERE email = ?";
+        $sql = "SELECT id, email, password, login_timestamp FROM kunden WHERE email = ?";
 
         // Set parameters
         $param_email = $email;
@@ -69,7 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             $_SESSION["previous_login"] = $login_timestamp;
 
                             // Update login timestamp
-                            $update_sql = "UPDATE users SET login_timestamp = NOW() WHERE id = ?";
+                            $update_sql = "UPDATE kunden SET login_timestamp = NOW() WHERE id = ?";
                             if ($update_stmt = mysqli_prepare($link, $update_sql)) {
                                 // Bind variables to the prepared statement as parameters
                                 mysqli_stmt_bind_param($update_stmt, "i", $id);
@@ -82,7 +82,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             }
 
                             // Update user points
-                            $points_sql = "UPDATE users SET points_awarded = points_awarded + 5 WHERE id = ?";
+                            $points_sql = "UPDATE punkte SET points = points + 5 WHERE kunden_id = ?";
                             if ($points_stmt = mysqli_prepare($link, $points_sql)) {
                                 // Bind variables to the prepared statement as parameters
                                 mysqli_stmt_bind_param($points_stmt, "i", $id);

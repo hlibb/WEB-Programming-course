@@ -24,10 +24,13 @@ include '../php/include/navimport.php';
         $username = $_SESSION['email'];
         $userId = $_SESSION['user_id'];
         $lastLoginTimestamp = $_SESSION['previous_login'];
-        // Fetch user data from database if necessary
+        setlocale(LC_TIME, 'de_DE.UTF-8');
+        $date = new DateTime($lastLoginTimestamp);
+        $formattedDate = strftime('%A, %d.%m.%Y', $date->getTimestamp());
+
         require_once '../php/include/db_connection.php';
         $userId = $_SESSION['user_id'];
-        $sql = "SELECT * FROM users WHERE id = ?";
+        $sql = "SELECT * FROM kunden WHERE id = ?";
         $stmt = $link->prepare($sql);
         $stmt->bind_param("i", $userId);
         $stmt->execute();
@@ -35,7 +38,7 @@ include '../php/include/navimport.php';
         $user = $result->fetch_assoc();
         // Display welcome message
         if ($user) {
-            echo "<p>Herzlich Willkommen Herr/Frau {$user['surname']}. Sie waren zuletzt am $lastLoginTimestamp online.</p>";
+            echo "<p>Herzlich Willkommen Herr/Frau {$user['surname']}. Sie waren zuletzt am $formattedDate online.</p>";
         } else {
             echo "<p>Willkommen, unbekannte User!</p>";
         }
