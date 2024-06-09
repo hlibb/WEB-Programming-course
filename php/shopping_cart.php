@@ -12,19 +12,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset
     $userId = $_SESSION['user_id'] ?? 1; // Verwenden Sie Ihre Methode zur Ermittlung der Benutzer-ID
 
     // Überprüfen, ob das Produkt bereits im Warenkorb ist
-    $stmt = $link->prepare("SELECT * FROM shopping_cart WHERE user_id = ? AND product_id = ?");
-    $stmt->bind_param("ii", $userId, $productId);
+    $stmt = $link->prepare("SELECT * FROM shopping_cart WHERE kunden_id = ? AND product_id = ?");
+    $stmt->bind_param("ii", $kundenId, $productId);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         $newQuantity = $row['quantity'] + $quantity;
-        $stmt = $link->prepare("UPDATE shopping_cart SET quantity = ? WHERE user_id = ? AND product_id = ?");
-        $stmt->bind_param("iii", $newQuantity, $userId, $productId);
+        $stmt = $link->prepare("UPDATE shopping_cart SET quantity = ? WHERE kunden_id = ? AND product_id = ?");
+        $stmt->bind_param("iii", $newQuantity, $kundenId, $productId);
     } else {
-        $stmt = $link->prepare("INSERT INTO shopping_cart (user_id, product_id, quantity) VALUES (?, ?, ?)");
-        $stmt->bind_param("iii", $userId, $productId, $quantity);
+        $stmt = $link->prepare("INSERT INTO shopping_cart (kunden_id, product_id, quantity) VALUES (?, ?, ?)");
+        $stmt->bind_param("iii", $kundenId, $productId, $quantity);
     }
     $stmt->execute();
     $stmt->close();
@@ -36,17 +36,17 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['remove'])) {
 
     $userId = $_SESSION['user_id'] ?? 1;
 
-    $stmt = $link->prepare("DELETE FROM shopping_cart WHERE user_id = ? AND product_id = ?");
-    $stmt->bind_param("ii", $userId, $productId);
+    $stmt = $link->prepare("DELETE FROM shopping_cart WHERE kunden_id = ? AND product_id = ?");
+    $stmt->bind_param("ii", $kundenId, $productId);
     $stmt->execute();
     $stmt->close();
 }
 
 // Warenkorb anzeigen
-$userId = $_SESSION['user_id'] ?? 1;
+$userId = $_SESSION['kunden_id'] ?? 1;
 
-$stmt = $link->prepare("SELECT sc.id, p.name, p.price, sc.quantity FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.user_id = ?");
-$stmt->bind_param("i", $userId);
+$stmt = $link->prepare("SELECT sc.id, p.name, p.price, sc.quantity FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.kunden_id = ?");
+$stmt->bind_param("i", $kundenId);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -60,7 +60,7 @@ $stmt->close();
 // E-Mail senden und Warenkorb leeren, wenn der Bezahlen-Knopf gedrückt wird
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pay'])) {
     // Benutzerinformationen aus der Datenbank abrufen
-    $stmt = $link->prepare("SELECT email, name FROM users WHERE id = ?");
+    $stmt = $link->prepare("SELECT email, name FROM kunden WHERE id = ?");
     $stmt->bind_param("i", $userId);
     $stmt->execute();
     $userResult = $stmt->get_result();
