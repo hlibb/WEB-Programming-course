@@ -7,4 +7,4 @@
 <?php
   include "fetch_online_users.php" //test halloi
 ?>
-<link rel="icon" type="image/x-icon" href="../assets/images/logo.png">
+<link rel="icon" type="image/x-icon" href="../assets/images/tabuicon.png">
