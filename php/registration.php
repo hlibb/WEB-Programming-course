@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Accounterstellung</title>
-    <link rel="stylesheet" href="../assets/css/styles.css"/>
+    <?php include '../php/include/headimport.php' ?>
 </head>
 <body>
 <h1>Accounterstellung</h1>

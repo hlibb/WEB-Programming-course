@@ -96,8 +96,7 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Warenkorb</title>
-    <?php include "include/headimport.php"; ?>
-    <link rel="stylesheet" href="../assets/css/styles.css">
+    <?php include '../php/include/headimport.php' ?>
 </head>
 <body>
 <?php include "include/navimport.php"; ?>
