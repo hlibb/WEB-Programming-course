@@ -9,7 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset
     $quantity = $_POST['quantity'];
 
     // Beispiel: Benutzer-ID aus der Session
-    $userId = $_SESSION['user_id'] ?? 1; // Verwenden Sie Ihre Methode zur Ermittlung der Benutzer-ID
+    $kundenId = $_SESSION['kunden_id'] ?? 1; // Verwenden Sie Ihre Methode zur Ermittlung der Benutzer-ID
 
     // Überprüfen, ob das Produkt bereits im Warenkorb ist
     $stmt = $link->prepare("SELECT * FROM shopping_cart WHERE kunden_id = ? AND product_id = ?");
@@ -34,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset
 if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['remove'])) {
     $productId = $_GET['remove'];
 
-    $userId = $_SESSION['user_id'] ?? 1;
+    $kundenId = $_SESSION['kunden_id'] ?? 1;
 
     $stmt = $link->prepare("DELETE FROM shopping_cart WHERE kunden_id = ? AND product_id = ?");
     $stmt->bind_param("ii", $kundenId, $productId);
@@ -43,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['remove'])) {
 }
 
 // Warenkorb anzeigen
-$userId = $_SESSION['kunden_id'] ?? 1;
+$kundenId = $_SESSION['kunden_id'] ?? 1;
 
 $stmt = $link->prepare("SELECT sc.id, p.name, p.price, sc.quantity FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.kunden_id = ?");
 $stmt->bind_param("i", $kundenId);
@@ -61,7 +61,7 @@ $stmt->close();
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pay'])) {
     // Benutzerinformationen aus der Datenbank abrufen
     $stmt = $link->prepare("SELECT email, name FROM kunden WHERE id = ?");
-    $stmt->bind_param("i", $userId);
+    $stmt->bind_param("i", $kundenId);
     $stmt->execute();
     $userResult = $stmt->get_result();
     $user = $userResult->fetch_assoc();
@@ -78,8 +78,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pay'])) {
     $stmt->close();
 
     // Warenkorb leeren
-    $stmt = $link->prepare("DELETE FROM shopping_cart WHERE user_id = ?");
-    $stmt->bind_param("i", $userId);
+    $stmt = $link->prepare("DELETE FROM shopping_cart WHERE kunden_id = ?");
+    $stmt->bind_param("i", $kundenId);
     $stmt->execute();
     $stmt->close();
 

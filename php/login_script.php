@@ -64,7 +64,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                             // Store data in session variables
                             $_SESSION["logged_in"] = true;
-                            $_SESSION["user_id"] = $id; // Assuming $id is the user's ID
+                            $_SESSION["kunden_id"] = $id; // Assuming $id is the user's ID
                             $_SESSION["email"] = $email; // Assuming $email is the user's email
                             $_SESSION["previous_login"] = $login_timestamp;
 

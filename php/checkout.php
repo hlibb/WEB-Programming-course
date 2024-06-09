@@ -8,10 +8,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset
     $productId = $_POST['product_id'];
     $quantity = $_POST['quantity'];
 
-    $userId = $_SESSION['user_id'] ?? 1;
+    $kundenId = $_SESSION['kunden_id'] ?? 1;
 
     $stmt = $link->prepare("SELECT * FROM shopping_cart WHERE kunden_id = ? AND product_id = ?");
-    $stmt->bind_param("ii", $userId, $productId);
+    $stmt->bind_param("ii", $kundenId, $productId);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -19,10 +19,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset
         $row = $result->fetch_assoc();
         $newQuantity = $row['quantity'] + $quantity;
         $stmt = $link->prepare("UPDATE shopping_cart SET quantity = ? WHERE kunden_id = ? AND product_id = ?");
-        $stmt->bind_param("iii", $newQuantity, $userId, $productId);
+        $stmt->bind_param("iii", $newQuantity, $kundenId, $productId);
     } else {
         $stmt = $link->prepare("INSERT INTO shopping_cart (kunden_id, product_id, quantity) VALUES (?, ?, ?)");
-        $stmt->bind_param("iii", $userId, $productId, $quantity);
+        $stmt->bind_param("iii", $kundenId, $productId, $quantity);
     }
     $stmt->execute();
     $stmt->close();
@@ -32,19 +32,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset
 if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['remove'])) {
     $productId = $_GET['remove'];
 
-    $userId = $_SESSION['user_id'] ?? 1;
+    $kundenId = $_SESSION['kunden_id'] ?? 1;
 
     $stmt = $link->prepare("DELETE FROM shopping_cart WHERE kunden_id = ? AND product_id = ?");
-    $stmt->bind_param("ii", $userId, $productId);
+    $stmt->bind_param("ii", $kundenId, $productId);
     $stmt->execute();
     $stmt->close();
 }
 
 // Warenkorb anzeigen
-$userId = $_SESSION['user_id'] ?? 1;
+$kundenId = $_SESSION['kunden_id'] ?? 1;
 
 $stmt = $link->prepare("SELECT sc.id, p.name, p.price, sc.quantity FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.kunden_id = ?");
-$stmt->bind_param("i", $userId);
+$stmt->bind_param("i", $kundenId);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -77,7 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
     // Bestellung in der Datenbank speichern
     $stmt = $link->prepare("INSERT INTO orders (kunden_id, total_amount, shipping_method, is_express_shipping, is_paid) VALUES (?, ?, ?, ?, ?)");
     $isPaid = 1; // Annahme: Zahlung erfolgreich
-    $stmt->bind_param("idssi", $userId, $totalAmount, $shippingMethod, $isExpressShipping, $isPaid);
+    $stmt->bind_param("idssi", $kundenId, $totalAmount, $shippingMethod, $isExpressShipping, $isPaid);
     $stmt->execute();
     $orderId = $stmt->insert_id;
     $stmt->close();
@@ -92,7 +92,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
 
     // Benutzerinformationen aus der Datenbank abrufen
     $stmt = $link->prepare("SELECT email, name FROM kunden WHERE id = ?");
-    $stmt->bind_param("i", $userId);
+    $stmt->bind_param("i", $kundenId);
     $stmt->execute();
     $userResult = $stmt->get_result();
     $user = $userResult->fetch_assoc();
@@ -110,7 +110,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
 
     // Warenkorb leeren
     $stmt = $link->prepare("DELETE FROM shopping_cart WHERE kunden_id = ?");
-    $stmt->bind_param("i", $userId);
+    $stmt->bind_param("i", $kundenId);
     $stmt->execute();
     $stmt->close();
 

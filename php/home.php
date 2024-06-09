@@ -19,20 +19,20 @@ include '../php/include/navimport.php';
     <?php
     include_once "../php/include/logged_in.php";
     // Check if user is logged in
-    if (isset($_SESSION['email']) && isset($_SESSION['user_id'])) {
+    if (isset($_SESSION['email']) && isset($_SESSION['kunden_id'])) {
         // User is logged in, display welcome message and other content
         $username = $_SESSION['email'];
-        $userId = $_SESSION['user_id'];
+        $kundenId = $_SESSION['kunden_id'];
         $lastLoginTimestamp = $_SESSION['previous_login'];
         setlocale(LC_TIME, 'de_DE.UTF-8');
         $date = new DateTime($lastLoginTimestamp);
         $formattedDate = strftime('%A, %d.%m.%Y', $date->getTimestamp());
 
         require_once '../php/include/db_connection.php';
-        $userId = $_SESSION['user_id'];
+        $kundenId = $_SESSION['kunden_id'];
         $sql = "SELECT * FROM kunden WHERE id = ?";
         $stmt = $link->prepare($sql);
-        $stmt->bind_param("i", $userId);
+        $stmt->bind_param("i", $kundenId);
         $stmt->execute();
         $result = $stmt->get_result();
         $user = $result->fetch_assoc();

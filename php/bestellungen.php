@@ -2,11 +2,11 @@
 session_start();
 include_once 'include/db_connection.php';
 
-$userId = $_SESSION['user_id'] ?? 1;
+$kundenId = $_SESSION['kunden_id'] ?? 1;
 
 // Bestellungen des Benutzers abrufen
 $stmt = $link->prepare("SELECT * FROM orders WHERE kunden_id = ?");
-$stmt->bind_param("i", $userId);
+$stmt->bind_param("i", $kundenId);
 $stmt->execute();
 $result = $stmt->get_result();
 

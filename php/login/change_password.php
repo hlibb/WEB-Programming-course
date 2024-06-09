@@ -8,11 +8,11 @@ if ($link->connect_error) {
     die("Connection failed: " . $link->connect_error);
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['user_id'])) {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['kunden_id'])) {
     $new_password = password_hash($_POST['new_password'], PASSWORD_BCRYPT);
-    $user_id = $_SESSION['user_id'];
+    $kunden_id = $_SESSION['kunden_id'];
 
-    $sql = "UPDATE users SET password = '$new_password', first_login = FALSE WHERE id = $user_id";
+    $sql = "UPDATE users SET password = '$new_password', first_login = FALSE WHERE id = $kunden_id";
 
     if ($link->query($sql) === TRUE) {
         echo "Password changed successfully";
