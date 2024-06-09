@@ -1,0 +1,205 @@
+body {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  background-color: #1b1b32;
+  color: #f5f6f7;
+  font-family: Tahoma;
+  font-size: 16px;
+}
+
+.logo {
+  display: block;
+  width: 20%;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+h1, p {
+  margin: 1em auto;
+  text-align: center;
+  font-family: Apple Chancery, sans-serif, cursive;
+}
+
+form {
+  width: 60vw;
+  max-width: 500px;
+  min-width: 300px;
+  margin: 0 auto;
+  padding-bottom: 2em;
+}
+
+fieldset {
+  border: none;
+  padding: 2rem 0;
+  border-bottom: 3px solid #3b3b4f;
+}
+
+fieldset:last-of-type {
+  border-bottom: none;
+}
+
+label {
+  display: block;
+  margin: 0.5rem 0;
+}
+
+input, textarea, select {
+  margin: 10px 0 0 0;
+  width: 100%;
+  min-height: 2em;
+}
+
+input, textarea {
+  background-color: #0a0a23;
+  border: 1px solid #0a0a23;
+  color: #ffffff;
+}
+
+.inline {
+  width: unset;
+  margin: 0 0.5em 0 0;
+  vertical-align: middle;
+}
+
+input[type="submit"] {
+  display: block;
+  width: 60%;
+  margin: 1em auto;
+  height: 2em;
+  font-size: 1.1rem;
+  background-color: #3b3b4f;
+  border-color: white;
+  min-width: 300px;
+}
+
+input[type="file"] {
+  padding: 1px 2px;
+}
+
+.inline {
+  display: inline;
+}
+
+a {
+  color: white;
+}
+
+.pos-f-t .collapse ul li a {
+  font-size: 20px;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.carousel-inner img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  max-height: 500px;
+}
+
+/* Neue Stile für die Produktkarten */
+.product-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px;
+}
+
+.product-card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  margin: 16px;
+  flex: 1 1 calc(33.333% - 32px);
+  max-width: calc(33.333% - 32px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: #282847;
+}
+
+.product-card img {
+  border-radius: 10px;
+  max-width: 100%;
+  margin-bottom: 16px;
+}
+
+.product-card h2 {
+  margin: 8px 0;
+  font-size: 1.2rem;
+}
+
+.product-card p {
+  margin: 8px 0;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.product-card form {
+  margin-top: 10px;
+}
+
+.product-card .quantity-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.product-card .quantity-input {
+  width: 60px;
+  padding: 5px;
+  text-align: center;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  height: 36px;
+}
+
+.product-card button {
+  padding: 8px 12px;
+  background-color: #3b3b4f;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  height: 36px;
+}
+
+.product-card button:hover {
+  background-color: #575768;
+}
+
+/* Neue Stile für das Formular und Promo-Code */
+.form-container {
+  background-color: #282847;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.promo-code-group {
+  display: flex;
+  max-width: 300px;
+  margin: auto;
+}
+
+.promo-code-group .form-control {
+  flex: 1;
+}
+
+.promo-code-group .btn {
+  margin-left: 5px;
+}
+
+.custom-control-label::before, .custom-control-label::after {
+  background-color: #0a0a23;
+}
