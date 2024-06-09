@@ -14,6 +14,7 @@
                 <li><a href="checkout.php">Checkout</a></li>
                 <li><a href="artikeluebersicht.php">Artikelübersicht</a></li>
                 <li><a href="home.php">Home</a></li>
+                <li><a href="bestellungen.php">Meine Bestellungen</a></li>
                 <li><a href="about.php">About Us</a></li>
             </ul>
         </div>
