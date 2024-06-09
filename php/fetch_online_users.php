@@ -1,7 +1,4 @@
 <?php
-// Start
-session_start();
-
 // Unique Nutzer Prüfen
 if (!isset($_SESSION['unique_user'])) {
     // Nutzerinitialisierung
