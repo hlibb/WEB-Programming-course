@@ -1,6 +1,7 @@
 <?php
 session_start();
 include_once 'include/db_connection.php';
+include 'send_email.php'; // Include the send email function
 
 // Funktion zum Hinzufügen von Produkten zum Warenkorb
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset($_POST['quantity'])) {
@@ -55,6 +56,38 @@ while ($row = $result->fetch_assoc()) {
 }
 
 $stmt->close();
+
+// E-Mail senden und Warenkorb leeren, wenn der Bezahlen-Knopf gedrückt wird
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pay'])) {
+    // Benutzerinformationen aus der Datenbank abrufen
+    $stmt = $link->prepare("SELECT email, name FROM users WHERE id = ?");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $userResult = $stmt->get_result();
+    $user = $userResult->fetch_assoc();
+
+    $recipientEmail = $user['email'];
+    $recipientName = $user['name'];
+
+    // Holen Sie sich die Bestätigungs-E-Mail-Vorlage
+    $emailTemplate = getPaymentConfirmationEmail($recipientName);
+
+    // Senden Sie die E-Mail
+    sendEmail($recipientEmail, $recipientName, $emailTemplate);
+
+    $stmt->close();
+
+    // Warenkorb leeren
+    $stmt = $link->prepare("DELETE FROM shopping_cart WHERE user_id = ?");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $stmt->close();
+
+    // Optionale Weiterleitung nach dem Leeren des Warenkorbs und dem Senden der E-Mail
+    header("Location: shopping_cart.php?success=1");
+    exit();
+}
+
 $link->close();
 ?>
 <!doctype html>
@@ -70,6 +103,11 @@ $link->close();
 <?php include "include/navimport.php"; ?>
 <div class="container">
     <h1 class="mt-5">Ihr Warenkorb</h1>
+    <?php
+    if (isset($_GET['success']) && $_GET['success'] == 1) {
+        echo "<div class='alert alert-success'>Bezahlung erfolgreich! Eine Bestätigungs-E-Mail wurde gesendet.</div>";
+    }
+    ?>
     <table class="table table-bordered mt-3">
         <thead>
             <tr>
@@ -98,6 +136,12 @@ $link->close();
         </tbody>
     </table>
     <h3>Gesamtpreis: <?php echo htmlspecialchars($totalPrice); ?>€</h3>
+    
+    <!-- Bezahl-Formular -->
+    <form method="post" action="">
+        <input type="hidden" name="pay" value="1">
+        <button type="submit" class="btn btn-primary">Bezahlen</button>
+    </form>
 </div>
 <?php include "include/footimport.php"; ?>
 </body>
