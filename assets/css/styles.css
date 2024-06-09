@@ -8,23 +8,18 @@ body {
   font-size: 16px;
 }
 
-/* Styles for the logo */
 .logo {
-  display: block; /* Ermöglicht die Verwendung von margin:auto; */
-  width: 20%; /* Passen Sie die Breite an */
-  height: auto; /* Beibehaltung des Seitenverhältnisses */
-  margin-left: auto; /* Zentrieren des Logos horizontal */
-  margin-right: auto; /* Zentrieren des Logos horizontal */
+  display: block;
+  width: 20%;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-h1,
-p {
+h1, p {
   margin: 1em auto;
   text-align: center;
-  font-family:
-          Apple Chancery,
-          sans-serif,
-          cursive;
+  font-family: Apple Chancery, sans-serif, cursive;
 }
 
 form {
@@ -50,16 +45,13 @@ label {
   margin: 0.5rem 0;
 }
 
-input,
-textarea,
-select {
+input, textarea, select {
   margin: 10px 0 0 0;
   width: 100%;
   min-height: 2em;
 }
 
-input,
-textarea {
+input, textarea {
   background-color: #0a0a23;
   border: 1px solid #0a0a23;
   color: #ffffff;
@@ -109,4 +101,105 @@ a {
   height: auto;
   object-fit: cover;
   max-height: 500px;
+}
+
+/* Neue Stile für die Produktkarten */
+.product-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px;
+}
+
+.product-card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  margin: 16px;
+  flex: 1 1 calc(33.333% - 32px);
+  max-width: calc(33.333% - 32px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: #282847;
+}
+
+.product-card img {
+  border-radius: 10px;
+  max-width: 100%;
+  margin-bottom: 16px;
+}
+
+.product-card h2 {
+  margin: 8px 0;
+  font-size: 1.2rem;
+}
+
+.product-card p {
+  margin: 8px 0;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.product-card form {
+  margin-top: 10px;
+}
+
+.product-card .quantity-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.product-card .quantity-input {
+  width: 60px;
+  padding: 5px;
+  text-align: center;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  height: 36px;
+}
+
+.product-card button {
+  padding: 8px 12px;
+  background-color: #3b3b4f;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  height: 36px;
+}
+
+.product-card button:hover {
+  background-color: #575768;
+}
+
+/* Neue Stile für das Formular und Promo-Code */
+.form-container {
+  background-color: #282847;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.promo-code-group {
+  display: flex;
+  max-width: 300px;
+  margin: auto;
+}
+
+.promo-code-group .form-control {
+  flex: 1;
+}
+
+.promo-code-group .btn {
+  margin-left: 5px;
+}
+
+.custom-control-label::before, .custom-control-label::after {
+  background-color: #0a0a23;
 }
