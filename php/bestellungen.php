@@ -5,7 +5,7 @@ include_once 'include/db_connection.php';
 $userId = $_SESSION['user_id'] ?? 1;
 
 // Bestellungen des Benutzers abrufen
-$stmt = $link->prepare("SELECT * FROM orders WHERE user_id = ?");
+$stmt = $link->prepare("SELECT * FROM orders WHERE kunden_id = ?");
 $stmt->bind_param("i", $userId);
 $stmt->execute();
 $result = $stmt->get_result();
