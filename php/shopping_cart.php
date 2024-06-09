@@ -30,6 +30,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset
     $stmt->close();
 }
 
+// Funktion zum Aktualisieren der Menge eines Artikels im Warenkorb
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_quantity'])) {
+    $productId = $_POST['product_id'];
+    $quantity = $_POST['quantity'];
+
+    $kundenId = $_SESSION['kunden_id'] ?? 1;
+
+    if ($quantity == 0) {
+        $stmt = $link->prepare("DELETE FROM shopping_cart WHERE kunden_id = ? AND product_id = ?");
+        $stmt->bind_param("ii", $kundenId, $productId);
+    } else {
+        $stmt = $link->prepare("UPDATE shopping_cart SET quantity = ? WHERE kunden_id = ? AND product_id = ?");
+        $stmt->bind_param("iii", $quantity, $kundenId, $productId);
+    }
+    $stmt->execute();
+    $stmt->close();
+}
+
 // Funktion zum Entfernen von Produkten aus dem Warenkorb
 if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['remove'])) {
     $productId = $_GET['remove'];
@@ -45,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['remove'])) {
 // Warenkorb anzeigen
 $kundenId = $_SESSION['kunden_id'] ?? 1;
 
-$stmt = $link->prepare("SELECT sc.id, p.name, p.price, sc.quantity FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.kunden_id = ?");
+$stmt = $link->prepare("SELECT sc.product_id, p.name, p.price, sc.quantity FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.kunden_id = ?");
 $stmt->bind_param("i", $kundenId);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -97,6 +115,38 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Warenkorb</title>
     <?php include '../php/include/headimport.php' ?>
+    <link rel="stylesheet" href="styles.css"> <!-- Include your CSS -->
+    <style>
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .quantity-controls form {
+            display: inline;
+        }
+        .quantity-controls span {
+            margin: 0 5px;
+            min-width: 24px;
+            text-align: center;
+            display: inline-block;
+        }
+        .table-container {
+            width: 80%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .table {
+            width: 100%;
+            table-layout: fixed;
+        }
+        @media (max-width: 768px) {
+            .table-container {
+                width: 100%;
+                padding: 0 10px;
+            }
+        }
+    </style>
 </head>
 <body>
 <?php include "include/navimport.php"; ?>
@@ -107,38 +157,61 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
         echo "<div class='alert alert-success'>Bezahlung erfolgreich! Eine Bestätigungs-E-Mail wurde gesendet.</div>";
     }
     ?>
-    <table class="table table-bordered mt-3">
-        <thead>
-        <tr>
-            <th>Produkt</th>
-            <th>Preis</th>
-            <th>Menge</th>
-            <th>Gesamt</th>
-            <th>Aktion</th>
-        </tr>
-        </thead>
-        <tbody>
-        <?php
-        $totalPrice = 0;
-        foreach ($cartItems as $item) {
-            $itemTotal = $item['price'] * $item['quantity'];
-            $totalPrice += $itemTotal;
-            echo "<tr>";
-            echo "<td>" . htmlspecialchars($item['name']) . "</td>";
-            echo "<td>" . htmlspecialchars($item['price']) . "€</td>";
-            echo "<td>" . htmlspecialchars($item['quantity']) . "</td>";
-            echo "<td>" . htmlspecialchars($itemTotal) . "€</td>";
-            echo "<td><a href='shopping_cart.php?remove=" . htmlspecialchars($item['id']) . "' class='btn btn-danger'>Entfernen</a></td>";
-            echo "</tr>";
-        }
-        ?>
-        </tbody>
-    </table>
-    <h3>Gesamtpreis: <?php echo htmlspecialchars($totalPrice); ?>€</h3>
+    <div class="table-container">
+        <table class="table table-bordered mt-3">
+            <thead>
+            <tr>
+                <th>Produkt</th>
+                <th>Preis</th>
+                <th>Menge</th>
+                <th>Rabatt</th>
+                <th>Gesamt</th>
+                <th>Aktion</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php
+            $totalPrice = 0;
+            foreach ($cartItems as $item) {
+                $discount = 0;
+                if ($item['quantity'] >= 10) {
+                    $discount = 0.20;
+                } elseif ($item['quantity'] >= 5) {
+                    $discount = 0.10;
+                }
+                $discountedPrice = $item['price'] * (1 - $discount);
+                $itemTotal = $discountedPrice * $item['quantity'];
+                $totalPrice += $itemTotal;
+                echo "<tr>";
+                echo "<td>" . htmlspecialchars($item['name']) . "</td>";
+                echo "<td>" . htmlspecialchars($item['price']) . "€</td>";
+                echo "<td class='quantity-controls'>
+                        <form method='post' action=''>
+                            <input type='hidden' name='product_id' value='" . htmlspecialchars($item['product_id']) . "'>
+                            <input type='hidden' name='quantity' value='" . ($item['quantity'] - 1) . "'>
+                            <button type='submit' name='update_quantity' class='btn btn-sm btn-secondary'>-</button>
+                        </form>
+                        <span>" . htmlspecialchars($item['quantity']) . "</span>
+                        <form method='post' action=''>
+                            <input type='hidden' name='product_id' value='" . htmlspecialchars($item['product_id']) . "'>
+                            <input type='hidden' name='quantity' value='" . ($item['quantity'] + 1) . "'>
+                            <button type='submit' name='update_quantity' class='btn btn-sm btn-secondary'>+</button>
+                        </form>
+                      </td>";
+                echo "<td>" . ($discount * 100) . "%</td>";
+                echo "<td>" . htmlspecialchars(number_format($itemTotal, 2)) . "€</td>";
+                echo "<td><a href='shopping_cart.php?remove=" . htmlspecialchars($item['product_id']) . "' class='btn btn-danger'>&times;</a></td>";
+                echo "</tr>";
+            }
+            ?>
+            </tbody>
+        </table>
+    </div>
+    <h3>Gesamtpreis: <?php echo htmlspecialchars(number_format($totalPrice, 2)); ?>€</h3>
 
     <!-- Bezahl-Formular -->
-    <form method="get" action="checkout.php">
-        <button type="submit" class="btn btn-primary">Bezahlen</button>
+    <form method="post" action="">
+        <button type="submit" name="pay" class="btn btn-primary">Bezahlen</button>
     </form>
 
 </div>
