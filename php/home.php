@@ -17,7 +17,7 @@ include '../php/include/navimport.php';
 ?>
 <div class="container">
     <?php
-
+    include_once "../php/include/logged_in.php";
     // Check if user is logged in
     if (isset($_SESSION['email']) && isset($_SESSION['user_id'])) {
         // User is logged in, display welcome message and other content
@@ -42,7 +42,7 @@ include '../php/include/navimport.php';
         }
     } else {
         // User not logged in, handle accordingly
-        header("Location: login.php");
+        echo "<p>Willkommen! 2</p>";
     }
     ?>
     <div id="carouselExample" class="carousel slide">
