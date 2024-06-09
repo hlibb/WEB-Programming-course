@@ -69,39 +69,16 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 $cartItems = [];
+$totalPrice = 0;
 while ($row = $result->fetch_assoc()) {
     $cartItems[] = $row;
+    $totalPrice += $row['price'] * $row['quantity'];
 }
 
 $stmt->close();
 
-// E-Mail senden und Warenkorb leeren, wenn der Bezahlen-Knopf gedrückt wird
+// Weiterleitung zur Checkout-Seite, wenn der Bezahlen-Knopf gedrückt wird
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pay'])) {
-    // Benutzerinformationen aus der Datenbank abrufen
-    $stmt = $link->prepare("SELECT email, name FROM kunden WHERE id = ?");
-    $stmt->bind_param("i", $kundenId);
-    $stmt->execute();
-    $userResult = $stmt->get_result();
-    $user = $userResult->fetch_assoc();
-
-    $recipientEmail = $user['email'];
-    $recipientName = $user['name'];
-
-    // Holen Sie sich die Bestätigungs-E-Mail-Vorlage
-    $emailTemplate = getPaymentConfirmationEmail($recipientName);
-
-    // Senden Sie die E-Mail
-    sendEmail($recipientEmail, $recipientName, $emailTemplate);
-
-    $stmt->close();
-
-    // Warenkorb leeren
-    $stmt = $link->prepare("DELETE FROM shopping_cart WHERE kunden_id = ?");
-    $stmt->bind_param("i", $kundenId);
-    $stmt->execute();
-    $stmt->close();
-
-    // Optionale Weiterleitung nach dem Leeren des Warenkorbs und dem Senden der E-Mail
     header("Location: checkout.php");
     exit();
 }
@@ -116,37 +93,6 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
     <title>Warenkorb</title>
     <?php include '../php/include/headimport.php' ?>
     <link rel="stylesheet" href="styles.css"> <!-- Include your CSS -->
-    <style>
-        .quantity-controls {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .quantity-controls form {
-            display: inline;
-        }
-        .quantity-controls span {
-            margin: 0 5px;
-            min-width: 24px;
-            text-align: center;
-            display: inline-block;
-        }
-        .table-container {
-            width: 80%;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .table {
-            width: 100%;
-            table-layout: fixed;
-        }
-        @media (max-width: 768px) {
-            .table-container {
-                width: 100%;
-                padding: 0 10px;
-            }
-        }
-    </style>
 </head>
 <body>
 <?php include "include/navimport.php"; ?>
@@ -171,7 +117,6 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
             </thead>
             <tbody>
             <?php
-            $totalPrice = 0;
             foreach ($cartItems as $item) {
                 $discount = 0;
                 if ($item['quantity'] >= 10) {

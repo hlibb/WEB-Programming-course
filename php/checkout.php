@@ -59,65 +59,80 @@ $stmt->close();
 
 // E-Mail senden, Bestellung speichern und Warenkorb leeren, wenn das Checkout-Formular abgeschickt wird
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
-    $firstName = $_POST['firstName'];
-    $lastName = $_POST['lastName'];
-    $email = $_POST['email'];
-    $address = $_POST['address'];
-    $address2 = $_POST['address2'];
-    $country = $_POST['country'];
-    $state = $_POST['state'];
-    $zip = $_POST['zip'];
-    $paymentMethod = $_POST['paymentMethod'];
-    $ccName = $_POST['cc_name'];
-    $ccNumber = $_POST['cc_number'];
-    $ccExpiration = $_POST['cc_expiration'];
-    $ccCVV = $_POST['cc_cvv'];
-    $shippingMethod = $_POST['shipping_method'];
-    $isExpressShipping = isset($_POST['is_express_shipping']) ? 1 : 0;
+    if (!isset($_POST['privacy_policy'])) {
+        echo "<div class='alert alert-danger'>Sie müssen die Datenschutzrichtlinie akzeptieren.</div>";
+    } else {
+        $firstName = $_POST['firstName'];
+        $lastName = $_POST['lastName'];
+        $email = $_POST['email'];
+        $address = $_POST['address'];
+        $address2 = $_POST['address2'];
+        $country = $_POST['country'];
+        $state = $_POST['state'];
+        $zip = $_POST['zip'];
+        $paymentMethod = $_POST['paymentMethod'];
+        $ccName = $_POST['cc_name'];
+        $ccNumber = $_POST['cc_number'];
+        $ccExpiration = $_POST['cc_expiration'];
+        $ccCVV = $_POST['cc_cvv'];
+        $shippingMethod = $_POST['shipping_method'];
+        $isExpressShipping = $shippingMethod === 'DHL Express' ? 1 : 0;
 
-    // Bestellung in der Datenbank speichern
-    $stmt = $link->prepare("INSERT INTO orders (kunden_id, total_amount, shipping_method, is_express_shipping, is_paid) VALUES (?, ?, ?, ?, ?)");
-    $isPaid = 1; // Annahme: Zahlung erfolgreich
-    $stmt->bind_param("idssi", $kundenId, $totalPrice, $shippingMethod, $isExpressShipping, $isPaid);
-    $stmt->execute();
-    $orderId = $stmt->insert_id;
-    $stmt->close();
+        // Versandkosten berechnen
+        $shippingCost = 0;
+        if ($shippingMethod == 'DHL') {
+            $shippingCost = 4.5;
+        } elseif ($shippingMethod == 'DHL Express') {
+            $shippingCost = 4.5 + 6;
+        } elseif ($shippingMethod == 'LPD') {
+            $shippingCost = 4.5 + 3;
+        }
+        $totalPriceWithShipping = $totalPrice + $shippingCost;
 
-    // Bestellpositionen speichern
-    foreach ($cartItems as $item) {
-        $stmt = $link->prepare("INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("iiid", $orderId, $item['product_id'], $item['quantity'], $item['price']);
+        // Bestellung in der Datenbank speichern
+        $stmt = $link->prepare("INSERT INTO orders (kunden_id, total_amount, shipping_method, is_express_shipping, is_paid) VALUES (?, ?, ?, ?, ?)");
+        $isPaid = 1; // Annahme: Zahlung erfolgreich
+        $stmt->bind_param("idssi", $kundenId, $totalPriceWithShipping, $shippingMethod, $isExpressShipping, $isPaid);
+        $stmt->execute();
+        $orderId = $stmt->insert_id;
+        $stmt->close();
+
+        // Bestellpositionen speichern
+        foreach ($cartItems as $item) {
+            $stmt = $link->prepare("INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("iiid", $orderId, $item['product_id'], $item['quantity'], $item['price']);
+            $stmt->execute();
+            $stmt->close();
+        }
+
+        // Benutzerinformationen aus der Datenbank abrufen
+        $stmt = $link->prepare("SELECT email, name FROM kunden WHERE id = ?");
+        $stmt->bind_param("i", $kundenId);
+        $stmt->execute();
+        $userResult = $stmt->get_result();
+        $user = $userResult->fetch_assoc();
+
+        $recipientEmail = $user['email'];
+        $recipientName = $user['name'];
+
+        // Holen Sie sich die Bestätigungs-E-Mail-Vorlage
+        $emailTemplate = getPaymentConfirmationEmail($recipientName);
+
+        // Senden Sie die E-Mail
+        sendEmail($recipientEmail, $recipientName, $emailTemplate);
+
+        $stmt->close();
+
+        // Warenkorb leeren
+        $stmt = $link->prepare("DELETE FROM shopping_cart WHERE kunden_id = ?");
+        $stmt->bind_param("i", $kundenId);
         $stmt->execute();
         $stmt->close();
+
+        // Weiterleitung nach dem Leeren des Warenkorbs und dem Senden der E-Mail
+        header("Location: danke.php");
+        exit();
     }
-
-    // Benutzerinformationen aus der Datenbank abrufen
-    $stmt = $link->prepare("SELECT email, name FROM kunden WHERE id = ?");
-    $stmt->bind_param("i", $kundenId);
-    $stmt->execute();
-    $userResult = $stmt->get_result();
-    $user = $userResult->fetch_assoc();
-
-    $recipientEmail = $user['email'];
-    $recipientName = $user['name'];
-
-    // Holen Sie sich die Bestätigungs-E-Mail-Vorlage
-    $emailTemplate = getPaymentConfirmationEmail($recipientName);
-
-    // Senden Sie die E-Mail
-    sendEmail($recipientEmail, $recipientName, $emailTemplate);
-
-    $stmt->close();
-
-    // Warenkorb leeren
-    $stmt = $link->prepare("DELETE FROM shopping_cart WHERE kunden_id = ?");
-    $stmt->bind_param("i", $kundenId);
-    $stmt->execute();
-    $stmt->close();
-
-    // Weiterleitung nach dem Leeren des Warenkorbs und dem Senden der E-Mail
-    header("Location: shopping_cart.php?success=1");
-    exit();
 }
 
 $link->close();
@@ -196,19 +211,26 @@ $link->close();
                     </div>
 
                     <hr class="mb-4">
-                    <div class="custom-control custom-checkbox">
-                        <input type="checkbox" class="custom-control-input" id="same-address" name="same_address">
-                        <label class="custom-control-label" for="same-address">Shipping address is the same as my billing address</label>
-                    </div>
-                    <div class="custom-control custom-checkbox">
-                        <input type="checkbox" class="custom-control-input" id="save-info" name="save_info">
-                        <label class="custom-control-label" for="save-info">Save this information for next time</label>
+
+                    <h4 class="mb-3">Versandart</h4>
+                    <div class="d-block my-3">
+                        <div class="custom-control custom-radio">
+                            <input id="dhl" name="shipping_method" type="radio" class="custom-control-input" value="DHL" checked required>
+                            <label class="custom-control-label" for="dhl">DHL (4,5€)</label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                            <input id="dhl_express" name="shipping_method" type="radio" class="custom-control-input" value="DHL Express" required>
+                            <label class="custom-control-label" for="dhl_express">DHL Express (+6€)</label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                            <input id="lpd" name="shipping_method" type="radio" class="custom-control-input" value="LPD" required>
+                            <label class="custom-control-label" for="lpd">LPD (+3€)</label>
+                        </div>
                     </div>
 
                     <hr class="mb-4">
 
                     <h4 class="mb-3">Payment</h4>
-
                     <div class="d-block my-3">
                         <div class="custom-control custom-radio">
                             <input id="credit" name="paymentMethod" type="radio" class="custom-control-input" checked required>
@@ -248,8 +270,13 @@ $link->close();
                     </div>
 
                     <hr class="mb-4">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="privacy_policy" name="privacy_policy" required>
+                        <label class="custom-control-label" for="privacy_policy">Ich akzeptiere die Datenschutzrichtlinie</label>
+                    </div>
+                    <hr class="mb-4">
                     <input type="hidden" name="checkout" value="1">
-                    <button class="btn btn-primary btn-lg btn-block" type="submit">Continue to checkout</button>
+                    <button class="btn btn-primary btn-lg btn-block" type="submit">Bezahlen</button>
                 </form>
             </div>
         </div>
@@ -265,29 +292,16 @@ $link->close();
                     echo '<li class="list-group-item d-flex justify-content-between lh-condensed">';
                     echo '<div>';
                     echo '<h6 class="my-0">' . htmlspecialchars($item['name']) . '</h6>';
-                    echo '<small class="text-muted">Brief description</small>';
                     echo '</div>';
                     echo '<span class="text-muted">' . htmlspecialchars($itemTotal) . '€</span>';
                     echo '</li>';
                 }
                 ?>
-                <li class="list-group-item d-flex justify-content-between bg-light">
-                    <div class="text-success">
-                        <h6 class="my-0">Promo code</h6>
-                        <small>EXAMPLECODE</small>
-                    </div>
-                    <span class="text-success">−$5</span>
-                </li>
                 <li class="list-group-item d-flex justify-content-between">
-                    <span>Total (USD)</span>
-                    <strong><?php echo htmlspecialchars($totalPrice); ?>€</strong>
+                    <span>Total (EUR)</span>
+                    <strong><?php echo htmlspecialchars(number_format($totalPrice, 2)); ?>€</strong>
                 </li>
             </ul>
-
-            <form class="card p-2 promo-code-group">
-                <input type="text" class="form-control promo-code" placeholder="Promo code">
-                <button type="submit" class="btn btn-secondary">Redeem</button>
-            </form>
         </div>
     </div>
 </div>
