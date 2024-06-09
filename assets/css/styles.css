@@ -8,6 +8,15 @@ body {
   font-size: 16px;
 }
 
+/* Styles for the logo */
+.logo {
+  display: block; /* Ermöglicht die Verwendung von margin:auto; */
+  width: 20%; /* Passen Sie die Breite an */
+  height: auto; /* Beibehaltung des Seitenverhältnisses */
+  margin-left: auto; /* Zentrieren des Logos horizontal */
+  margin-right: auto; /* Zentrieren des Logos horizontal */
+}
+
 h1,
 p {
   margin: 1em auto;
