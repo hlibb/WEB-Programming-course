@@ -10,7 +10,7 @@
             margin-left: 20%;
             margin-right: 20%;
         }
-    </style>
+    </style>a
 </head>
 <body>
 <?php include '../php/include/navimport.php' ?>
