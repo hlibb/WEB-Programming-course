@@ -102,7 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pay'])) {
     $stmt->close();
 
     // Optionale Weiterleitung nach dem Leeren des Warenkorbs und dem Senden der E-Mail
-    header("Location: shopping_cart.php?success=1");
+    header("Location: checkout.php");
     exit();
 }
 
