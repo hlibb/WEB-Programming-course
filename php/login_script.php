@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validate credentials
     if (empty($email_err) && empty($password_err)) {
         // Prepare a select statement
-        $sql = "SELECT id, email, password FROM users WHERE email = ?";
+        $sql = "SELECT id, email, password, login_timestamp FROM users WHERE email = ?";
 
         // Set parameters
         $param_email = $email;
@@ -54,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Check if email exists, if yes then verify password
                 if (mysqli_stmt_num_rows($stmt) == 1) {
                     // Bind result variables
-                    mysqli_stmt_bind_result($stmt, $id, $email, $hashed_password);
+                    mysqli_stmt_bind_result($stmt, $id, $email, $hashed_password, $login_timestamp);
                     if (mysqli_stmt_fetch($stmt)) {
                         if (password_verify($password, $hashed_password)) {
                             // Start a new session if not already started
@@ -66,6 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             $_SESSION["logged_in"] = true;
                             $_SESSION["user_id"] = $id; // Assuming $id is the user's ID
                             $_SESSION["email"] = $email; // Assuming $email is the user's email
+                            $_SESSION["previous_login"] = $login_timestamp;
 
                             // Update login timestamp
                             $update_sql = "UPDATE users SET login_timestamp = NOW() WHERE id = ?";

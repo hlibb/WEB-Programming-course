@@ -23,6 +23,7 @@ include '../php/include/navimport.php';
         // User is logged in, display welcome message and other content
         $username = $_SESSION['email'];
         $userId = $_SESSION['user_id'];
+        $lastLoginTimestamp = $_SESSION['previous_login'];
         // Fetch user data from database if necessary
         require_once '../php/include/db_connection.php';
         $userId = $_SESSION['user_id'];
@@ -34,15 +35,12 @@ include '../php/include/navimport.php';
         $user = $result->fetch_assoc();
         // Display welcome message
         if ($user) {
-            $loginTimestamp = $user['login_timestamp'];
-            echo "<p>Herzlich Willkommen Herr/Frau {$user['surname']}. Sie waren zuletzt am $loginTimestamp online.</p>";
+            echo "<p>Herzlich Willkommen Herr/Frau {$user['surname']}. Sie waren zuletzt am $lastLoginTimestamp online.</p>";
         } else {
-            // User not found
-            echo "<p>Willkommen! 1</p>";
+            echo "<p>Willkommen, unbekannte User!</p>";
         }
     } else {
-        // User not logged in, handle accordingly
-        echo "<p>Willkommen! 2</p>";
+        echo "<p>Willkommen, nicht eingeloggte User!</p>";
     }
     ?>
     <div id="carouselExample" class="carousel slide">
