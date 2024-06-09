@@ -30,6 +30,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset
     $stmt->close();
 }
 
+// Update user points for buying stuff
+$points_sql = "UPDATE punkte SET points = points + 25 WHERE kunden_id = ?";
+if ($points_stmt = mysqli_prepare($link, $points_sql)) {
+    // Bind variables to the prepared statement as parameters
+    mysqli_stmt_bind_param($points_stmt, "i", $id);
+    // Attempt to execute the prepared statement
+    if (!mysqli_stmt_execute($points_stmt)) {
+        echo "Oops! Something went wrong. Please try again later.";
+    }
+    // Close statement
+    mysqli_stmt_close($points_stmt);
+}
+
 // Funktion zum Entfernen von Produkten aus dem Warenkorb
 if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['remove'])) {
     $productId = $_GET['remove'];
