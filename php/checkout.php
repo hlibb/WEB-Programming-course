@@ -289,6 +289,7 @@ $link->close();
             <form class="card p-2 promo-code-group">
                 <input type="text" class="form-control promo-code" placeholder="Promo code">
                 <button type="submit" class="btn btn-secondary">Redeem</button>
+                </input>
             </form>
         </div>
     </div>
