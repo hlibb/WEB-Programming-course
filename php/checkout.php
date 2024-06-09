@@ -43,14 +43,16 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['remove'])) {
 // Warenkorb anzeigen
 $kundenId = $_SESSION['kunden_id'] ?? 1;
 
-$stmt = $link->prepare("SELECT sc.id, p.name, p.price, sc.quantity FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.kunden_id = ?");
+$stmt = $link->prepare("SELECT sc.product_id, p.name, p.price, sc.quantity FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.kunden_id = ?");
 $stmt->bind_param("i", $kundenId);
 $stmt->execute();
 $result = $stmt->get_result();
 
 $cartItems = [];
+$totalPrice = 0;
 while ($row = $result->fetch_assoc()) {
     $cartItems[] = $row;
+    $totalPrice += $row['price'] * $row['quantity'];
 }
 
 $stmt->close();
@@ -72,12 +74,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
     $ccCVV = $_POST['cc_cvv'];
     $shippingMethod = $_POST['shipping_method'];
     $isExpressShipping = isset($_POST['is_express_shipping']) ? 1 : 0;
-    $totalAmount = $_POST['total_amount'];
 
     // Bestellung in der Datenbank speichern
     $stmt = $link->prepare("INSERT INTO orders (kunden_id, total_amount, shipping_method, is_express_shipping, is_paid) VALUES (?, ?, ?, ?, ?)");
     $isPaid = 1; // Annahme: Zahlung erfolgreich
-    $stmt->bind_param("idssi", $kundenId, $totalAmount, $shippingMethod, $isExpressShipping, $isPaid);
+    $stmt->bind_param("idssi", $kundenId, $totalPrice, $shippingMethod, $isExpressShipping, $isPaid);
     $stmt->execute();
     $orderId = $stmt->insert_id;
     $stmt->close();
@@ -260,16 +261,14 @@ $link->close();
             </h4>
             <ul class="list-group mb-3">
                 <?php
-                $totalPrice = 0;
                 foreach ($cartItems as $item) {
                     $itemTotal = $item['price'] * $item['quantity'];
-                    $totalPrice += $itemTotal;
                     echo '<li class="list-group-item d-flex justify-content-between lh-condensed">';
                     echo '<div>';
                     echo '<h6 class="my-0">' . htmlspecialchars($item['name']) . '</h6>';
                     echo '<small class="text-muted">Brief description</small>';
                     echo '</div>';
-                    echo '<span class="text-muted">' . htmlspecialchars($item['price']) . '€</span>';
+                    echo '<span class="text-muted">' . htmlspecialchars($itemTotal) . '€</span>';
                     echo '</li>';
                 }
                 ?>
