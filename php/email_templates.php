@@ -14,4 +14,12 @@ function getOrderShippedEmail($recipientName) {
 }
 
 // Add more email templates as needed
+function getPasswordResetEmail($recipientName, $resetToken) {
+    $subject = 'Password Reset Request';
+    $body = "<p>Dear $recipientName,</p>
+             <p>We received a request to reset your password. Click the link below to reset your password:</p>
+             <p><a href='http://yourdomain.com/reset_password.php?token=$resetToken'>Reset Password</a></p>
+             <p>If you did not request a password reset, please ignore this email.</p>";
+    return ['subject' => $subject, 'body' => $body];
+}
 ?>

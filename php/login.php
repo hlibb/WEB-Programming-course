@@ -32,6 +32,9 @@
         <div class="panel-footer">
             <p class='text-info'>Don't have an account? <a href="registration.php">Register</a></p>
         </div>
+        <div class="panel-footer">
+            <p class='text-info'><a href="reset_password.php">Passwort vergessen?</a></p>
+        </div>
     </div>
 
 </div>
