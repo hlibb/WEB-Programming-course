@@ -1,6 +1,5 @@
 <?php
 include_once 'include/logged_in.php';
-
 include_once 'include/db_connection.php';
 include 'send_email.php'; // Include the send email function
 
@@ -73,7 +72,6 @@ $cartItems = [];
 $totalPrice = 0;
 while ($row = $result->fetch_assoc()) {
     $cartItems[] = $row;
-    $totalPrice += $row['price'] * $row['quantity'];
 }
 
 $stmt->close();
@@ -150,10 +148,13 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
                 echo "</tr>";
             }
             ?>
+            <tr>
+                <td colspan="4" class="text-right"><strong>Gesamtpreis:</strong></td>
+                <td colspan="2"><strong><?php echo htmlspecialchars(number_format($totalPrice, 2)); ?>€</strong></td>
+            </tr>
             </tbody>
         </table>
     </div>
-    <h3>Gesamtpreis: <?php echo htmlspecialchars(number_format($totalPrice, 2)); ?>€</h3>
 
     <!-- Bezahl-Formular -->
     <form method="post" action="">
