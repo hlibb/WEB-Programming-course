@@ -1,8 +1,7 @@
 <?php
 include_once 'include/logged_in.php';
-
 include_once 'include/db_connection.php';
-include 'send_email.php';
+include 'send_email.php'; // Include the send email function
 
 // Funktion zum Hinzufügen von Produkten zum Warenkorb
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset($_POST['quantity'])) {
@@ -10,6 +9,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset
     $quantity = $_POST['quantity'];
 
     $kundenId = $_SESSION['kunden_id'] ?? 1;
+
+    // Berechnung des Rabatts
+    $discount = 0;
+    if ($quantity >= 10) {
+        $discount = 0.20;
+    } elseif ($quantity >= 5) {
+        $discount = 0.10;
+    }
 
     $stmt = $link->prepare("SELECT * FROM shopping_cart WHERE kunden_id = ? AND product_id = ?");
     $stmt->bind_param("ii", $kundenId, $productId);
@@ -19,11 +26,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         $newQuantity = $row['quantity'] + $quantity;
-        $stmt = $link->prepare("UPDATE shopping_cart SET quantity = ? WHERE kunden_id = ? AND product_id = ?");
-        $stmt->bind_param("iii", $newQuantity, $kundenId, $productId);
+        // Aktualisieren Sie den Rabatt entsprechend der neuen Menge
+        if ($newQuantity >= 10) {
+            $discount = 0.20;
+        } elseif ($newQuantity >= 5) {
+            $discount = 0.10;
+        } else {
+            $discount = 0;
+        }
+        $stmt = $link->prepare("UPDATE shopping_cart SET quantity = ?, rabatt = ? WHERE kunden_id = ? AND product_id = ?");
+        $stmt->bind_param("idii", $newQuantity, $discount, $kundenId, $productId);
     } else {
-        $stmt = $link->prepare("INSERT INTO shopping_cart (kunden_id, product_id, quantity) VALUES (?, ?, ?)");
-        $stmt->bind_param("iii", $kundenId, $productId, $quantity);
+        $stmt = $link->prepare("INSERT INTO shopping_cart (kunden_id, product_id, quantity, rabatt) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("iiid", $kundenId, $productId, $quantity, $discount);
     }
     $stmt->execute();
     $stmt->close();
@@ -41,10 +56,29 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['remove'])) {
     $stmt->close();
 }
 
+// Versandkosten initialisieren
+$shippingCost = 0;
+$shippingMethod = '';
+$isExpressShipping = 0;
+
+// Versandkosten berechnen und in der Session speichern
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['shipping_method'])) {
+    $shippingMethod = $_POST['shipping_method'];
+    if ($shippingMethod == 'DHL') {
+        $shippingCost = 4.5;
+    } elseif ($shippingMethod == 'DHL Express') {
+        $shippingCost = 4.5 + 6;
+    } elseif ($shippingMethod == 'LPD') {
+        $shippingCost = 4.5 + 3;
+    }
+    $_SESSION['shipping_cost'] = $shippingCost;
+    $_SESSION['shipping_method'] = $shippingMethod;
+}
+
 // Warenkorb anzeigen
 $kundenId = $_SESSION['kunden_id'] ?? 1;
 
-$stmt = $link->prepare("SELECT sc.product_id, p.name, p.price, sc.quantity FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.kunden_id = ?");
+$stmt = $link->prepare("SELECT sc.product_id, p.name, p.price, sc.quantity, sc.rabatt FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.kunden_id = ?");
 $stmt->bind_param("i", $kundenId);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -53,10 +87,17 @@ $cartItems = [];
 $totalPrice = 0;
 while ($row = $result->fetch_assoc()) {
     $cartItems[] = $row;
-    $totalPrice += $row['price'] * $row['quantity'];
 }
 
 $stmt->close();
+
+// Versandkosten und Versandart aus der Session holen
+if (isset($_SESSION['shipping_cost'])) {
+    $shippingCost = $_SESSION['shipping_cost'];
+}
+if (isset($_SESSION['shipping_method'])) {
+    $shippingMethod = $_SESSION['shipping_method'];
+}
 
 // E-Mail senden, Bestellung speichern und Warenkorb leeren, wenn das Checkout-Formular abgeschickt wird
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
@@ -80,7 +121,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
         $isExpressShipping = $shippingMethod === 'DHL Express' ? 1 : 0;
 
         // Versandkosten berechnen
-        $shippingCost = 0;
         if ($shippingMethod == 'DHL') {
             $shippingCost = 4.5;
         } elseif ($shippingMethod == 'DHL Express') {
@@ -151,22 +191,22 @@ $link->close();
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-8">
-            <h2>Billing address</h2>
+            <h2>Rechnungsadresse</h2>
             <div class="form-container">
                 <form method="post" action="">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="firstName">First name</label>
+                            <label for="firstName">Vorname</label>
                             <input type="text" class="form-control" id="firstName" name="firstName" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="lastName">Last name</label>
+                            <label for="lastName">Nachname</label>
                             <input type="text" class="form-control" id="lastName" name="lastName" required>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label for="username">Username</label>
+                        <label for="username">Benutzername</label>
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">@</span>
@@ -176,37 +216,41 @@ $link->close();
                     </div>
 
                     <div class="mb-3">
-                        <label for="email">Email <span class="text-muted">(Optional)</span></label>
+                        <label for="email">E-Mail <span class="text-muted">(Optional)</span></label>
                         <input type="email" class="form-control" id="email" name="email">
                     </div>
 
                     <div class="mb-3">
-                        <label for="address">Address</label>
+                        <label for="address">Adresse</label>
                         <input type="text" class="form-control" id="address" name="address" required>
                     </div>
 
                     <div class="mb-3">
-                        <label for="address2">Address 2 <span class="text-muted">(Optional)</span></label>
+                        <label for="address2">Adresse 2 <span class="text-muted">(Optional)</span></label>
                         <input type="text" class="form-control" id="address2" name="address2">
                     </div>
 
                     <div class="row">
                         <div class="col-md-5 mb-3">
-                            <label for="country">Country</label>
+                            <label for="country">Land</label>
                             <select class="custom-select d-block w-100" id="country" name="country" required>
-                                <option value="">Choose...</option>
-                                <option>United States</option>
+                                <option value="">Auswählen...</option>
+                                <option>Deutschland</option>
+                                <option>Österreich</option>
+                                <option>Schweiz</option>
                             </select>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label for="state">State</label>
+                            <label for="state">Bundesland</label>
                             <select class="custom-select d-block w-100" id="state" name="state" required>
-                                <option value="">Choose...</option>
-                                <option>California</option>
+                                <option value="">Auswählen...</option>
+                                <option>Bayern</option>
+                                <option>Berlin</option>
+                                <option>Hamburg</option>
                             </select>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label for="zip">Zip</label>
+                            <label for="zip">PLZ</label>
                             <input type="text" class="form-control" id="zip" name="zip" required>
                         </div>
                     </div>
@@ -231,15 +275,15 @@ $link->close();
 
                     <hr class="mb-4">
 
-                    <h4 class="mb-3">Payment</h4>
+                    <h4 class="mb-3">Zahlungsmethode</h4>
                     <div class="d-block my-3">
                         <div class="custom-control custom-radio">
                             <input id="credit" name="paymentMethod" type="radio" class="custom-control-input" checked required>
-                            <label class="custom-control-label" for="credit">Credit card</label>
+                            <label class="custom-control-label" for="credit">Kreditkarte</label>
                         </div>
                         <div class="custom-control custom-radio">
                             <input id="debit" name="paymentMethod" type="radio" class="custom-control-input" required>
-                            <label class="custom-control-label" for="debit">Debit card</label>
+                            <label class="custom-control-label" for="debit">Debitkarte</label>
                         </div>
                         <div class="custom-control custom-radio">
                             <input id="paypal" name="paymentMethod" type="radio" class="custom-control-input" required>
@@ -249,19 +293,19 @@ $link->close();
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="cc-name">Name on card</label>
+                            <label for="cc-name">Name auf der Karte</label>
                             <input type="text" class="form-control" id="cc-name" name="cc_name" required>
-                            <small class="text-muted">Full name as displayed on card</small>
+                            <small class="text-muted">Vollständiger Name, wie auf der Karte angezeigt</small>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="cc-number">Credit card number</label>
+                            <label for="cc-number">Kreditkartennummer</label>
                             <input type="text" class="form-control" id="cc-number" name="cc_number" required>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-3 mb-3">
-                            <label for="cc-expiration">Expiration</label>
+                            <label for="cc-expiration">Ablaufdatum</label>
                             <input type="text" class="form-control" id="cc-expiration" name="cc_expiration" required>
                         </div>
                         <div class="col-md-3 mb-3">
@@ -283,24 +327,36 @@ $link->close();
         </div>
         <div class="col-md-4 order-md-2 mb-4">
             <h4 class="d-flex justify-content-between align-items-center mb-3">
-                <span class="text-muted">Your cart</span>
+                <span class="text-muted">Ihr Warenkorb</span>
                 <span class="badge badge-primary badge-pill"><?php echo count($cartItems); ?></span>
             </h4>
             <ul class="list-group mb-3">
                 <?php
                 foreach ($cartItems as $item) {
-                    $itemTotal = $item['price'] * $item['quantity'];
+                    $discountedPrice = $item['price'] * (1 - $item['rabatt']);
+                    $itemTotal = $discountedPrice * $item['quantity'];
                     echo '<li class="list-group-item d-flex justify-content-between lh-condensed">';
                     echo '<div>';
                     echo '<h6 class="my-0">' . htmlspecialchars($item['name']) . '</h6>';
+                    echo '<small class="text-muted">Preis: ' . htmlspecialchars(number_format($item['price'], 2)) . '€</small><br>';
+                    echo '<small class="text-muted">Rabatt: ' . htmlspecialchars($item['rabatt'] * 100) . '%</small><br>';
+                    echo '<small class="text-muted">- Rabatt: ' . htmlspecialchars(number_format($item['price'] * $item['rabatt'], 2)) . '€</small>';
                     echo '</div>';
-                    echo '<span class="text-muted">' . htmlspecialchars($itemTotal) . '€</span>';
+                    echo '<span class="text-muted">' . htmlspecialchars(number_format($itemTotal, 2)) . '€</span>';
                     echo '</li>';
+                    $totalPrice += $itemTotal;
                 }
                 ?>
+                <li class="list-group-item d-flex justify-content-between lh-condensed">
+                    <div>
+                        <h6 class="my-0">Versandkosten</h6>
+                        <small class="text-muted"><?php echo htmlspecialchars($shippingMethod); ?></small>
+                    </div>
+                    <span class="text-muted"><?php echo htmlspecialchars(number_format($shippingCost, 2)); ?>€</span>
+                </li>
                 <li class="list-group-item d-flex justify-content-between">
-                    <span>Total (EUR)</span>
-                    <strong><?php echo htmlspecialchars(number_format($totalPrice, 2)); ?>€</strong>
+                    <span>Gesamt (EUR)</span>
+                    <strong><?php echo htmlspecialchars(number_format($totalPrice + $shippingCost, 2)); ?>€</strong>
                 </li>
             </ul>
         </div>
