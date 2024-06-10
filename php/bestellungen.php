@@ -67,7 +67,19 @@ $result = $stmt->get_result();
 
 $orders = [];
 while ($row = $result->fetch_assoc()) {
+    // Abrufen der Artikel für jede Bestellung
+    $order_id = $row['id'];
+    $item_stmt = $link->prepare("SELECT * FROM order_items WHERE order_id = ?");
+    $item_stmt->bind_param("i", $order_id);
+    $item_stmt->execute();
+    $item_result = $item_stmt->get_result();
+    $items = [];
+    while ($item_row = $item_result->fetch_assoc()) {
+        $items[] = $item_row;
+    }
+    $row['items'] = $items;
     $orders[] = $row;
+    $item_stmt->close();
 }
 
 $stmt->close();
@@ -105,7 +117,12 @@ $link->close();
         <tbody>
         <?php foreach ($orders as $order): ?>
             <tr>
-                <td><?php echo htmlspecialchars($order['id']); ?></td>
+                <td>
+                    <button class="btn btn-link" data-toggle="collapse" data-target="#order-<?php echo $order['id']; ?>" aria-expanded="false" aria-controls="order-<?php echo $order['id']; ?>">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <?php echo htmlspecialchars($order['id']); ?>
+                </td>
                 <td><?php echo htmlspecialchars($order['order_date']); ?></td>
                 <td><?php echo htmlspecialchars($order['total_amount']); ?>€</td>
                 <td><?php echo htmlspecialchars($order['shipping_method']); ?></td>
@@ -116,6 +133,28 @@ $link->close();
                         <input type="hidden" name="order_id" value="<?php echo htmlspecialchars($order['id']); ?>">
                         <button type="submit" name="reorder" class="btn btn-primary">Erneut Bestellen</button>
                     </form>
+                </td>
+            </tr>
+            <tr class="collapse" id="order-<?php echo $order['id']; ?>">
+                <td colspan="7">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Artikel</th>
+                            <th>Menge</th>
+                            <th>Preis</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($order['items'] as $item): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($item['product_id']); ?></td>
+                                <td><?php echo htmlspecialchars($item['quantity']); ?></td>
+                                <td><?php echo htmlspecialchars($item['unit_price']); ?>€</td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
                 </td>
             </tr>
         <?php endforeach; ?>
