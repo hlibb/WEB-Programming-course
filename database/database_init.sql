@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS `shopping_cart` (
     `kunden_id` INT,
     `product_id` INT,
     `quantity` INT,
+    `rabatt` DECIMAL(5, 2),
     FOREIGN KEY (`kunden_id`) REFERENCES `kunden`(`id`),
     FOREIGN KEY (`product_id`) REFERENCES `products`(`id`)
 );

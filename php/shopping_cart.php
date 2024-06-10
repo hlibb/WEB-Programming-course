@@ -11,6 +11,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset
     // Beispiel: Benutzer-ID aus der Session
     $kundenId = $_SESSION['kunden_id'] ?? 1; // Verwenden Sie Ihre Methode zur Ermittlung der Benutzer-ID
 
+    // Berechnung des Rabatts
+    $discount = 0;
+    if ($quantity >= 10) {
+        $discount = 0.20;
+    } elseif ($quantity >= 5) {
+        $discount = 0.10;
+    }
+
     // Überprüfen, ob das Produkt bereits im Warenkorb ist
     $stmt = $link->prepare("SELECT * FROM shopping_cart WHERE kunden_id = ? AND product_id = ?");
     $stmt->bind_param("ii", $kundenId, $productId);
@@ -20,11 +28,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         $newQuantity = $row['quantity'] + $quantity;
-        $stmt = $link->prepare("UPDATE shopping_cart SET quantity = ? WHERE kunden_id = ? AND product_id = ?");
-        $stmt->bind_param("iii", $newQuantity, $kundenId, $productId);
+        // Aktualisieren Sie den Rabatt entsprechend der neuen Menge
+        if ($newQuantity >= 10) {
+            $discount = 0.20;
+        } elseif ($newQuantity >= 5) {
+            $discount = 0.10;
+        } else {
+            $discount = 0;
+        }
+        $stmt = $link->prepare("UPDATE shopping_cart SET quantity = ?, rabatt = ? WHERE kunden_id = ? AND product_id = ?");
+        $stmt->bind_param("idii", $newQuantity, $discount, $kundenId, $productId);
     } else {
-        $stmt = $link->prepare("INSERT INTO shopping_cart (kunden_id, product_id, quantity) VALUES (?, ?, ?)");
-        $stmt->bind_param("iii", $kundenId, $productId, $quantity);
+        $stmt = $link->prepare("INSERT INTO shopping_cart (kunden_id, product_id, quantity, rabatt) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("iiid", $kundenId, $productId, $quantity, $discount);
     }
     $stmt->execute();
     $stmt->close();
@@ -41,8 +57,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_quantity'])) {
         $stmt = $link->prepare("DELETE FROM shopping_cart WHERE kunden_id = ? AND product_id = ?");
         $stmt->bind_param("ii", $kundenId, $productId);
     } else {
-        $stmt = $link->prepare("UPDATE shopping_cart SET quantity = ? WHERE kunden_id = ? AND product_id = ?");
-        $stmt->bind_param("iii", $quantity, $kundenId, $productId);
+        // Berechnung des Rabatts basierend auf der aktualisierten Menge
+        $discount = 0;
+        if ($quantity >= 10) {
+            $discount = 0.20;
+        } elseif ($quantity >= 5) {
+            $discount = 0.10;
+        }
+        $stmt = $link->prepare("UPDATE shopping_cart SET quantity = ?, rabatt = ? WHERE kunden_id = ? AND product_id = ?");
+        $stmt->bind_param("idii", $quantity, $discount, $kundenId, $productId);
     }
     $stmt->execute();
     $stmt->close();
@@ -63,7 +86,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['remove'])) {
 // Warenkorb anzeigen
 $kundenId = $_SESSION['kunden_id'] ?? 1;
 
-$stmt = $link->prepare("SELECT sc.product_id, p.name, p.price, sc.quantity FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.kunden_id = ?");
+$stmt = $link->prepare("SELECT sc.product_id, p.name, p.price, sc.quantity, sc.rabatt FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.kunden_id = ?");
 $stmt->bind_param("i", $kundenId);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -117,12 +140,7 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
             <tbody>
             <?php
             foreach ($cartItems as $item) {
-                $discount = 0;
-                if ($item['quantity'] >= 10) {
-                    $discount = 0.20;
-                } elseif ($item['quantity'] >= 5) {
-                    $discount = 0.10;
-                }
+                $discount = $item['rabatt'];
                 $discountedPrice = $item['price'] * (1 - $discount);
                 $itemTotal = $discountedPrice * $item['quantity'];
                 $totalPrice += $itemTotal;
