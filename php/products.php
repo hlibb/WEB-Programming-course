@@ -1,5 +1,6 @@
 <?php
-session_start();
+include_once 'include/logged_in.php';
+
 include_once 'include/db_connection.php';
 
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {

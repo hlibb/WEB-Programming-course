@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+<?php
+include_once 'include/logged_in.php';
+?>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">

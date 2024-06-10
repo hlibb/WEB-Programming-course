@@ -1,5 +1,5 @@
 <?php
-session_start();
+include_once 'include/logged_in.php';
 ?>
 <!doctype html>
 <html lang="de">

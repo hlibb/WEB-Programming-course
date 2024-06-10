@@ -4,12 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Willkommen</title>
-    <?php include '../php/include/headimport.php' ?>
+    <?php include '../php/include/headimport.php'; ?>
 </head>
 <body>
-<?php
-include '../php/include/navimport.php';
-?>
+<?php include '../php/include/navimport.php'; ?>
 <div class="container">
     <?php
     include_once "../php/include/logged_in.php";
@@ -24,7 +22,6 @@ include '../php/include/navimport.php';
         $formattedDate = strftime('%A, %d.%m.%Y', $date->getTimestamp());
 
         require_once '../php/include/db_connection.php';
-        $kundenId = $_SESSION['kunden_id'];
         $sql = "SELECT * FROM kunden WHERE id = ?";
         $stmt = $link->prepare($sql);
         $stmt->bind_param("i", $kundenId);
@@ -102,8 +99,6 @@ include '../php/include/navimport.php';
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
-<?php
-include '../php/include/footimport.php'
-?>
+<?php include '../php/include/footimport.php'; ?>
 </body>
 </html>

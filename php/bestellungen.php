@@ -1,5 +1,6 @@
 <?php
-session_start();
+include_once 'include/logged_in.php'; // Ensure this is included at the top
+
 include_once 'include/db_connection.php';
 include 'send_email.php'; // Include the send email function
 
@@ -78,7 +79,7 @@ $link->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bestellungen</title>
-    <?php include '../php/include/headimport.php' ?>
+    <?php include '../php/include/headimport.php'; ?>
 </head>
 <body>
 <?php include "include/navimport.php"; ?>
