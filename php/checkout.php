@@ -334,6 +334,7 @@ $link->close();
             </h4>
             <ul class="list-group mb-3">
                 <?php
+                $totalPrice = 0; // Reset totalPrice before recalculating
                 foreach ($cartItems as $item) {
                     $discountedPrice = $item['price'] * (1 - $item['rabatt']);
                     $itemTotal = $discountedPrice * $item['quantity'];
