@@ -1,6 +1,5 @@
 <?php
 include_once 'include/logged_in.php'; // Ensure this is included at the top
-
 include_once 'include/db_connection.php';
 include 'send_email.php'; // Include the send email function
 
@@ -48,8 +47,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reorder'])) {
     $recipientEmail = $user['email'];
     $recipientName = $user['name'];
 
+    // Abrufen der neuen Bestelldaten
+    $stmt = $link->prepare("SELECT total_amount, shipping_method, is_express_shipping FROM orders WHERE id = ?");
+    $stmt->bind_param("i", $newOrderId);
+    $stmt->execute();
+    $newOrderResult = $stmt->get_result();
+    $newOrder = $newOrderResult->fetch_assoc();
+    $stmt->close();
+
+    $shippingCost = $newOrder['is_express_shipping'] ? 10.00 : 5.00; // Beispiel für Versandkosten
+    $totalPrice = $newOrder['total_amount'];
+
     // E-Mail-Vorlage abrufen
-    $emailTemplate = getPaymentConfirmationEmail($recipientName);
+    $emailTemplate = getPaymentConfirmationEmail($recipientName, $orderItems, $totalPrice, $newOrder['shipping_method'], $shippingCost);
 
     // E-Mail senden
     sendEmail($recipientEmail, $recipientName, $emailTemplate);

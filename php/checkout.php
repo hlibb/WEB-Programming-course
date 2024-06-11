@@ -87,6 +87,8 @@ $cartItems = [];
 $totalPrice = 0;
 while ($row = $result->fetch_assoc()) {
     $cartItems[] = $row;
+    $discountedPrice = $row['price'] * (1 - $row['rabatt']);
+    $totalPrice += $discountedPrice * $row['quantity'];
 }
 
 $stmt->close();
@@ -157,7 +159,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
         $recipientName = $user['name'];
 
         // Holen Sie sich die Bestätigungs-E-Mail-Vorlage
-        $emailTemplate = getPaymentConfirmationEmail($recipientName);
+        $emailTemplate = getPaymentConfirmationEmail($recipientName, $cartItems, $totalPrice, $shippingMethod, $shippingCost);
 
         // Senden Sie die E-Mail
         sendEmail($recipientEmail, $recipientName, $emailTemplate);
