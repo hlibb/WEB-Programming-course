@@ -29,7 +29,7 @@ function getPaymentConfirmationEmail($recipientName, $cartItems, $totalPrice, $s
             body {
                 width: 100%;
                 margin: 0;
-                background-color: #1b1b32;
+                background-color: #282847;
                 color: #f5f6f7;
                 font-family: Tahoma, sans-serif;
                 font-size: 16px;
@@ -38,12 +38,12 @@ function getPaymentConfirmationEmail($recipientName, $cartItems, $totalPrice, $s
                 max-width: 600px;
                 margin: 0 auto;
                 padding: 20px;
-                border: 1px solid #ddd;
-                background-color: #f9f9f9;
-                color: #1b1b32;
+                border: 1px solid #3b3f7;
+                background-color: #282847;
+                color: #f5f6f7;
             }
             .header {
-                background-color: #007bff;
+                background-color: #3b3b4f;
                 color: #fff;
                 padding: 10px;
                 text-align: center;
@@ -52,7 +52,7 @@ function getPaymentConfirmationEmail($recipientName, $cartItems, $totalPrice, $s
                 margin: 20px 0;
             }
             .footer {
-                background-color: #007bff;
+                background-color: #3b3b4f;
                 color: #fff;
                 text-align: center;
                 padding: 10px;
@@ -84,7 +84,7 @@ function getPaymentConfirmationEmail($recipientName, $cartItems, $totalPrice, $s
     <body>
         <div class='container'>
             <div class='header'>
-                <h1>Payment Confirmation</h1>
+                <h1 style='color: #fff;'>Payment Confirmation</h1>
             </div>
             <div class='content'>
                 <p>Dear $recipientName,</p>
