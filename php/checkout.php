@@ -148,6 +148,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
             $stmt->close();
         }
 
+        // Log the purchase event with total price
+        $log_sql = "INSERT INTO logs (kunden_id, event_type, event_details) VALUES (?, 'purchase', ?)";
+        $event_details = "User made a purchase. Total price: " . number_format($totalPriceWithShipping, 2) . "€";
+        if ($log_stmt = $link->prepare($log_sql)) {
+            $log_stmt->bind_param("is", $kundenId, $event_details);
+            $log_stmt->execute();
+            $log_stmt->close();
+        }
+
         // Benutzerinformationen aus der Datenbank abrufen
         $stmt = $link->prepare("SELECT email, name FROM kunden WHERE id = ?");
         $stmt->bind_param("i", $kundenId);
@@ -183,8 +192,8 @@ $link->close();
 <!doctype html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Checkout</title>
     <?php include '../php/include/headimport.php' ?>
 </head>
@@ -262,15 +271,18 @@ $link->close();
                     <h4 class="mb-3">Versandart</h4>
                     <div class="d-block my-3">
                         <div class="custom-control custom-radio">
-                            <input id="dhl" name="shipping_method" type="radio" class="custom-control-input" value="DHL" checked required>
+                            <input id="dhl" name="shipping_method" type="radio" class="custom-control-input" value="DHL"
+                                   checked required>
                             <label class="custom-control-label" for="dhl">DHL (4,5€)</label>
                         </div>
                         <div class="custom-control custom-radio">
-                            <input id="dhl_express" name="shipping_method" type="radio" class="custom-control-input" value="DHL Express" required>
+                            <input id="dhl_express" name="shipping_method" type="radio" class="custom-control-input"
+                                   value="DHL Express" required>
                             <label class="custom-control-label" for="dhl_express">DHL Express (+6€)</label>
                         </div>
                         <div class="custom-control custom-radio">
-                            <input id="lpd" name="shipping_method" type="radio" class="custom-control-input" value="LPD" required>
+                            <input id="lpd" name="shipping_method" type="radio" class="custom-control-input" value="LPD"
+                                   required>
                             <label class="custom-control-label" for="lpd">LPD (+3€)</label>
                         </div>
                     </div>
@@ -280,7 +292,8 @@ $link->close();
                     <h4 class="mb-3">Zahlungsmethode</h4>
                     <div class="d-block my-3">
                         <div class="custom-control custom-radio">
-                            <input id="credit" name="paymentMethod" type="radio" class="custom-control-input" checked required>
+                            <input id="credit" name="paymentMethod" type="radio" class="custom-control-input" checked
+                                   required>
                             <label class="custom-control-label" for="credit">Kreditkarte</label>
                         </div>
                         <div class="custom-control custom-radio">
@@ -318,8 +331,10 @@ $link->close();
 
                     <hr class="mb-4">
                     <div class="custom-control custom-checkbox">
-                        <input type="checkbox" class="custom-control-input" id="privacy_policy" name="privacy_policy" required>
-                        <label class="custom-control-label" for="privacy_policy">Ich akzeptiere die Datenschutzrichtlinie</label>
+                        <input type="checkbox" class="custom-control-input" id="privacy_policy" name="privacy_policy"
+                               required>
+                        <label class="custom-control-label" for="privacy_policy">Ich akzeptiere die
+                            Datenschutzrichtlinie</label>
                     </div>
                     <hr class="mb-4">
                     <input type="hidden" name="checkout" value="1">

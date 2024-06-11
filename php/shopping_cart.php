@@ -88,6 +88,7 @@ $kundenId = $_SESSION['kunden_id'] ?? 1;
 
 $stmt = $link->prepare("SELECT sc.product_id, p.name, p.price, sc.quantity, sc.rabatt FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.kunden_id = ?");
 $stmt->bind_param("i", $kundenId);
+$discountedPrice = 0;
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -95,6 +96,8 @@ $cartItems = [];
 $totalPrice = 0;
 while ($row = $result->fetch_assoc()) {
     $cartItems[] = $row;
+    $discountedPrice = $row['price'] * (1 - $row['rabatt']);
+    $totalPrice += $discountedPrice * $row['quantity'];
 }
 
 $stmt->close();
@@ -110,11 +113,34 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
 <!doctype html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Warenkorb</title>
     <?php include '../php/include/headimport.php' ?>
     <link rel="stylesheet" href="styles.css"> <!-- Include your CSS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Include jQuery -->
+    <style>
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-top: 20px; /* Add some top margin to space it out from the table */
+        }
+
+        .form-group input {
+            margin-right: 10px;
+        }
+
+        .form-group label {
+            margin-bottom: 0; /* Remove the default bottom margin from the label */
+        }
+
+        .form-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px; /* Add some top margin to space it out from the table */
+        }
+    </style>
 </head>
 <body>
 <?php include "include/navimport.php"; ?>
@@ -139,6 +165,7 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
             </thead>
             <tbody>
             <?php
+            $totalPrice = 0; // Ensure totalPrice is reset before calculating
             foreach ($cartItems as $item) {
                 $discount = $item['rabatt'];
                 $discountedPrice = $item['price'] * (1 - $discount);
@@ -168,7 +195,7 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
             ?>
             <tr>
                 <td colspan="4" class="text-right"><strong>Gesamtpreis:</strong></td>
-                <td colspan="2"><strong><?php echo htmlspecialchars(number_format($totalPrice, 2)); ?>€</strong></td>
+                <td colspan="2"><strong id="totalPrice"><?php echo htmlspecialchars(number_format($totalPrice, 2)); ?> €</strong></td>
             </tr>
             </tbody>
         </table>
@@ -176,10 +203,56 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
 
     <!-- Bezahl-Formular -->
     <form method="post" action="">
-        <button type="submit" name="pay" class="btn btn-primary">Bezahlen</button>
+        <div class="form-actions">
+            <div class="form-group">
+                <input type="checkbox" id="use_points" name="use_points">
+                <label for="use_points">Punkte benutzen (<span id="currentPoints">Laden...</span> Punkte verfügbar)</label>
+            </div>
+            <button type="submit" name="pay" class="btn btn-primary">Bezahlen</button>
+        </div>
     </form>
 
 </div>
+
+<script>
+    $(document).ready(function () {
+        // Fetch current points
+        $.ajax({
+            url: 'fetch_points.php',
+            type: 'GET',
+            success: function (response) {
+                if (isNaN(response)) {
+                    console.error('Error fetching points: ', response);
+                    $('#currentPoints').text('Fehler beim Laden der Punkte');
+                } else {
+                    $('#currentPoints').text(response);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('AJAX error:', status, error);
+                $('#currentPoints').text('Fehler beim Laden der Punkte');
+            }
+        });
+
+        // Handle checkbox change
+        $('#use_points').change(function () {
+            var usePoints = $(this).is(':checked') ? 1 : 0;
+            $.ajax({
+                url: 'update_total_price.php',
+                type: 'POST',
+                data: {use_points: usePoints},
+                success: function (response) {
+                    $('#totalPrice').text(response + ' €');
+                },
+                error: function (xhr, status, error) {
+                    console.error('AJAX error:', status, error);
+                }
+            });
+        });
+    });
+</script>
+
+
 <?php include "include/footimport.php"; ?>
 </body>
 </html>

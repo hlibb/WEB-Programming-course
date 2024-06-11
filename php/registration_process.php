@@ -59,6 +59,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Execute failed: " . $stmt->error);
     } else {
         $id = $stmt->insert_id;
+
+        // Insert default points for the new user
+        $stmt = $link->prepare("INSERT INTO punkte (kunden_id, points) VALUES (?, 100)");
+        if ($stmt === false) {
+            die("Prepare failed: " . $link->error);
+        }
+        $stmt->bind_param("i", $id);
+        if ($stmt->execute() === false) {
+            die("Execute failed: " . $stmt->error);
+        }
+
         $update_sql = "UPDATE kunden SET login_timestamp = NOW() WHERE id = ?";
         if ($update_stmt = mysqli_prepare($link, $update_sql)) {
             mysqli_stmt_bind_param($update_stmt, "i", $id);
