@@ -4,14 +4,14 @@ function getPaymentConfirmationEmail($recipientName, $cartItems, $totalPrice, $s
 
     $itemsHtml = '';
     foreach ($cartItems as $item) {
-        $discountedPrice = $item['unit_price']; // Da unit_price in der Datenbank bereits der Rabattpreis sein sollte
+        $discountedPrice = $item['unit_price'];
         $itemTotal = $discountedPrice * $item['quantity'];
         $itemsHtml .= "
             <tr>
-                <td>{$item['product_id']}</td> <!-- Produktname sollte hier eingefügt werden -->
+                <td>{$item['product_id']}</td>
                 <td>{$item['quantity']}</td>
                 <td>" . number_format($item['unit_price'], 2) . "€</td>
-                <td>0%</td> <!-- Rabatt ist nicht bekannt -->
+                <td>0%</td>
                 <td>" . number_format($itemTotal, 2) . "€</td>
             </tr>";
     }
@@ -121,4 +121,75 @@ function getPaymentConfirmationEmail($recipientName, $cartItems, $totalPrice, $s
 
     return ['subject' => $subject, 'body' => $body];
 }
-?>
+
+function getRegistrationEmail($recipientName, $username, $temporaryPassword) {
+    $subject = 'Account Registration';
+
+    $body = "
+    <!DOCTYPE html>
+    <html lang='de'>
+    <head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>Account Registration</title>
+        <style>
+            body {
+                width: 100%;
+                margin: 0;
+                background-color: #282847;
+                color: #f5f6f7;
+                font-family: Tahoma, sans-serif;
+                font-size: 16px;
+            }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                border: 1px solid #3b3f7;
+                background-color: #282847;
+                color: #f5f6f7;
+            }
+            .header {
+                background-color: #3b3b4f;
+                color: #fff;
+                padding: 10px;
+                text-align: center;
+            }
+            .content {
+                margin: 20px 0;
+            }
+            .footer {
+                background-color: #3b3b4f;
+                color: #fff;
+                text-align: center;
+                padding: 10px;
+                font-size: 0.8em;
+            }
+            h1, p {
+                margin: 1em auto;
+                text-align: center;
+                font-family: Apple Chancery, sans-serif, cursive;
+            }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <div class='header'>
+                <h1 style='color: #fff;'>Accounterstellung</h1>
+            </div>
+            <div class='content'>
+                <p>Liebe/r $recipientName,</p>
+                <p>Vielen Dank für Ihre Registrierung. Hier sind Ihre Login-Daten:</p>
+                <p>Benutzername: $username</p>
+                <p>Temporäres Passwort: $temporaryPassword</p>
+                <p>Bitte loggen Sie sich mit ihrem temporärem Passwort ein und ändern sie dies.</p>
+            </div>
+            <div class='footer'>
+                <p>&copy; Ink & Inspiration. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>";
+
+    return ['subject' => $subject, 'body' => $body];
+}
