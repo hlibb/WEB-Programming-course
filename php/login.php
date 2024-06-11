@@ -5,12 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php include '../php/include/headimport.php' ?>
-
 </head>
 <body>
-<br><br>
-<div style="width: 400px; margin: auto;">
-
+<div class="login-box">
     <div class="panel panel-info">
         <div class="panel-heading"><h1>Login</h1></div>
         <div class="panel-body">
@@ -25,9 +22,8 @@
                 <div class="text-danger"><?php if (isset($_GET['error'])) {
                         echo htmlspecialchars($_GET['error']);
                     } ?></div>
-                <input type="submit" value="Login"/>
+                <input type="submit" value="Login" class="btn btn-primary"/>
             </form>
-
         </div>
         <div class="panel-footer">
             <p class='text-info'>Don't have an account? <a href="registration.php">Register</a></p>
@@ -36,7 +32,9 @@
             <p class='text-info'><a href="reset_password.php">Passwort vergessen?</a></p>
         </div>
     </div>
-
+    <div class="button-wrapper">
+        <a href="artikeluebersicht.php"><button class="btn btn-secondary">Produkte ansehen</button></a>
+    </div>
 </div>
 </body>
 </html>

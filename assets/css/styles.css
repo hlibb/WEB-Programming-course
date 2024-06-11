@@ -4,8 +4,11 @@ body {
   margin: 0;
   background-color: #1b1b32;
   color: #f5f6f7;
-  font-family: Tahoma;
+  font-family: Tahoma, sans-serif;
   font-size: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .logo {
@@ -49,15 +52,18 @@ input, textarea, select {
   margin: 10px 0 0 0;
   width: 100%;
   min-height: 2em;
-}
-
-input, textarea {
   background-color: #0a0a23;
   border: 1px solid #0a0a23;
   color: #ffffff;
 }
 
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #3b3b4f;
+}
+
 .inline {
+  display: inline;
   width: unset;
   margin: 0 0.5em 0 0;
   vertical-align: middle;
@@ -76,10 +82,6 @@ input[type="submit"] {
 
 input[type="file"] {
   padding: 1px 2px;
-}
-
-.inline {
-  display: inline;
 }
 
 a {
@@ -210,6 +212,7 @@ a {
   max-width: 800px;
   margin: 0 auto;
 }
+
 .table {
   background-color: #282847;
   color: #f5f6f7;
@@ -218,36 +221,61 @@ a {
 }
 
 .table th, .table td {
-  border-color: #3b3f7;
+  border-color: #3b3f47;
 }
 
 .table thead th {
   background-color: #3b3b4f;
 }
 
+.btn-secondary, .btn-primary, .btn-danger {
+  border: none;
+  padding: 10px 20px;
+  color: #f5f6f7;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
 .btn-secondary {
-  background-color: #3b3b4f;
-  border-color: #3b3b4f;
+  background-color: #575768;
 }
 
 .btn-secondary:hover {
+  background-color: #3b3b4f;
+}
+
+.btn-primary {
+  background-color: #3b3b4f;
+}
+
+.btn-primary:hover {
   background-color: #575768;
-  border-color: #575768;
 }
 
 .btn-danger {
   background-color: #ff4c4c;
-  border-color: #ff4c4c;
 }
 
 .btn-danger:hover {
   background-color: #ff6666;
-  border-color: #ff6666;
 }
 
 .button-spacing {
   margin: 10px;
 }
+
+.text-warning, .text-info, .text-danger {
+  color: #ffcc00;
+}
+
+.panel-footer a {
+  color: #f5f6f7;
+}
+
+.panel-footer a:hover {
+  color: #ddd;
+}
+
 @media (max-width: 768px) {
   .table-container {
     width: 100%;
@@ -255,3 +283,35 @@ a {
   }
 }
 
+/* Neue Stile für das Login-Formular */
+.login-box {
+  background-color: #282847;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px 0px #000;
+  width: 400px;
+  text-align: center;
+}
+
+.login-box h1 {
+  font-family: Apple Chancery, sans-serif, cursive;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  background-color: #1b1b32;
+  color: #f5f6f7;
+}
+
+.button-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}

@@ -1,6 +1,10 @@
 <?php
+// Start the session only if it's not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 // Prüfen, ob der Benutzer eingeloggt ist
-$isLoggedIn = isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true;
+$isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
 ?>
 <a href="home.php"><img src="../assets/images/logo.png" class="logo"></a>
 <div class="text-right mt-2">
@@ -33,3 +37,9 @@ $isLoggedIn = isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true;
         </div>
     </div>
 <?php endif; ?>
+
+<style>
+    .button-spacing {
+        margin: 0 5px; /* Abstand um die Buttons herum */
+    }
+</style>
