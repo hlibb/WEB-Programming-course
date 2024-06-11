@@ -121,6 +121,15 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
     <title>Warenkorb</title>
     <?php include '../php/include/headimport.php' ?>
     <link rel="stylesheet" href="styles.css"> <!-- Include your CSS -->
+    <style>
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+        }
+        .quantity-controls form {
+            margin: 0 5px;
+        }
+    </style>
 </head>
 <body>
 <?php include "include/navimport.php"; ?>
