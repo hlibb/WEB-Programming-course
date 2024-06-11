@@ -27,10 +27,10 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
         <div class="collapse" id="navbarToggleExternalContent">
             <div class="bg-dark p-4">
                 <ul class="list-unstyled">
-                    <li><a href="checkout.php">Checkout</a></li>
-                    <li><a href="artikeluebersicht.php">Artikelübersicht</a></li>
                     <li><a href="home.php">Home</a></li>
+                    <li><a href="artikeluebersicht.php">Artikelübersicht</a></li>
                     <li><a href="bestellungen.php">Meine Bestellungen</a></li>
+                    <li><a href="checkout.php">Checkout</a></li>
                     <li><a href="about.php">About Us</a></li>
                 </ul>
             </div>
