@@ -9,14 +9,14 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column; /* Added to ensure elements stack vertically */
 }
 
 .logo {
   display: block;
   width: 20%;
   height: auto;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto;
 }
 
 h1, p {
@@ -31,6 +31,8 @@ form {
   min-width: 300px;
   margin: 0 auto;
   padding-bottom: 2em;
+  display: flex;
+  flex-direction: column; /* Ensure form fields stack vertically */
 }
 
 fieldset {
@@ -63,7 +65,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .inline {
-  display: inline;
+  display: inline-block; /* Changed from inline to inline-block */
   width: unset;
   margin: 0 0.5em 0 0;
   vertical-align: middle;
@@ -105,7 +107,6 @@ a {
   max-height: 500px;
 }
 
-/* Neue Stile für die Produktkarten */
 .product-grid {
   display: flex;
   flex-wrap: wrap;
@@ -181,7 +182,6 @@ a {
   background-color: #575768;
 }
 
-/* Neue Stile für das Formular und Promo-Code */
 .form-container {
   background-color: #282847;
   padding: 20px;
@@ -206,7 +206,6 @@ a {
   background-color: #0a0a23;
 }
 
-/* Neue Stile für den Warenkorb */
 .table-container {
   width: 80%;
   max-width: 800px;
@@ -283,7 +282,6 @@ a {
   }
 }
 
-/* Neue Stile für das Login-Formular */
 .login-box {
   background-color: #282847;
   padding: 20px;
