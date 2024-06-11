@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS `kunden` (
     `username` VARCHAR(255) NOT NULL,
     `email` VARCHAR(255) NOT NULL,
     `password` VARCHAR(255) NOT NULL,
+    `password_status` VARCHAR(20),
 -- `address` VARCHAR(255),
     `login_timestamp` DATETIME,
     `screen_resolution` VARCHAR(255) NOT NULL,
