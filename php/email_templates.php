@@ -87,26 +87,26 @@ function getPaymentConfirmationEmail($recipientName, $cartItems, $totalPrice, $s
                 <h1 style='color: #fff;'>Payment Confirmation</h1>
             </div>
             <div class='content'>
-                <p>Dear $recipientName,</p>
-                <p>Thank you for your payment. Here are the details of your order:</p>
+                <p>Liebe/r $recipientName,</p>
+                <p>Vielen Dank für deine Bestellung. Hier sind die Bestelldetails:</p>
                 <table>
                     <thead>
                         <tr>
-                            <th>Product</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Discount</th>
-                            <th>Total</th>
+                            <th>Produkt</th>
+                            <th>Menge</th>
+                            <th>Preis</th>
+                            <th>Rabatt</th>
+                            <th>Gesamt</th>
                         </tr>
                     </thead>
                     <tbody>
                         $itemsHtml
                         <tr>
-                            <td colspan='4'><strong>Shipping ({$shippingMethod})</strong></td>
+                            <td colspan='4'><strong>Versand: ({$shippingMethod})</strong></td>
                             <td><strong>" . number_format($shippingCost, 2) . "€</strong></td>
                         </tr>
                         <tr>
-                            <td colspan='4'><strong>Total</strong></td>
+                            <td colspan='4'><strong>Gesamt:</strong></td>
                             <td><strong>" . number_format($totalPriceWithShipping, 2) . "€</strong></td>
                         </tr>
                     </tbody>

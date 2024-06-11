@@ -79,7 +79,7 @@ $orders = [];
 while ($row = $result->fetch_assoc()) {
     // Abrufen der Artikel für jede Bestellung
     $order_id = $row['id'];
-    $item_stmt = $link->prepare("SELECT * FROM order_items WHERE order_id = ?");
+    $item_stmt = $link->prepare("SELECT oi.*, p.name AS product_name, sc.rabatt AS rabatt FROM order_items oi JOIN products p ON oi.product_id = p.id LEFT JOIN shopping_cart sc ON sc.product_id = oi.product_id WHERE oi.order_id = ?");
     $item_stmt->bind_param("i", $order_id);
     $item_stmt->execute();
     $item_result = $item_stmt->get_result();
@@ -153,14 +153,23 @@ $link->close();
                             <th>Artikel</th>
                             <th>Menge</th>
                             <th>Preis</th>
+                            <th>Rabatt</th>
+                            <th>Gesamt</th>
                         </tr>
                         </thead>
                         <tbody>
                         <?php foreach ($order['items'] as $item): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($item['product_id']); ?></td>
+                                <td><?php echo htmlspecialchars($item['product_name']); ?></td>
                                 <td><?php echo htmlspecialchars($item['quantity']); ?></td>
                                 <td><?php echo htmlspecialchars($item['unit_price']); ?>€</td>
+                                <td><?php echo isset($item['rabatt']) ? htmlspecialchars($item['rabatt']) . '%' : '0%'; ?></td>
+                                <?php
+                                $rabatt = isset($item['rabatt']) ? $item['rabatt'] : 0;
+                                $discountedPrice = $item['unit_price'] * (1 - $rabatt / 100);
+                                $itemTotal = $discountedPrice * $item['quantity'];
+                                ?>
+                                <td><?php echo number_format($itemTotal, 2); ?>€</td>
                             </tr>
                         <?php endforeach; ?>
                         </tbody>
