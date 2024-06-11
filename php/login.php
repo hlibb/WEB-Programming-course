@@ -23,8 +23,8 @@
             </div>
             <p class="text-warning">Für weitere Funktionen bitte einloggen</p>
             <form action="login_script.php" method="post">
-                <div class="form-group">E-mail
-                    <input type="text" name="email" class="form-control">
+                <div class="form-group">E-mail oder Benutzername
+                    <input type="text" name="email_or_username" class="form-control">
                 </div>
                 <div class="form-group">Passwort
                     <input type="password" name="password" class="form-control">
