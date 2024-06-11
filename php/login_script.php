@@ -33,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit();
         }
     } else {
-        header("Location: login.php?error=Invalid email or password");
+        header("Location: login.php?error=Ungültige Email oder Passwort");
         exit();
     }
 }
