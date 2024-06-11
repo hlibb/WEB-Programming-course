@@ -245,6 +245,9 @@ a {
   border-color: #ff6666;
 }
 
+.button-spacing {
+  margin: 10px;
+}
 @media (max-width: 768px) {
   .table-container {
     width: 100%;
