@@ -52,7 +52,9 @@ $link->close();
         <?php if (!empty($products)): ?>
             <?php foreach ($products as $product): ?>
                 <div class="product-card">
-                    <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="Produktbild">
+                    <a href="products.php?id=<?php echo htmlspecialchars($product['id']); ?>">
+                        <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="Produktbild">
+                    </a>
                     <h2><?php echo htmlspecialchars($product['name']); ?></h2>
                     <p><?php echo htmlspecialchars($product['price']); ?>€</p>
                     <?php if (isset($_SESSION['kunden_id'])): ?>
