@@ -11,6 +11,7 @@
     <div class="panel panel-info">
         <div class="panel-heading"><h1>Login</h1></div>
         <div class="panel-body">
+            <a href="artikeluebersicht.php"><button class="btn btn-secondary">Produkte ansehen</button></a>
             <p class="text-warning">Login to make a purchase</p>
             <form action="login_script.php" method="post">
                 <div class="form-group">Email
@@ -31,9 +32,6 @@
         <div class="panel-footer">
             <p class='text-info'><a href="reset_password.php">Passwort vergessen?</a></p>
         </div>
-    </div>
-    <div class="button-wrapper">
-        <a href="artikeluebersicht.php"><button class="btn btn-secondary">Produkte ansehen</button></a>
     </div>
 </div>
 </body>
