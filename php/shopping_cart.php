@@ -97,16 +97,10 @@ $totalPrice = 0;
 $totalDiscount = 0; // Gesamtrabatt initialisieren
 while ($row = $result->fetch_assoc()) {
     $cartItems[] = $row;
-<<<<<<< HEAD
-    $discount = $row['rabatt'];
-    $discountedPrice = $row['price'] * (1 - $discount);
+    $discountedPrice = $row['price'] * (1 - $row['rabatt']);
     $itemTotal = $discountedPrice * $row['quantity'];
     $totalPrice += $itemTotal;
-    $totalDiscount += ($row['price'] * $row['quantity']) * $discount; // Gesamtrabatt berechnen
-=======
-    $discountedPrice = $row['price'] * (1 - $row['rabatt']);
-    $totalPrice += $discountedPrice * $row['quantity'];
->>>>>>> 8343b13bb5cad09a87e168c14026a566072619f1
+    $totalDiscount += ($row['price'] * $row['quantity']) * $row['rabatt']; // Gesamtrabatt berechnen
 }
 
 $stmt->close();
@@ -127,29 +121,6 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
     <title>Warenkorb</title>
     <?php include '../php/include/headimport.php' ?>
     <link rel="stylesheet" href="styles.css"> <!-- Include your CSS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Include jQuery -->
-    <style>
-        .form-group {
-            display: flex;
-            align-items: center;
-            margin-top: 20px; /* Add some top margin to space it out from the table */
-        }
-
-        .form-group input {
-            margin-right: 10px;
-        }
-
-        .form-group label {
-            margin-bottom: 0; /* Remove the default bottom margin from the label */
-        }
-
-        .form-actions {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 20px; /* Add some top margin to space it out from the table */
-        }
-    </style>
 </head>
 <body>
 <?php include "include/navimport.php"; ?>
@@ -179,8 +150,9 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
                 $discount = $item['rabatt'];
                 $discountedPrice = $item['price'] * (1 - $discount);
                 $itemTotal = $discountedPrice * $item['quantity'];
+                $totalPrice += $itemTotal;
                 echo "<tr>";
-                echo "<td>" . htmlspecialchars($item['name']) . " (" . htmlspecialchars($item['quantity']) . ")</td>"; // Menge neben Produktnamen anzeigen
+                echo "<td>" . htmlspecialchars($item['name']) . "</td>";
                 echo "<td>" . htmlspecialchars($item['price']) . "€</td>";
                 echo "<td class='quantity-controls'>
                         <form method='post' action=''>
@@ -202,12 +174,12 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
             }
             ?>
             <tr>
-                <td colspan="3" class="text-right"><strong>Gesamtrabatt:</strong></td>
-                <td colspan="3"><strong><?php echo htmlspecialchars(number_format($totalDiscount, 2)); ?>€</strong></td>
+                <td colspan="4" class="text-right"><strong>Gesamtpreis:</strong></td>
+                <td colspan="2"><strong><?php echo htmlspecialchars(number_format($totalPrice, 2)); ?> €</strong></td>
             </tr>
             <tr>
-                <td colspan="4" class="text-right"><strong>Gesamtpreis:</strong></td>
-                <td colspan="2"><strong id="totalPrice"><?php echo htmlspecialchars(number_format($totalPrice, 2)); ?> €</strong></td>
+                <td colspan="4" class="text-right"><strong>Gesamtrabatt:</strong></td>
+                <td colspan="2"><strong><?php echo htmlspecialchars(number_format($totalDiscount, 2)); ?> €</strong></td>
             </tr>
             </tbody>
         </table>
@@ -215,56 +187,9 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
 
     <!-- Bezahl-Formular -->
     <form method="post" action="">
-        <div class="form-actions">
-            <div class="form-group">
-                <input type="checkbox" id="use_points" name="use_points">
-                <label for="use_points">Punkte benutzen (<span id="currentPoints">Laden...</span> Punkte verfügbar)</label>
-            </div>
-            <button type="submit" name="pay" class="btn btn-primary">Bezahlen</button>
-        </div>
+        <button type="submit" name="pay" class="btn btn-primary">Bezahlen</button>
     </form>
-
 </div>
-
-<script>
-    $(document).ready(function () {
-        // Fetch current points
-        $.ajax({
-            url: 'fetch_points.php',
-            type: 'GET',
-            success: function (response) {
-                if (isNaN(response)) {
-                    console.error('Error fetching points: ', response);
-                    $('#currentPoints').text('Fehler beim Laden der Punkte');
-                } else {
-                    $('#currentPoints').text(response);
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error('AJAX error:', status, error);
-                $('#currentPoints').text('Fehler beim Laden der Punkte');
-            }
-        });
-
-        // Handle checkbox change
-        $('#use_points').change(function () {
-            var usePoints = $(this).is(':checked') ? 1 : 0;
-            $.ajax({
-                url: 'update_total_price.php',
-                type: 'POST',
-                data: {use_points: usePoints},
-                success: function (response) {
-                    $('#totalPrice').text(response + ' €');
-                },
-                error: function (xhr, status, error) {
-                    console.error('AJAX error:', status, error);
-                }
-            });
-        });
-    });
-</script>
-
-
 <?php include "include/footimport.php"; ?>
 </body>
 </html>
