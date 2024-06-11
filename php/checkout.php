@@ -3,59 +3,6 @@ include_once 'include/logged_in.php';
 include_once 'include/db_connection.php';
 include 'send_email.php'; // Include the send email function
 
-// Funktion zum Hinzufügen von Produkten zum Warenkorb
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset($_POST['quantity'])) {
-    $productId = $_POST['product_id'];
-    $quantity = $_POST['quantity'];
-
-    $kundenId = $_SESSION['kunden_id'] ?? 1;
-
-    // Berechnung des Rabatts
-    $discount = 0;
-    if ($quantity >= 10) {
-        $discount = 0.20;
-    } elseif ($quantity >= 5) {
-        $discount = 0.10;
-    }
-
-    $stmt = $link->prepare("SELECT * FROM shopping_cart WHERE kunden_id = ? AND product_id = ?");
-    $stmt->bind_param("ii", $kundenId, $productId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $newQuantity = $row['quantity'] + $quantity;
-        // Aktualisieren Sie den Rabatt entsprechend der neuen Menge
-        if ($newQuantity >= 10) {
-            $discount = 0.20;
-        } elseif ($newQuantity >= 5) {
-            $discount = 0.10;
-        } else {
-            $discount = 0;
-        }
-        $stmt = $link->prepare("UPDATE shopping_cart SET quantity = ?, rabatt = ? WHERE kunden_id = ? AND product_id = ?");
-        $stmt->bind_param("idii", $newQuantity, $discount, $kundenId, $productId);
-    } else {
-        $stmt = $link->prepare("INSERT INTO shopping_cart (kunden_id, product_id, quantity, rabatt) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("iiid", $kundenId, $productId, $quantity, $discount);
-    }
-    $stmt->execute();
-    $stmt->close();
-}
-
-// Funktion zum Entfernen von Produkten aus dem Warenkorb
-if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['remove'])) {
-    $productId = $_GET['remove'];
-
-    $kundenId = $_SESSION['kunden_id'] ?? 1;
-
-    $stmt = $link->prepare("DELETE FROM shopping_cart WHERE kunden_id = ? AND product_id = ?");
-    $stmt->bind_param("ii", $kundenId, $productId);
-    $stmt->execute();
-    $stmt->close();
-}
-
 // Versandkosten initialisieren
 $shippingCost = 0;
 $shippingMethod = '';
@@ -85,10 +32,13 @@ $result = $stmt->get_result();
 
 $cartItems = [];
 $totalPrice = 0;
+$totalDiscount = 0; // Gesamtrabatt initialisieren
 while ($row = $result->fetch_assoc()) {
     $cartItems[] = $row;
     $discountedPrice = $row['price'] * (1 - $row['rabatt']);
-    $totalPrice += $discountedPrice * $row['quantity'];
+    $itemTotal = $discountedPrice * $row['quantity'];
+    $totalPrice += $itemTotal;
+    $totalDiscount += ($row['price'] * $row['quantity']) * $row['rabatt']; // Gesamtrabatt berechnen
 }
 
 $stmt->close();
@@ -355,10 +305,9 @@ $link->close();
                     $itemTotal = $discountedPrice * $item['quantity'];
                     echo '<li class="list-group-item d-flex justify-content-between lh-condensed">';
                     echo '<div>';
-                    echo '<h6 class="my-0">' . htmlspecialchars($item['name']) . '</h6>';
+                    echo '<h6 class="my-0">' . htmlspecialchars($item['name']) . ' (' . htmlspecialchars($item['quantity']) . ')</h6>'; // Anzahl des Produktes neben dem Namen anzeigen
                     echo '<small class="text-muted">Preis: ' . htmlspecialchars(number_format($item['price'], 2)) . '€</small><br>';
-                    echo '<small class="text-muted">Rabatt: ' . htmlspecialchars($item['rabatt'] * 100) . '%</small><br>';
-                    echo '<small class="text-muted">- Rabatt: ' . htmlspecialchars(number_format($item['price'] * $item['rabatt'], 2)) . '€</small>';
+                    echo '<small class="text-muted">- Rabatt: ' . htmlspecialchars(number_format($item['price'] * $item['rabatt'] * $item['quantity'], 2)) . '€</small>'; // Gesamtrabatt anzeigen
                     echo '</div>';
                     echo '<span class="text-muted">' . htmlspecialchars(number_format($itemTotal, 2)) . '€</span>';
                     echo '</li>';
