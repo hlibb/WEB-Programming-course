@@ -94,10 +94,19 @@ $result = $stmt->get_result();
 
 $cartItems = [];
 $totalPrice = 0;
+$totalDiscount = 0; // Gesamtrabatt initialisieren
 while ($row = $result->fetch_assoc()) {
     $cartItems[] = $row;
+<<<<<<< HEAD
+    $discount = $row['rabatt'];
+    $discountedPrice = $row['price'] * (1 - $discount);
+    $itemTotal = $discountedPrice * $row['quantity'];
+    $totalPrice += $itemTotal;
+    $totalDiscount += ($row['price'] * $row['quantity']) * $discount; // Gesamtrabatt berechnen
+=======
     $discountedPrice = $row['price'] * (1 - $row['rabatt']);
     $totalPrice += $discountedPrice * $row['quantity'];
+>>>>>>> 8343b13bb5cad09a87e168c14026a566072619f1
 }
 
 $stmt->close();
@@ -170,9 +179,8 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
                 $discount = $item['rabatt'];
                 $discountedPrice = $item['price'] * (1 - $discount);
                 $itemTotal = $discountedPrice * $item['quantity'];
-                $totalPrice += $itemTotal;
                 echo "<tr>";
-                echo "<td>" . htmlspecialchars($item['name']) . "</td>";
+                echo "<td>" . htmlspecialchars($item['name']) . " (" . htmlspecialchars($item['quantity']) . ")</td>"; // Menge neben Produktnamen anzeigen
                 echo "<td>" . htmlspecialchars($item['price']) . "€</td>";
                 echo "<td class='quantity-controls'>
                         <form method='post' action=''>
@@ -193,6 +201,10 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
                 echo "</tr>";
             }
             ?>
+            <tr>
+                <td colspan="3" class="text-right"><strong>Gesamtrabatt:</strong></td>
+                <td colspan="3"><strong><?php echo htmlspecialchars(number_format($totalDiscount, 2)); ?>€</strong></td>
+            </tr>
             <tr>
                 <td colspan="4" class="text-right"><strong>Gesamtpreis:</strong></td>
                 <td colspan="2"><strong id="totalPrice"><?php echo htmlspecialchars(number_format($totalPrice, 2)); ?> €</strong></td>
