@@ -193,3 +193,73 @@ function getRegistrationEmail($recipientName, $username, $temporaryPassword) {
 
     return ['subject' => $subject, 'body' => $body];
 }
+function getResetPasswordEmail($recipientName, $newPassword) {
+    $subject = 'Passwort zurückgesetzt';
+
+    $body = "
+    <!DOCTYPE html>
+    <html lang='de'>
+    <head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>Passwort zurückgesetzt</title>
+        <style>
+            body {
+                width: 100%;
+                margin: 0;
+                background-color: #282847;
+                color: #f5f6f7;
+                font-family: Tahoma, sans-serif;
+                font-size: 16px;
+            }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                border: 1px solid #3b3f7;
+                background-color: #282847;
+                color: #f5f6f7;
+            }
+            .header {
+                background-color: #3b3b4f;
+                color: #fff;
+                padding: 10px;
+                text-align: center;
+            }
+            .content {
+                margin: 20px 0;
+            }
+            .footer {
+                background-color: #3b3b4f;
+                color: #fff;
+                text-align: center;
+                padding: 10px;
+                font-size: 0.8em;
+            }
+            h1, p {
+                margin: 1em auto;
+                text-align: center;
+                font-family: Apple Chancery, sans-serif, cursive;
+            }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <div class='header'>
+                <h1 style='color: #fff;'>Passwort zurückgesetzt</h1>
+            </div>
+            <div class='content'>
+                <p>Hallo $recipientName,</p>
+                <p>Ihr Passwort wurde zurückgesetzt. Hier ist Ihr neues temporäres Passwort:</p>
+                <p><strong>$newPassword</strong></p>
+                <p>Bitte loggen Sie sich ein und ändern Sie Ihr Passwort sofort.</p>
+            </div>
+            <div class='footer'>
+                <p>&copy; 2024 Ihr Unternehmen. Alle Rechte vorbehalten.</p>
+            </div>
+        </div>
+    </body>
+    </html>";
+
+    return ['subject' => $subject, 'body' => $body];
+}
