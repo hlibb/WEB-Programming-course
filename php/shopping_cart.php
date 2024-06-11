@@ -174,12 +174,12 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
             }
             ?>
             <tr>
-                <td colspan="4" class="text-right"><strong>Gesamtpreis:</strong></td>
-                <td colspan="2"><strong><?php echo htmlspecialchars(number_format($totalPrice, 2)); ?> €</strong></td>
-            </tr>
-            <tr>
                 <td colspan="4" class="text-right"><strong>Gesamtrabatt:</strong></td>
                 <td colspan="2"><strong><?php echo htmlspecialchars(number_format($totalDiscount, 2)); ?> €</strong></td>
+            </tr>
+            <tr>
+                <td colspan="4" class="text-right"><strong>Gesamtpreis:</strong></td>
+                <td colspan="2"><strong><?php echo htmlspecialchars(number_format($totalPrice, 2)); ?> €</strong></td>
             </tr>
             </tbody>
         </table>
