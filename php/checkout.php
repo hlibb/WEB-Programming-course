@@ -3,6 +3,25 @@ include_once 'include/logged_in.php';
 include_once 'include/db_connection.php';
 include 'send_email.php';
 
+function getCartItems($usersId, $link) {
+    $stmt = $link->prepare("SELECT ch.id as cart_id, cb.product_id, p.name, p.price, cb.quantity, cb.rabatt 
+                            FROM `cart-body` cb 
+                            JOIN products p ON cb.product_id = p.id 
+                            JOIN `cart-header` ch ON cb.warenkorb_id = ch.id 
+                            WHERE ch.users_id = ?");
+    $stmt->bind_param("i", $usersId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $cartItems = [];
+    while ($row = $result->fetch_assoc()) {
+        $cartItems[] = $row;
+    }
+    $stmt->close();
+    return $cartItems;
+}
+
+$cartItems = []; // Initialisiere die Variable $cartItems als leeres Array
+
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
     $usersId = $_SESSION['users_id'];
     $cartItems = getCartItems($usersId, $link);
@@ -16,9 +35,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
     } elseif ($shippingMethod == 'LPD') {
         $shippingCost = 7.5;
     }
+
+    // Berechnung des Gesamtpreises
+    $totalPrice = 0;
+    foreach ($cartItems as $item) {
+        $discountedPrice = $item['price'] * (1 - $item['rabatt']);
+        $totalPrice += $discountedPrice * $item['quantity'];
+    }
     $totalPriceWithShipping = $totalPrice + $shippingCost;
     $isExpressShipping = $shippingMethod === 'DHL Express' ? 1 : 0;
 
+    // Bestellung speichern
     $stmt = $link->prepare("INSERT INTO orders (users_id, total_amount, shipping_method, is_express_shipping, is_paid) VALUES (?, ?, ?, ?, ?)");
     $isPaid = 1;
     $stmt->bind_param("idssi", $usersId, $totalPriceWithShipping, $shippingMethod, $isExpressShipping, $isPaid);
@@ -26,6 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
     $orderId = $stmt->insert_id;
     $stmt->close();
 
+    // Bestellpositionen speichern
     foreach ($cartItems as $item) {
         $stmt = $link->prepare("INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("iiid", $orderId, $item['product_id'], $item['quantity'], $item['price']);
@@ -33,6 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
         $stmt->close();
     }
 
+    // Punkte aktualisieren
     $update_points_sql = "UPDATE punkte SET points = points + 25 WHERE users_id = ?";
     if ($update_points_stmt = $link->prepare($update_points_sql)) {
         $update_points_stmt->bind_param("i", $usersId);
@@ -40,6 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
         $update_points_stmt->close();
     }
 
+    // Warenkorb leeren
     $stmt = $link->prepare("DELETE FROM `cart-body` WHERE warenkorb_id = (SELECT id FROM `cart-header` WHERE users_id = ?)");
     $stmt->bind_param("i", $usersId);
     $stmt->execute();
@@ -52,6 +82,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
 
     header("Location: danke.php");
     exit();
+} else {
+    $usersId = $_SESSION['users_id'];
+    $cartItems = getCartItems($usersId, $link);
+
+    $shippingMethod = 'DHL';
+    $shippingCost = 4.5;
+
+    $totalDiscount = 0;
+    $totalPrice = 0;
+    foreach ($cartItems as $item) {
+        $discountedPrice = $item['price'] * (1 - $item['rabatt']);
+        $itemTotal = $discountedPrice * $item['quantity'];
+        $totalPrice += $itemTotal;
+        $totalDiscount += ($item['price'] * $item['quantity']) * $item['rabatt'];
+    }
 }
 ?>
 <!doctype html>
