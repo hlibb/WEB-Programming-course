@@ -176,6 +176,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
         // Senden Sie die E-Mail
         sendEmail($recipientEmail, $recipientName, $emailTemplate);
 
+        // Add 25 points to the user's account after a successful purchase
+        $update_points_sql = "UPDATE punkte SET points = points + 25 WHERE kunden_id = ?";
+        if ($update_points_stmt = $link->prepare($update_points_sql)) {
+            $update_points_stmt->bind_param("i", $kundenId);
+            $update_points_stmt->execute();
+            $update_points_stmt->close();
+        }
+
         $stmt->close();
 
         // Warenkorb leeren
