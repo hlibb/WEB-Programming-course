@@ -35,8 +35,6 @@ CREATE TABLE IF NOT EXISTS `punkte` (
     FOREIGN KEY (`kunden_id`) REFERENCES `kunden`(`id`) ON DELETE CASCADE
 );
 
-
-
 -- Table for storing product information
 CREATE TABLE IF NOT EXISTS `products` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
