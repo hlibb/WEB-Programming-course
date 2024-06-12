@@ -5,21 +5,26 @@ include 'send_email.php'; // Include the send email function
 
 $usersId = $_SESSION['users_id'] ?? 1;
 
+// Funktion zum Abrufen der Bestellartikel
+function getOrderItems($orderId, $link) {
+    $stmt = $link->prepare("SELECT oi.*, p.name AS product_name FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = ?");
+    $stmt->bind_param("i", $orderId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $orderItems = [];
+    while ($row = $result->fetch_assoc()) {
+        $orderItems[] = $row;
+    }
+    $stmt->close();
+    return $orderItems;
+}
+
 // Bestellung erneut tätigen, wenn der Button gedrückt wird
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reorder'])) {
     $orderId = $_POST['order_id'];
 
     // Abrufen der Originalbestellung
-    $stmt = $link->prepare("SELECT * FROM order_items WHERE order_id = ?");
-    $stmt->bind_param("i", $orderId);
-    $stmt->execute();
-    $orderItemsResult = $stmt->get_result();
-
-    $orderItems = [];
-    while ($row = $orderItemsResult->fetch_assoc()) {
-        $orderItems[] = $row;
-    }
-    $stmt->close();
+    $orderItems = getOrderItems($orderId, $link);
 
     // Neue Bestellung in der Datenbank speichern
     $stmt = $link->prepare("INSERT INTO orders (users_id, total_amount, shipping_method, is_express_shipping, is_paid) SELECT users_id, total_amount, shipping_method, is_express_shipping, is_paid FROM orders WHERE id = ?");
@@ -79,17 +84,9 @@ $orders = [];
 while ($row = $result->fetch_assoc()) {
     // Abrufen der Artikel für jede Bestellung
     $order_id = $row['id'];
-    $item_stmt = $link->prepare("SELECT oi.*, p.name AS product_name, sc.rabatt AS rabatt FROM order_items oi JOIN products p ON oi.product_id = p.id LEFT JOIN shopping_cart sc ON sc.product_id = oi.product_id WHERE oi.order_id = ?");
-    $item_stmt->bind_param("i", $order_id);
-    $item_stmt->execute();
-    $item_result = $item_stmt->get_result();
-    $items = [];
-    while ($item_row = $item_result->fetch_assoc()) {
-        $items[] = $item_row;
-    }
+    $items = getOrderItems($order_id, $link);
     $row['items'] = $items;
     $orders[] = $row;
-    $item_stmt->close();
 }
 
 $stmt->close();
