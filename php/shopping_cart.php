@@ -102,8 +102,26 @@ while ($row = $result->fetch_assoc()) {
     $totalPrice += $itemTotal;
     $totalDiscount += ($row['price'] * $row['quantity']) * $row['rabatt']; // Gesamtrabatt berechnen
 }
-
 $stmt->close();
+
+// Benutzerpunkte abrufen
+$stmt = $link->prepare("SELECT points FROM punkte WHERE kunden_id = ?");
+$stmt->bind_param("i", $kundenId);
+$stmt->execute();
+$result = $stmt->get_result();
+$userPoints = 0;
+if ($row = $result->fetch_assoc()) {
+    $userPoints = $row['points'];
+}
+$stmt->close();
+
+// Punkte-Rabatt berechnen
+$pointsDiscount = 0;
+if (isset($_POST['use_points']) && $_POST['use_points'] == '1') {
+    $pointsDiscount = min($userPoints, $totalPrice * 10); // max 10 Punkte pro 1€
+    $pointsDiscountValue = $pointsDiscount * 0.10;
+    $totalPrice -= $pointsDiscountValue;
+}
 
 // Weiterleitung zur Checkout-Seite, wenn der Bezahlen-Knopf gedrückt wird
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['pay'])) {
@@ -182,9 +200,15 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
                 echo "</tr>";
             }
             ?>
+            <?php if ($pointsDiscount > 0): ?>
+                <tr>
+                    <td colspan="4" class="text-right"><strong>Punkterabatt:</strong></td>
+                    <td colspan="2"><strong><?php echo htmlspecialchars(number_format($pointsDiscount * 0.10, 2)); ?> €</strong></td>
+                </tr>
+            <?php endif; ?>
             <tr>
                 <td colspan="4" class="text-right"><strong>Gesamtrabatt:</strong></td>
-                <td colspan="2"><strong><?php echo htmlspecialchars(number_format($totalDiscount, 2)); ?> €</strong></td>
+                <td colspan="2"><strong><?php echo htmlspecialchars(number_format($totalDiscount + ($pointsDiscount * 0.10), 2)); ?> €</strong></td>
             </tr>
             <tr>
                 <td colspan="4" class="text-right"><strong>Gesamtpreis:</strong></td>
@@ -193,6 +217,15 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
             </tbody>
         </table>
     </div>
+
+    <!-- Punkte verwenden -->
+    <form method="post" action="">
+        <div class="form-group">
+            <input type="checkbox" id="use_points" name="use_points" value="1" <?php if (isset($_POST['use_points']) && $_POST['use_points'] == '1') echo 'checked'; ?>>
+            <label for="use_points">Punkte verwenden (Verfügbar: <?php echo $userPoints; ?> Punkte)</label>
+        </div>
+        <button type="submit" name="apply_points" class="btn btn-primary">Rabatt anwenden</button>
+    </form>
 
     <!-- Bezahl-Formular -->
     <form method="post" action="">
