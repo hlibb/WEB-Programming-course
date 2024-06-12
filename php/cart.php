@@ -149,7 +149,7 @@ $link->close();
     </form>
 
     <!-- Bezahl-Formular -->
-    <form method="post" action="">
+    <form method="post" action="checkout.php">
         <button type="submit" name="pay" class="btn btn-primary">Bezahlen</button>
     </form>
 </div>

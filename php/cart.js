@@ -64,4 +64,25 @@ $(document).ready(function () {
             }
         });
     });
+
+    // Punkte verwenden-Checkbox-Event
+    $('#use_points').on('change', function () {
+        $.ajax({
+            type: 'POST',
+            url: 'apply_points.php',
+            data: {
+                use_points: $(this).is(':checked') ? 1 : 0
+            },
+            success: function (response) {
+                if (response.success) {
+                    location.reload(); // Seite neu laden, um die Änderungen anzuzeigen
+                } else {
+                    console.error('Fehler beim Anwenden der Punkte.');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Fehler beim Anwenden der Punkte:', error);
+            }
+        });
+    });
 });
