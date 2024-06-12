@@ -1,196 +1,58 @@
 <?php
 include_once 'include/logged_in.php';
 include_once 'include/db_connection.php';
-include 'send_email.php'; // Include the send email function
+include 'send_email.php';
 
-// Funktion zum Hinzufügen von Produkten zum Warenkorb
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset($_POST['quantity'])) {
-    $productId = $_POST['product_id'];
-    $quantity = $_POST['quantity'];
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
+    $usersId = $_SESSION['users_id'];
+    $cartItems = getCartItems($usersId, $link);
 
-    $usersId = $_SESSION['users_id'] ?? 1;
-
-    // Berechnung des Rabatts
-    $discount = 0;
-    if ($quantity >= 10) {
-        $discount = 0.20;
-    } elseif ($quantity >= 5) {
-        $discount = 0.10;
-    }
-
-    $stmt = $link->prepare("SELECT * FROM shopping_cart WHERE users_id = ? AND product_id = ?");
-    $stmt->bind_param("ii", $usersId, $productId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $newQuantity = $row['quantity'] + $quantity;
-        // Aktualisieren Sie den Rabatt entsprechend der neuen Menge
-        if ($newQuantity >= 10) {
-            $discount = 0.20;
-        } elseif ($newQuantity >= 5) {
-            $discount = 0.10;
-        } else {
-            $discount = 0;
-        }
-        $stmt = $link->prepare("UPDATE shopping_cart SET quantity = ?, rabatt = ? WHERE users_id = ? AND product_id = ?");
-        $stmt->bind_param("idii", $newQuantity, $discount, $usersId, $productId);
-    } else {
-        $stmt = $link->prepare("INSERT INTO shopping_cart (users_id, product_id, quantity, rabatt) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("iiid", $usersId, $productId, $quantity, $discount);
-    }
-    $stmt->execute();
-    $stmt->close();
-}
-
-// Funktion zum Entfernen von Produkten aus dem Warenkorb
-if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['remove'])) {
-    $productId = $_GET['remove'];
-
-    $usersId = $_SESSION['users_id'] ?? 1;
-
-    $stmt = $link->prepare("DELETE FROM shopping_cart WHERE users_id = ? AND product_id = ?");
-    $stmt->bind_param("ii", $usersId, $productId);
-    $stmt->execute();
-    $stmt->close();
-}
-
-// Versandkosten initialisieren
-$shippingCost = 0;
-$shippingMethod = '';
-$isExpressShipping = 0;
-
-// Versandkosten berechnen und in der Session speichern
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['shipping_method'])) {
     $shippingMethod = $_POST['shipping_method'];
+    $shippingCost = 0;
     if ($shippingMethod == 'DHL') {
         $shippingCost = 4.5;
     } elseif ($shippingMethod == 'DHL Express') {
-        $shippingCost = 4.5 + 6;
+        $shippingCost = 10.5;
     } elseif ($shippingMethod == 'LPD') {
-        $shippingCost = 4.5 + 3;
+        $shippingCost = 7.5;
     }
-    $_SESSION['shipping_cost'] = $shippingCost;
-    $_SESSION['shipping_method'] = $shippingMethod;
-}
+    $totalPriceWithShipping = $totalPrice + $shippingCost;
+    $isExpressShipping = $shippingMethod === 'DHL Express' ? 1 : 0;
 
-// Warenkorb anzeigen
-$usersId = $_SESSION['users_id'] ?? 1;
+    $stmt = $link->prepare("INSERT INTO orders (users_id, total_amount, shipping_method, is_express_shipping, is_paid) VALUES (?, ?, ?, ?, ?)");
+    $isPaid = 1;
+    $stmt->bind_param("idssi", $usersId, $totalPriceWithShipping, $shippingMethod, $isExpressShipping, $isPaid);
+    $stmt->execute();
+    $orderId = $stmt->insert_id;
+    $stmt->close();
 
-$stmt = $link->prepare("SELECT sc.product_id, p.name, p.price, sc.quantity, sc.rabatt FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.users_id = ?");
-$stmt->bind_param("i", $usersId);
-$stmt->execute();
-$result = $stmt->get_result();
-
-$cartItems = [];
-$totalPrice = 0;
-$totalDiscount = 0; // Gesamtrabatt initialisieren
-while ($row = $result->fetch_assoc()) {
-    $cartItems[] = $row;
-    $discountedPrice = $row['price'] * (1 - $row['rabatt']);
-    $itemTotal = $discountedPrice * $row['quantity'];
-    $totalPrice += $itemTotal;
-    $totalDiscount += ($row['price'] * $row['quantity']) * $row['rabatt']; // Gesamtrabatt berechnen
-}
-
-$stmt->close();
-
-// Versandkosten und Versandart aus der Session holen
-if (isset($_SESSION['shipping_cost'])) {
-    $shippingCost = $_SESSION['shipping_cost'];
-}
-if (isset($_SESSION['shipping_method'])) {
-    $shippingMethod = $_SESSION['shipping_method'];
-}
-
-// E-Mail senden, Bestellung speichern und Warenkorb leeren, wenn das Checkout-Formular abgeschickt wird
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
-    if (!isset($_POST['privacy_policy'])) {
-        echo "<div class='alert alert-danger'>Sie müssen die Datenschutzrichtlinie akzeptieren.</div>";
-    } else {
-        $firstName = $_POST['firstName'];
-        $lastName = $_POST['lastName'];
-        $email = $_POST['email'];
-        $address = $_POST['address'];
-        $address2 = $_POST['address2'];
-        $country = $_POST['country'];
-        $state = $_POST['state'];
-        $zip = $_POST['zip'];
-        $paymentMethod = $_POST['paymentMethod'];
-        $ccName = $_POST['cc_name'];
-        $ccNumber = $_POST['cc_number'];
-        $ccExpiration = $_POST['cc_expiration'];
-        $ccCVV = $_POST['cc_cvv'];
-        $shippingMethod = $_POST['shipping_method'];
-        $isExpressShipping = $shippingMethod === 'DHL Express' ? 1 : 0;
-
-        // Versandkosten berechnen
-        if ($shippingMethod == 'DHL') {
-            $shippingCost = 4.5;
-        } elseif ($shippingMethod == 'DHL Express') {
-            $shippingCost = 4.5 + 6;
-        } elseif ($shippingMethod == 'LPD') {
-            $shippingCost = 4.5 + 3;
-        }
-        $totalPriceWithShipping = $totalPrice + $shippingCost;
-
-        // Bestellung in der Datenbank speichern
-        $stmt = $link->prepare("INSERT INTO orders (users_id, total_amount, shipping_method, is_express_shipping, is_paid) VALUES (?, ?, ?, ?, ?)");
-        $isPaid = 1; // Annahme: Zahlung erfolgreich
-        $stmt->bind_param("idssi", $usersId, $totalPriceWithShipping, $shippingMethod, $isExpressShipping, $isPaid);
-        $stmt->execute();
-        $orderId = $stmt->insert_id;
-        $stmt->close();
-
-        // Bestellpositionen speichern
-        foreach ($cartItems as $item) {
-            $stmt = $link->prepare("INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("iiid", $orderId, $item['product_id'], $item['quantity'], $item['price']);
-            $stmt->execute();
-            $stmt->close();
-        }
-
-        // Log the purchase event with total price
-        $log_sql = "INSERT INTO logs (users_id, event_type, event_details) VALUES (?, 'purchase', ?)";
-        $event_details = "User made a purchase. Total price: " . number_format($totalPriceWithShipping, 2) . "€";
-        if ($log_stmt = $link->prepare($log_sql)) {
-            $log_stmt->bind_param("is", $usersId, $event_details);
-            $log_stmt->execute();
-            $log_stmt->close();
-        }
-
-        // Benutzerinformationen aus der Datenbank abrufen
-        $stmt = $link->prepare("SELECT email, name FROM users WHERE id = ?");
-        $stmt->bind_param("i", $usersId);
-        $stmt->execute();
-        $userResult = $stmt->get_result();
-        $user = $userResult->fetch_assoc();
-
-        $recipientEmail = $user['email'];
-        $recipientName = $user['name'];
-
-        // Holen Sie sich die Bestätigungs-E-Mail-Vorlage
-        $emailTemplate = getPaymentConfirmationEmail($recipientName, $cartItems, $totalPrice, $shippingMethod, $shippingCost);
-
-        // Senden Sie die E-Mail
-        sendEmail($recipientEmail, $recipientName, $emailTemplate);
-
-        $stmt->close();
-
-        // Warenkorb leeren
-        $stmt = $link->prepare("DELETE FROM shopping_cart WHERE users_id = ?");
-        $stmt->bind_param("i", $usersId);
+    foreach ($cartItems as $item) {
+        $stmt = $link->prepare("INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("iiid", $orderId, $item['product_id'], $item['quantity'], $item['price']);
         $stmt->execute();
         $stmt->close();
-
-        // Weiterleitung nach dem Leeren des Warenkorbs und dem Senden der E-Mail
-        header("Location: danke.php");
-        exit();
     }
-}
 
-$link->close();
+    $update_points_sql = "UPDATE punkte SET points = points + 25 WHERE users_id = ?";
+    if ($update_points_stmt = $link->prepare($update_points_sql)) {
+        $update_points_stmt->bind_param("i", $usersId);
+        $update_points_stmt->execute();
+        $update_points_stmt->close();
+    }
+
+    $stmt = $link->prepare("DELETE FROM `cart-body` WHERE warenkorb_id = (SELECT id FROM `cart-header` WHERE users_id = ?)");
+    $stmt->bind_param("i", $usersId);
+    $stmt->execute();
+    $stmt->close();
+
+    $stmt = $link->prepare("DELETE FROM `cart-header` WHERE users_id = ?");
+    $stmt->bind_param("i", $usersId);
+    $stmt->execute();
+    $stmt->close();
+
+    header("Location: danke.php");
+    exit();
+}
 ?>
 <!doctype html>
 <html lang="de">
@@ -274,18 +136,15 @@ $link->close();
                     <h4 class="mb-3">Versandart</h4>
                     <div class="d-block my-3">
                         <div class="custom-control custom-radio">
-                            <input id="dhl" name="shipping_method" type="radio" class="custom-control-input" value="DHL"
-                                   checked required>
+                            <input id="dhl" name="shipping_method" type="radio" class="custom-control-input" value="DHL" checked required>
                             <label class="custom-control-label" for="dhl">DHL (4,5€)</label>
                         </div>
                         <div class="custom-control custom-radio">
-                            <input id="dhl_express" name="shipping_method" type="radio" class="custom-control-input"
-                                   value="DHL Express" required>
+                            <input id="dhl_express" name="shipping_method" type="radio" class="custom-control-input" value="DHL Express" required>
                             <label class="custom-control-label" for="dhl_express">DHL Express (+6€)</label>
                         </div>
                         <div class="custom-control custom-radio">
-                            <input id="lpd" name="shipping_method" type="radio" class="custom-control-input" value="LPD"
-                                   required>
+                            <input id="lpd" name="shipping_method" type="radio" class="custom-control-input" value="LPD" required>
                             <label class="custom-control-label" for="lpd">LPD (+3€)</label>
                         </div>
                     </div>
@@ -295,8 +154,7 @@ $link->close();
                     <h4 class="mb-3">Zahlungsmethode</h4>
                     <div class="d-block my-3">
                         <div class="custom-control custom-radio">
-                            <input id="credit" name="paymentMethod" type="radio" class="custom-control-input" checked
-                                   required>
+                            <input id="credit" name="paymentMethod" type="radio" class="custom-control-input" checked required>
                             <label class="custom-control-label" for="credit">Kreditkarte</label>
                         </div>
                         <div class="custom-control custom-radio">
@@ -334,10 +192,8 @@ $link->close();
 
                     <hr class="mb-4">
                     <div class="custom-control custom-checkbox">
-                        <input type="checkbox" class="custom-control-input" id="privacy_policy" name="privacy_policy"
-                               required>
-                        <label class="custom-control-label" for="privacy_policy">Ich akzeptiere die
-                            Datenschutzrichtlinie</label>
+                        <input type="checkbox" class="custom-control-input" id="privacy_policy" name="privacy_policy" required>
+                        <label class="custom-control-label" for="privacy_policy">Ich akzeptiere die Datenschutzrichtlinie</label>
                     </div>
                     <hr class="mb-4">
                     <input type="hidden" name="checkout" value="1">
@@ -361,7 +217,7 @@ $link->close();
                     echo '<h6 class="my-0">' . htmlspecialchars($item['name']) . ' (' . htmlspecialchars($item['quantity']) . ')</h6>';
                     echo '<small class="text-muted">Preis: ' . htmlspecialchars(number_format($item['price'], 2)) . '€</small><br>';
                     echo '<small class="text-muted">Rabatt: ' . htmlspecialchars($item['rabatt'] * 100) . '%</small><br>';
-                    echo '<small class="text-muted">- Rabatt: ' . htmlspecialchars(number_format($item['price'] * $item['rabatt'] * $item['quantity'], 2)) . '€</small>'; // Gesamt-Rabatt
+                    echo '<small class="text-muted">- Rabatt: ' . htmlspecialchars(number_format($item['price'] * $item['rabatt'] * $item['quantity'], 2)) . '€</small>';
                     echo '</div>';
                     echo '<span class="text-muted">' . htmlspecialchars(number_format($itemTotal, 2)) . '€</span>';
                     echo '</li>';

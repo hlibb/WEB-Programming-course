@@ -1,37 +1,48 @@
 <?php
-include_once 'include/logged_in.php';
+session_start();
 include_once 'include/db_connection.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['article_id']) && isset($_POST['quantity'])) {
-    $productId = $_POST['article_id'];
+$response = array('success' => false);
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset($_POST['quantity'])) {
+    $productId = $_POST['product_id'];
     $quantity = $_POST['quantity'];
-    $usersId = $_SESSION['users_id'] ?? 1;
+    $usersId = $_SESSION['users_id']; // Benutzer-ID aus der Sitzung
 
-    $discount = 0;
-    if ($quantity >= 10) {
-        $discount = 0.20;
-    } elseif ($quantity >= 5) {
-        $discount = 0.10;
-    }
-
-    $stmt = $link->prepare("UPDATE shopping_cart SET quantity = ?, rabatt = ? WHERE users_id = ? AND product_id = ?");
-    $stmt->bind_param("idii", $quantity, $discount, $usersId, $productId);
-    $stmt->execute();
-    $stmt->close();
-
-    // Aktualisieren der Anzahl der Artikel im Warenkorb
-    $stmt = $link->prepare("SELECT SUM(quantity) AS cart_count FROM shopping_cart WHERE users_id = ?");
+    // Warenkorb-Kopf-ID abrufen
+    $stmt = $link->prepare("SELECT id FROM `cart-header` WHERE users_id = ?");
     $stmt->bind_param("i", $usersId);
     $stmt->execute();
     $result = $stmt->get_result();
-    $cartCount = 0;
     if ($row = $result->fetch_assoc()) {
-        $cartCount = $row['cart_count'];
-    }
-    $stmt->close();
+        $cartId = $row['id'];
 
-    echo json_encode(['success' => true, 'cart_count' => $cartCount]);
-} else {
-    echo json_encode(['success' => false]);
+        // Warenkorb-Artikelmenge aktualisieren
+        if ($quantity > 0) {
+            $stmt = $link->prepare("UPDATE `cart-body` SET quantity = ? WHERE warenkorb_id = ? AND product_id = ?");
+            $stmt->bind_param("iii", $quantity, $cartId, $productId);
+        } else {
+            $stmt = $link->prepare("DELETE FROM `cart-body` WHERE warenkorb_id = ? AND product_id = ?");
+            $stmt->bind_param("ii", $cartId, $productId);
+        }
+        $stmt->execute();
+        $stmt->close();
+
+        // Gesamtsumme und Artikelanzahl neu berechnen
+        $stmt = $link->prepare("SELECT SUM(p.price * cb.quantity) AS total, SUM(cb.quantity) AS count FROM `cart-body` cb JOIN products p ON cb.product_id = p.id WHERE cb.warenkorb_id = ?");
+        $stmt->bind_param("i", $cartId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($row = $result->fetch_assoc()) {
+            $response['newTotal'] = $row['total'];
+            $response['cartCount'] = $row['count'];
+            $response['success'] = true;
+        }
+        $stmt->close();
+    }
 }
+
+header('Content-Type: application/json');
+echo json_encode($response);
+exit();
 ?>

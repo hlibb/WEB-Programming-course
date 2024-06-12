@@ -1,30 +1,42 @@
 <?php
-include_once 'include/logged_in.php';
+session_start();
 include_once 'include/db_connection.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['article_id'])) {
-    $productId = $_POST['article_id'];
-    $usersId = $_SESSION['users_id'] ?? 1;
+$response = array('success' => false);
 
-    $stmt = $link->prepare("DELETE FROM shopping_cart WHERE users_id = ? AND product_id = ?");
-    $stmt->bind_param("ii", $usersId, $productId);
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
+    $productId = $_POST['product_id'];
+    $usersId = $_SESSION['users_id']; // Benutzer-ID aus der Sitzung
+
+    // Warenkorb-Kopf-ID abrufen
+    $stmt = $link->prepare("SELECT id FROM `cart-header` WHERE users_id = ?");
+    $stmt->bind_param("i", $usersId);
     $stmt->execute();
+    $result = $stmt->get_result();
+    if ($row = $result->fetch_assoc()) {
+        $cartId = $row['id'];
 
-    if ($stmt->affected_rows > 0) {
-        $stmt = $link->prepare("SELECT COUNT(*) AS cart_count FROM shopping_cart WHERE users_id = ?");
-        $stmt->bind_param("i", $usersId);
+        // Warenkorb-Artikel entfernen
+        $stmt = $link->prepare("DELETE FROM `cart-body` WHERE warenkorb_id = ? AND product_id = ?");
+        $stmt->bind_param("ii", $cartId, $productId);
+        $stmt->execute();
+        $stmt->close();
+
+        // Gesamtsumme und Artikelanzahl neu berechnen
+        $stmt = $link->prepare("SELECT SUM(p.price * cb.quantity) AS total, SUM(cb.quantity) AS count FROM `cart-body` cb JOIN products p ON cb.product_id = p.id WHERE cb.warenkorb_id = ?");
+        $stmt->bind_param("i", $cartId);
         $stmt->execute();
         $result = $stmt->get_result();
-        $cartCount = 0;
         if ($row = $result->fetch_assoc()) {
-            $cartCount = $row['cart_count'];
+            $response['newTotal'] = $row['total'];
+            $response['cartCount'] = $row['count'];
+            $response['success'] = true;
         }
         $stmt->close();
-        echo json_encode(['success' => true, 'cart_count' => $cartCount]);
-    } else {
-        echo json_encode(['success' => false]);
     }
-} else {
-    echo json_encode(['success' => false]);
 }
+
+header('Content-Type: application/json');
+echo json_encode($response);
+exit();
 ?>

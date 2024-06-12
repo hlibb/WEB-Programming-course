@@ -20,7 +20,7 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
             <button class="navbar-toggler ml-2" type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <a href="shopping_cart.php"><button type="button" class="btn btn-primary button-spacing">
+            <a href="cart.php"><button type="button" class="btn btn-primary button-spacing">
                     Warenkorb <span class="badge text-bg-secondary">x</span>
                 </button></a>
         </nav>
