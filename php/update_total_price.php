@@ -2,14 +2,14 @@
 include_once 'include/db_connection.php';
 session_start();
 
-$kundenId = $_SESSION['kunden_id'] ?? 1;
+$usersId = $_SESSION['users_id'] ?? 1;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['use_points'])) {
     $usePoints = $_POST['use_points'];
 
     // Calculate total price from the shopping cart
-    $stmt = $link->prepare("SELECT sc.product_id, p.name, p.price, sc.quantity, sc.rabatt FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.kunden_id = ?");
-    $stmt->bind_param("i", $kundenId);
+    $stmt = $link->prepare("SELECT sc.product_id, p.name, p.price, sc.quantity, sc.rabatt FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.users_id = ?");
+    $stmt->bind_param("i", $usersId);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -21,8 +21,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['use_points'])) {
     $stmt->close();
 
     // Fetch user points
-    $stmt = $link->prepare("SELECT points FROM punkte WHERE kunden_id = ?");
-    $stmt->bind_param("i", $kundenId);
+    $stmt = $link->prepare("SELECT points FROM punkte WHERE users_id = ?");
+    $stmt->bind_param("i", $usersId);
     $stmt->execute();
     $stmt->bind_result($points);
     $stmt->fetch();

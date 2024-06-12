@@ -14,7 +14,7 @@ function generateRandomPassword($length = 12) {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
-    $stmt = $link->prepare("SELECT * FROM kunden WHERE email = ?");
+    $stmt = $link->prepare("SELECT * FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $randomPassword = generateRandomPassword();
         $hashedPassword = password_hash($randomPassword, PASSWORD_DEFAULT);
 
-        $stmt = $link->prepare("UPDATE kunden SET password = ?, password_status = 'temporary' WHERE email = ?");
+        $stmt = $link->prepare("UPDATE users SET password = ?, password_status = 'temporary' WHERE email = ?");
         $stmt->bind_param("ss", $hashedPassword, $email);
         $stmt->execute();
         $stmt->close();

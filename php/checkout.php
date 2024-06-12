@@ -8,7 +8,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset
     $productId = $_POST['product_id'];
     $quantity = $_POST['quantity'];
 
-    $kundenId = $_SESSION['kunden_id'] ?? 1;
+    $usersId = $_SESSION['users_id'] ?? 1;
 
     // Berechnung des Rabatts
     $discount = 0;
@@ -18,8 +18,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset
         $discount = 0.10;
     }
 
-    $stmt = $link->prepare("SELECT * FROM shopping_cart WHERE kunden_id = ? AND product_id = ?");
-    $stmt->bind_param("ii", $kundenId, $productId);
+    $stmt = $link->prepare("SELECT * FROM shopping_cart WHERE users_id = ? AND product_id = ?");
+    $stmt->bind_param("ii", $usersId, $productId);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -34,11 +34,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset
         } else {
             $discount = 0;
         }
-        $stmt = $link->prepare("UPDATE shopping_cart SET quantity = ?, rabatt = ? WHERE kunden_id = ? AND product_id = ?");
-        $stmt->bind_param("idii", $newQuantity, $discount, $kundenId, $productId);
+        $stmt = $link->prepare("UPDATE shopping_cart SET quantity = ?, rabatt = ? WHERE users_id = ? AND product_id = ?");
+        $stmt->bind_param("idii", $newQuantity, $discount, $usersId, $productId);
     } else {
-        $stmt = $link->prepare("INSERT INTO shopping_cart (kunden_id, product_id, quantity, rabatt) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("iiid", $kundenId, $productId, $quantity, $discount);
+        $stmt = $link->prepare("INSERT INTO shopping_cart (users_id, product_id, quantity, rabatt) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("iiid", $usersId, $productId, $quantity, $discount);
     }
     $stmt->execute();
     $stmt->close();
@@ -48,10 +48,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset
 if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['remove'])) {
     $productId = $_GET['remove'];
 
-    $kundenId = $_SESSION['kunden_id'] ?? 1;
+    $usersId = $_SESSION['users_id'] ?? 1;
 
-    $stmt = $link->prepare("DELETE FROM shopping_cart WHERE kunden_id = ? AND product_id = ?");
-    $stmt->bind_param("ii", $kundenId, $productId);
+    $stmt = $link->prepare("DELETE FROM shopping_cart WHERE users_id = ? AND product_id = ?");
+    $stmt->bind_param("ii", $usersId, $productId);
     $stmt->execute();
     $stmt->close();
 }
@@ -76,10 +76,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['shipping_method'])) {
 }
 
 // Warenkorb anzeigen
-$kundenId = $_SESSION['kunden_id'] ?? 1;
+$usersId = $_SESSION['users_id'] ?? 1;
 
-$stmt = $link->prepare("SELECT sc.product_id, p.name, p.price, sc.quantity, sc.rabatt FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.kunden_id = ?");
-$stmt->bind_param("i", $kundenId);
+$stmt = $link->prepare("SELECT sc.product_id, p.name, p.price, sc.quantity, sc.rabatt FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.users_id = ?");
+$stmt->bind_param("i", $usersId);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -136,9 +136,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
         $totalPriceWithShipping = $totalPrice + $shippingCost;
 
         // Bestellung in der Datenbank speichern
-        $stmt = $link->prepare("INSERT INTO orders (kunden_id, total_amount, shipping_method, is_express_shipping, is_paid) VALUES (?, ?, ?, ?, ?)");
+        $stmt = $link->prepare("INSERT INTO orders (users_id, total_amount, shipping_method, is_express_shipping, is_paid) VALUES (?, ?, ?, ?, ?)");
         $isPaid = 1; // Annahme: Zahlung erfolgreich
-        $stmt->bind_param("idssi", $kundenId, $totalPriceWithShipping, $shippingMethod, $isExpressShipping, $isPaid);
+        $stmt->bind_param("idssi", $usersId, $totalPriceWithShipping, $shippingMethod, $isExpressShipping, $isPaid);
         $stmt->execute();
         $orderId = $stmt->insert_id;
         $stmt->close();
@@ -152,17 +152,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
         }
 
         // Log the purchase event with total price
-        $log_sql = "INSERT INTO logs (kunden_id, event_type, event_details) VALUES (?, 'purchase', ?)";
+        $log_sql = "INSERT INTO logs (users_id, event_type, event_details) VALUES (?, 'purchase', ?)";
         $event_details = "User made a purchase. Total price: " . number_format($totalPriceWithShipping, 2) . "€";
         if ($log_stmt = $link->prepare($log_sql)) {
-            $log_stmt->bind_param("is", $kundenId, $event_details);
+            $log_stmt->bind_param("is", $usersId, $event_details);
             $log_stmt->execute();
             $log_stmt->close();
         }
 
         // Benutzerinformationen aus der Datenbank abrufen
-        $stmt = $link->prepare("SELECT email, name FROM kunden WHERE id = ?");
-        $stmt->bind_param("i", $kundenId);
+        $stmt = $link->prepare("SELECT email, name FROM users WHERE id = ?");
+        $stmt->bind_param("i", $usersId);
         $stmt->execute();
         $userResult = $stmt->get_result();
         $user = $userResult->fetch_assoc();
@@ -176,19 +176,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
         // Senden Sie die E-Mail
         sendEmail($recipientEmail, $recipientName, $emailTemplate);
 
-        // Add 25 points to the user's account after a successful purchase
-        $update_points_sql = "UPDATE punkte SET points = points + 25 WHERE kunden_id = ?";
-        if ($update_points_stmt = $link->prepare($update_points_sql)) {
-            $update_points_stmt->bind_param("i", $kundenId);
-            $update_points_stmt->execute();
-            $update_points_stmt->close();
-        }
-
         $stmt->close();
 
         // Warenkorb leeren
-        $stmt = $link->prepare("DELETE FROM shopping_cart WHERE kunden_id = ?");
-        $stmt->bind_param("i", $kundenId);
+        $stmt = $link->prepare("DELETE FROM shopping_cart WHERE users_id = ?");
+        $stmt->bind_param("i", $usersId);
         $stmt->execute();
         $stmt->close();
 

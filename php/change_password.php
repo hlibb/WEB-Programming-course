@@ -11,8 +11,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $newPassword = $_POST['new_password'];
     $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 
-    $stmt = $link->prepare("UPDATE kunden SET password = ?, password_status = 'permanent' WHERE id = ?");
-    $stmt->bind_param("si", $hashedPassword, $_SESSION['kunden_id']);
+    $stmt = $link->prepare("UPDATE users SET password = ?, password_status = 'permanent' WHERE id = ?");
+    $stmt->bind_param("si", $hashedPassword, $_SESSION['users_id']);
     $stmt->execute();
     $stmt->close();
 

@@ -57,7 +57,7 @@ $link->close();
                     </a>
                     <h2><?php echo htmlspecialchars($product['name']); ?></h2>
                     <p><?php echo htmlspecialchars($product['price']); ?>€</p>
-                    <?php if (isset($_SESSION['kunden_id'])): ?>
+                    <?php if (isset($_SESSION['users_id'])): ?>
                         <form method="post" action="shopping_cart.php">
                             <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product['id']); ?>">
                             <div class="quantity-wrapper">

@@ -2,10 +2,10 @@
 include_once 'include/db_connection.php';
 session_start();
 
-$kundenId = $_SESSION['kunden_id'] ?? 1;
+$usersId = $_SESSION['users_id'] ?? 1;
 
-if ($stmt = $link->prepare("SELECT points FROM punkte WHERE kunden_id = ?")) {
-    $stmt->bind_param("i", $kundenId);
+if ($stmt = $link->prepare("SELECT points FROM punkte WHERE users_id = ?")) {
+    $stmt->bind_param("i", $usersId);
     $stmt->execute();
     $stmt->bind_result($points);
     $stmt->fetch();

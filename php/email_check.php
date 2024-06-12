@@ -12,7 +12,7 @@ header('Content-Type: application/json');
 if (isset($_POST['email'])) {
     $email = trim($_POST['email']);
 
-    $sql = "SELECT * FROM kunden WHERE email = ?";
+    $sql = "SELECT * FROM users WHERE email = ?";
     if ($stmt = mysqli_prepare($link, $sql)) {
         mysqli_stmt_bind_param($stmt, "s", $email);
         if (mysqli_stmt_execute($stmt)) {

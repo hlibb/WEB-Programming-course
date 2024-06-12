@@ -34,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Connection failed: " . $link->connect_error);
     }
 
-    $stmt = $link->prepare("SELECT * FROM kunden WHERE email = ?");
+    $stmt = $link->prepare("SELECT * FROM users WHERE email = ?");
     if ($stmt === false) {
         die("Prepare failed: " . $link->error);
     }
@@ -45,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Email already exists.");
     }
 
-    $stmt = $link->prepare("INSERT INTO kunden (name, surname, username, email, password, password_status, screen_resolution, operating_system) VALUES (?, ?, ?, ?, ?, 'temporary', ?, ?)");
+    $stmt = $link->prepare("INSERT INTO users (name, surname, username, email, password, password_status, screen_resolution, operating_system) VALUES (?, ?, ?, ?, ?, 'temporary', ?, ?)");
     if ($stmt === false) {
         die("Prepare failed: " . $link->error);
     }
@@ -61,7 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $id = $stmt->insert_id;
 
         // Insert default points for the new user
-        $stmt = $link->prepare("INSERT INTO punkte (kunden_id, points) VALUES (?, 100)");
+        $stmt = $link->prepare("INSERT INTO punkte (users_id, points) VALUES (?, 100)");
         if ($stmt === false) {
             die("Prepare failed: " . $link->error);
         }
@@ -70,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             die("Execute failed: " . $stmt->error);
         }
 
-        $update_sql = "UPDATE kunden SET login_timestamp = NOW() WHERE id = ?";
+        $update_sql = "UPDATE users SET login_timestamp = NOW() WHERE id = ?";
         if ($update_stmt = mysqli_prepare($link, $update_sql)) {
             mysqli_stmt_bind_param($update_stmt, "i", $id);
             if (!mysqli_stmt_execute($update_stmt)) {

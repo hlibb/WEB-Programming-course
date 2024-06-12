@@ -48,25 +48,25 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
 <div class="container">
     <?php
     // Check if user is logged in
-    if (isset($_SESSION['email']) && isset($_SESSION['kunden_id'])) {
+    if (isset($_SESSION['email']) && isset($_SESSION['users_id'])) {
         // User is logged in, display welcome message and other content
         $username = $_SESSION['email'];
-        $kundenId = $_SESSION['kunden_id'];
+        $usersId = $_SESSION['users_id'];
         $lastLoginTimestamp = $_SESSION['previous_login'];
         setlocale(LC_TIME, 'de_DE.UTF-8');
         $date = new DateTime($lastLoginTimestamp);
         $formattedDate = strftime('%A, %d.%m.%Y', $date->getTimestamp());
 
         require_once '../php/include/db_connection.php';
-        $sql = "SELECT * FROM kunden WHERE id = ?";
+        $sql = "SELECT * FROM users WHERE id = ?";
         $stmt = $link->prepare($sql);
-        $stmt->bind_param("i", $kundenId);
+        $stmt->bind_param("i", $usersId);
         $stmt->execute();
         $result = $stmt->get_result();
-        $user = $result->fetch_assoc();
+        $users = $result->fetch_assoc();
         // Display welcome message
-        if ($user) {
-            echo "<p>Herzlich Willkommen Herr/Frau {$user['surname']}. Sie waren zuletzt am $formattedDate online.</p>";
+        if ($users) {
+            echo "<p>Herzlich Willkommen Herr/Frau {$users['surname']}. Sie waren zuletzt am $formattedDate online.</p>";
         } else {
             echo "<p>Willkommen, unbekannte User!</p>";
         }

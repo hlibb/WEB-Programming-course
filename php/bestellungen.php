@@ -3,7 +3,7 @@ include_once 'include/logged_in.php'; // Ensure this is included at the top
 include_once 'include/db_connection.php';
 include 'send_email.php'; // Include the send email function
 
-$kundenId = $_SESSION['kunden_id'] ?? 1;
+$usersId = $_SESSION['users_id'] ?? 1;
 
 // Bestellung erneut tätigen, wenn der Button gedrückt wird
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reorder'])) {
@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reorder'])) {
     $stmt->close();
 
     // Neue Bestellung in der Datenbank speichern
-    $stmt = $link->prepare("INSERT INTO orders (kunden_id, total_amount, shipping_method, is_express_shipping, is_paid) SELECT kunden_id, total_amount, shipping_method, is_express_shipping, is_paid FROM orders WHERE id = ?");
+    $stmt = $link->prepare("INSERT INTO orders (users_id, total_amount, shipping_method, is_express_shipping, is_paid) SELECT users_id, total_amount, shipping_method, is_express_shipping, is_paid FROM orders WHERE id = ?");
     $stmt->bind_param("i", $orderId);
     $stmt->execute();
     $newOrderId = $stmt->insert_id;
@@ -37,8 +37,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reorder'])) {
     }
 
     // Benutzerinformationen aus der Datenbank abrufen
-    $stmt = $link->prepare("SELECT email, name FROM kunden WHERE id = ?");
-    $stmt->bind_param("i", $kundenId);
+    $stmt = $link->prepare("SELECT email, name FROM users WHERE id = ?");
+    $stmt->bind_param("i", $usersId);
     $stmt->execute();
     $userResult = $stmt->get_result();
     $user = $userResult->fetch_assoc();
@@ -70,8 +70,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reorder'])) {
 }
 
 // Bestellungen des Benutzers abrufen
-$stmt = $link->prepare("SELECT * FROM orders WHERE kunden_id = ?");
-$stmt->bind_param("i", $kundenId);
+$stmt = $link->prepare("SELECT * FROM orders WHERE users_id = ?");
+$stmt->bind_param("i", $usersId);
 $stmt->execute();
 $result = $stmt->get_result();
 

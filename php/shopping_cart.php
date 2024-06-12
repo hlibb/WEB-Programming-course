@@ -9,7 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset
     $quantity = $_POST['quantity'];
 
     // Beispiel: Benutzer-ID aus der Session
-    $kundenId = $_SESSION['kunden_id'] ?? 1; // Verwenden Sie Ihre Methode zur Ermittlung der Benutzer-ID
+    $usersId = $_SESSION['users_id'] ?? 1; // Verwenden Sie Ihre Methode zur Ermittlung der Benutzer-ID
 
     // Berechnung des Rabatts
     $discount = 0;
@@ -20,8 +20,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset
     }
 
     // Überprüfen, ob das Produkt bereits im Warenkorb ist
-    $stmt = $link->prepare("SELECT * FROM shopping_cart WHERE kunden_id = ? AND product_id = ?");
-    $stmt->bind_param("ii", $kundenId, $productId);
+    $stmt = $link->prepare("SELECT * FROM shopping_cart WHERE users_id = ? AND product_id = ?");
+    $stmt->bind_param("ii", $usersId, $productId);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -36,11 +36,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset
         } else {
             $discount = 0;
         }
-        $stmt = $link->prepare("UPDATE shopping_cart SET quantity = ?, rabatt = ? WHERE kunden_id = ? AND product_id = ?");
-        $stmt->bind_param("idii", $newQuantity, $discount, $kundenId, $productId);
+        $stmt = $link->prepare("UPDATE shopping_cart SET quantity = ?, rabatt = ? WHERE users_id = ? AND product_id = ?");
+        $stmt->bind_param("idii", $newQuantity, $discount, $usersId, $productId);
     } else {
-        $stmt = $link->prepare("INSERT INTO shopping_cart (kunden_id, product_id, quantity, rabatt) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("iiid", $kundenId, $productId, $quantity, $discount);
+        $stmt = $link->prepare("INSERT INTO shopping_cart (users_id, product_id, quantity, rabatt) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("iiid", $usersId, $productId, $quantity, $discount);
     }
     $stmt->execute();
     $stmt->close();
@@ -51,11 +51,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_quantity'])) {
     $productId = $_POST['product_id'];
     $quantity = $_POST['quantity'];
 
-    $kundenId = $_SESSION['kunden_id'] ?? 1;
+    $usersId = $_SESSION['users_id'] ?? 1;
 
     if ($quantity == 0) {
-        $stmt = $link->prepare("DELETE FROM shopping_cart WHERE kunden_id = ? AND product_id = ?");
-        $stmt->bind_param("ii", $kundenId, $productId);
+        $stmt = $link->prepare("DELETE FROM shopping_cart WHERE users_id = ? AND product_id = ?");
+        $stmt->bind_param("ii", $usersId, $productId);
     } else {
         // Berechnung des Rabatts basierend auf der aktualisierten Menge
         $discount = 0;
@@ -64,8 +64,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_quantity'])) {
         } elseif ($quantity >= 5) {
             $discount = 0.10;
         }
-        $stmt = $link->prepare("UPDATE shopping_cart SET quantity = ?, rabatt = ? WHERE kunden_id = ? AND product_id = ?");
-        $stmt->bind_param("idii", $quantity, $discount, $kundenId, $productId);
+        $stmt = $link->prepare("UPDATE shopping_cart SET quantity = ?, rabatt = ? WHERE users_id = ? AND product_id = ?");
+        $stmt->bind_param("idii", $quantity, $discount, $usersId, $productId);
     }
     $stmt->execute();
     $stmt->close();
@@ -75,19 +75,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_quantity'])) {
 if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['remove'])) {
     $productId = $_GET['remove'];
 
-    $kundenId = $_SESSION['kunden_id'] ?? 1;
+    $usersId = $_SESSION['users_id'] ?? 1;
 
-    $stmt = $link->prepare("DELETE FROM shopping_cart WHERE kunden_id = ? AND product_id = ?");
-    $stmt->bind_param("ii", $kundenId, $productId);
+    $stmt = $link->prepare("DELETE FROM shopping_cart WHERE users_id = ? AND product_id = ?");
+    $stmt->bind_param("ii", $usersId, $productId);
     $stmt->execute();
     $stmt->close();
 }
 
 // Warenkorb anzeigen
-$kundenId = $_SESSION['kunden_id'] ?? 1;
+$usersId = $_SESSION['users_id'] ?? 1;
 
-$stmt = $link->prepare("SELECT sc.product_id, p.name, p.price, sc.quantity, sc.rabatt FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.kunden_id = ?");
-$stmt->bind_param("i", $kundenId);
+$stmt = $link->prepare("SELECT sc.product_id, p.name, p.price, sc.quantity, sc.rabatt FROM shopping_cart sc JOIN products p ON sc.product_id = p.id WHERE sc.users_id = ?");
+$stmt->bind_param("i", $usersId);
 $discountedPrice = 0;
 $stmt->execute();
 $result = $stmt->get_result();
@@ -105,8 +105,8 @@ while ($row = $result->fetch_assoc()) {
 $stmt->close();
 
 // Benutzerpunkte abrufen
-$stmt = $link->prepare("SELECT points FROM punkte WHERE kunden_id = ?");
-$stmt->bind_param("i", $kundenId);
+$stmt = $link->prepare("SELECT points FROM punkte WHERE users_id = ?");
+$stmt->bind_param("i", $usersId);
 $stmt->execute();
 $result = $stmt->get_result();
 $userPoints = 0;
