@@ -8,10 +8,10 @@ INSERT INTO `products` (`name`, `price`, `quantity`, `image_url`, `description`)
 ('Lamy', 199, 24, 'https://schreibundstil.de/cdn/shop/products/Lamy-Fueller-2000-Schwarz-3.1_700x.jpg?v=1613996674', 'Füller 2000 Schwarz');
 
 INSERT INTO `products` (`name`, `price`, `quantity`, `image_url`, `description`) VALUES
-('Waldmann', 416, 4, 'https://schreibundstil.de/cdn/shop/products/Waldmann-Fueller-Xetra-Vienna-Lack-Schwarz-11_700x.jpg?v=1593538004', 'Füller Xetra Vienna Lack Schwarz');
+('Wüldmänn', 416, 4, 'https://schreibundstil.de/cdn/shop/products/Waldmann-Fueller-Xetra-Vienna-Lack-Schwarz-11_700x.jpg?v=1593538004', 'Füller Xetra Vienna Lack Schwarz');
 
 INSERT INTO `products` (`name`, `price`, `quantity`, `image_url`, `description`) VALUES
-('Cleo Skribent', 202, 7, 'https://schreibundstil.de/cdn/shop/products/Cleo-Skribent-Kolbenfueller-Classic-Palladium-Gold-Schwarz-1_700x.jpg?v=1594663723', 'Kolbenfüller Classic Palladium Gold-Schwarz');
+('Cleö Skribent', 202, 7, 'https://schreibundstil.de/cdn/shop/products/Cleo-Skribent-Kolbenfueller-Classic-Palladium-Gold-Schwarz-1_700x.jpg?v=1594663723', 'Kolbenfüller Classic Palladium Gold-Schwarz');
 
 INSERT INTO `products` (`name`, `price`, `quantity`, `image_url`, `description`) VALUES
 ('Caran d'' Ache', 280, 63, 'https://schreibundstil.de/cdn/shop/products/Caran-d_Ache-Fueller-Ecridor-Retro_3_700x.jpg?v=1595308676', 'Füller Ecridor Retro');
