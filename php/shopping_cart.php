@@ -69,6 +69,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_quantity'])) {
     }
     $stmt->execute();
     $stmt->close();
+    echo json_encode(['success' => true]); // Rückgabe für AJAX-Anfrage
+    exit();
 }
 
 // Funktion zum Entfernen von Produkten aus dem Warenkorb
@@ -164,17 +166,9 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
                 echo "<td>" . htmlspecialchars($item['name']) . "</td>";
                 echo "<td>" . htmlspecialchars($item['price']) . "€</td>";
                 echo "<td class='quantity-controls'>
-                        <form method='post' action=''>
-                            <input type='hidden' name='product_id' value='" . htmlspecialchars($item['product_id']) . "'>
-                            <input type='hidden' name='quantity' value='" . ($item['quantity'] - 1) . "'>
-                            <button type='submit' name='update_quantity' class='btn btn-sm btn-secondary'>-</button>
-                        </form>
+                        <button class='btn btn-sm btn-secondary update-quantity' data-product-id='" . htmlspecialchars($item['product_id']) . "' data-quantity='" . ($item['quantity'] - 1) . "'>-</button>
                         <span>" . htmlspecialchars($item['quantity']) . "</span>
-                        <form method='post' action=''>
-                            <input type='hidden' name='product_id' value='" . htmlspecialchars($item['product_id']) . "'>
-                            <input type='hidden' name='quantity' value='" . ($item['quantity'] + 1) . "'>
-                            <button type='submit' name='update_quantity' class='btn btn-sm btn-secondary'>+</button>
-                        </form>
+                        <button class='btn btn-sm btn-secondary update-quantity' data-product-id='" . htmlspecialchars($item['product_id']) . "' data-quantity='" . ($item['quantity'] + 1) . "'>+</button>
                       </td>";
                 echo "<td>" . ($discount * 100) . "%</td>";
                 echo "<td>" . htmlspecialchars(number_format($itemTotal, 2)) . "€</td>";
@@ -199,6 +193,34 @@ $link->close(); // Schließe die Verbindung am Ende des Skripts
         <button type="submit" name="pay" class="btn btn-primary">Bezahlen</button>
     </form>
 </div>
+
+<!-- jQuery laden -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.update-quantity').click(function() {
+            var productId = $(this).data('product-id');
+            var quantity = $(this).data('quantity');
+
+            $.ajax({
+                url: 'shopping_cart.php',
+                type: 'POST',
+                data: {
+                    update_quantity: true,
+                    product_id: productId,
+                    quantity: quantity
+                },
+                success: function(response) {
+                    location.reload();
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr);
+                }
+            });
+        });
+    });
+</script>
+
 <?php include "include/footimport.php"; ?>
 </body>
 </html>
