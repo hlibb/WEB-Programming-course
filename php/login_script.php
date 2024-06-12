@@ -1,9 +1,9 @@
 <?php
 session_start();
 include_once 'include/db_connection.php';
+require_once '../extern/google_auth/PHPGangsta/GoogleAuthenticator.php';
 
-require 'vendor/autoload.php';
-use PHPGangsta_GoogleAuthenticator;
+$ga = new PHPGangsta_GoogleAuthenticator();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $emailOrUsername = $_POST['email_or_username'];
@@ -17,7 +17,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $user = $result->fetch_assoc();
 
     if ($user && password_verify($password, $user['password'])) {
-        $ga = new PHPGangsta_GoogleAuthenticator();
         $secret = $user['secret'];
         $checkResult = $ga->verifyCode($secret, $totpCode, 2); // 2 = 2*30sec clock tolerance
 
@@ -65,7 +64,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 exit();
             }
         } else {
-            header("Location: login.php?error=Invalid TOTP code");
+            header("Location: login.php?error=Ungültiger TOTP-Code");
             exit();
         }
     } else {
