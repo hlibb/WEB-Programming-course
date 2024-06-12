@@ -29,11 +29,12 @@ CREATE TABLE IF NOT EXISTS `logs` (
 );
 
 CREATE TABLE IF NOT EXISTS `punkte` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
     `kunden_id` INT NOT NULL,
     `points` INT NOT NULL DEFAULT 100,
+    PRIMARY KEY (`kunden_id`),
     FOREIGN KEY (`kunden_id`) REFERENCES `kunden`(`id`) ON DELETE CASCADE
 );
+
 
 
 -- Table for storing product information
