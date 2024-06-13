@@ -72,45 +72,6 @@ $link->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Warenkorb</title>
     <?php include '../php/include/headimport.php' ?>
-    <style>
-        .quantity-wrapper {
-            display: flex;
-            align-items: center;
-        }
-        .quantity-button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-        .quantity-display {
-            width: 40px;
-            text-align: center;
-            margin: 0 5px;
-            border: 1px solid #ddd;
-            padding: 5px;
-        }
-        .remove-button {
-            background-color: red;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-        .total-price-row {
-            font-weight: bold;
-            text-align: right;
-        }
-        .points-row {
-            display: flex;
-            align-items: center;
-        }
-        .form-check-input {
-            width: 20px;
-            height: 20px;
-        }
-    </style>
 </head>
 <body>
 <?php include "include/navimport.php"; ?>
