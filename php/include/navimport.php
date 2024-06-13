@@ -34,11 +34,21 @@ if ($isLoggedIn) {
     $stmt->close();
 }
 
+$userPoints = 0;
+if ($isLoggedIn) {
+    $userId = $_SESSION['users_id'];
+    $stmt = $link->prepare("SELECT points FROM points WHERE users_id = ?");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $stmt->bind_result($userPoints);
+    $stmt->fetch();
+    $stmt->close();
+}
 ?>
 <a href="home.php"><img src="../assets/images/logo.png" class="logo"></a>
 <div class="text-right mt-2">
     <?php if ($isLoggedIn): ?>
-        <a href="include/logout.php" class="btn btn-danger button-spacing">Logout</a>
+        Dein Punktestand: <?php echo $userPoints; ?><a href="include/logout.php" class="btn btn-danger button-spacing">Logout</a>
     <?php else: ?>
         <a href="login.php" class="btn btn-primary button-spacing">Login</a>
     <?php endif; ?>

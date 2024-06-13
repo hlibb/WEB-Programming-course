@@ -52,7 +52,6 @@ while ($row = $result->fetch_assoc()) {
 
     $totalPrice += $productTotalAfterDiscount;
     $totalDiscount += $discountAmount;
-    $_SESSION['totalDiscount'] = $totalDiscount;
 }
 
 // Get user points
@@ -319,10 +318,10 @@ $link->close();
                 </li>
             </ul>
 
-            <form id="promo-form" class="card p-2 promo-code-group">
+            <form class="card p-2 promo-code-group">
                 <div class="input-group">
-                    <input type="text" class="form-control" id="promo-code-input" placeholder="Promo code">
-                    <button type="button" class="btn btn-secondary" id="apply-promo">Redeem</button>
+                    <input type="text" class="form-control" placeholder="Promo code" id="promo-code-input">
+                    <button type="button" class="btn btn-secondary" id="redeem-btn">Redeem</button>
                 </div>
             </form>
         </div>
@@ -332,31 +331,31 @@ $link->close();
 <script src="https://getbootstrap.com/docs/5.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="form-validation.js"></script>
 <script>
-    document.getElementById('apply-promo').addEventListener('click', function(e) {
-        e.preventDefault();
-        const promoCode = document.getElementById('promo-code-input').value;
+    document.getElementById('redeem-btn').addEventListener('click', function() {
+        var couponCode = document.getElementById('promo-code-input').value;
 
-        fetch('apply_coupon.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: 'coupon_code=' + encodeURIComponent(promoCode)
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('total-price').innerText = data.new_total_price.toFixed(2) + '€';
-                    document.querySelector('.promo-code-group .form-control').value = promoCode;
-                    alert('Gutscheincode erfolgreich angewendet!');
+        if (couponCode.trim() === '') {
+            alert('Please enter a promo code.');
+            return;
+        }
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'redeem_coupon.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                var response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    document.getElementById('total-price').textContent = response.newTotalPrice + '€';
+                    alert('Promo code applied. Discount: ' + response.discountAmount + '€');
                 } else {
-                    alert(data.message);
+                    alert(response.message || 'An error occurred. Please try again.');
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.');
-            });
+            }
+        };
+
+        xhr.send('couponCode=' + encodeURIComponent(couponCode));
     });
 </script>
 </body>
