@@ -24,7 +24,7 @@ if ($link->connect_error) {
 $cartItemCount = 0;
 if ($isLoggedIn) {
     $userId = $_SESSION['users_id'];
-    $stmt = $link->prepare("SELECT SUM(cb.quantity) AS total_items FROM `cart-body` cb
+    $stmt = $link->prepare("SELECT COUNT(*) AS total_items FROM `cart-body` cb
                             JOIN `cart-header` ch ON cb.warenkorb_id = ch.id
                             WHERE ch.users_id = ?");
     $stmt->bind_param("i", $userId);

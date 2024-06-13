@@ -52,6 +52,7 @@ while ($row = $result->fetch_assoc()) {
 
     $totalPrice += $productTotalAfterDiscount;
     $totalDiscount += $discountAmount;
+    $_SESSION['totalDiscount'] = $totalDiscount;
 }
 
 // Get user points

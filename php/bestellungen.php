@@ -62,9 +62,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reorder'])) {
 
     $shippingCost = $newOrder['is_express_shipping'] ? 10.00 : 5.00; // Beispiel für Versandkosten
     $totalPrice = $newOrder['total_amount'];
+    $totalDiscount = $_SESSION['total_discount'] ?? 0;
 
     // E-Mail-Vorlage abrufen
-    $emailTemplate = getPaymentConfirmationEmail($recipientName, $orderItems, $totalPrice, $newOrder['shipping_method'], $shippingCost);
+    $emailTemplate = getPaymentConfirmationEmail($recipientName, $orderItems, $totalPrice, $newOrder['shipping_method'], $shippingCost, $totalDiscount);
 
     // E-Mail senden
     sendEmail($recipientEmail, $recipientName, $emailTemplate);
