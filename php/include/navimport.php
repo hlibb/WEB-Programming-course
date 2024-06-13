@@ -32,6 +32,7 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
                     <li><a href="bestellungen.php">Meine Bestellungen</a></li>
                     <li><a href="checkout.php">Checkout</a></li>
                     <li><a href="about.php">About Us</a></li>
+                    <li><a href="rueckgabe.php">Kundenportal</a></li>
                 </ul>
             </div>
         </div>

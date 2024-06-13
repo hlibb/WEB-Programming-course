@@ -1,3 +1,128 @@
+<?php
+include_once 'include/logged_in.php';
+include_once 'include/db_connection.php';
+include_once 'send_email.php';
+
+function calculateDiscount($price, $quantity) {
+    if ($quantity >= 10) {
+        $discountRate = 0.20;
+    } elseif ($quantity >= 5) {
+        $discountRate = 0.10;
+    } else {
+        $discountRate = 0.00;
+    }
+
+    $discountAmount = $price * $quantity * $discountRate;
+    return [$discountAmount, $discountRate];
+}
+
+$userId = $_SESSION['users_id'];
+
+// Fetch cart items
+$stmt = $link->prepare("SELECT p.id, p.name, p.price, cb.quantity, (p.price * cb.quantity) AS product_total 
+                        FROM `cart-body` cb
+                        JOIN `cart-header` ch ON cb.warenkorb_id = ch.id
+                        JOIN `products` p ON cb.product_id = p.id
+                        WHERE ch.users_id = ?");
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$cartItems = [];
+$totalPrice = 0;
+$totalDiscount = 0;
+while ($row = $result->fetch_assoc()) {
+    $productId = $row['id'];
+    $price = $row['price'];
+    $quantity = $row['quantity'];
+    $productTotal = $row['product_total'];
+
+    list($discountAmount, $discountRate) = calculateDiscount($price, $quantity);
+    $discountDisplay = number_format($discountAmount, 2) . '€ (' . ($discountRate * 100) . '%)';
+    $productTotalAfterDiscount = $productTotal - $discountAmount;
+
+    $cartItems[] = [
+        'id' => $productId,
+        'name' => $row['name'],
+        'price' => $price,
+        'quantity' => $quantity,
+        'product_total' => $productTotalAfterDiscount,
+        'discount' => $discountDisplay
+    ];
+
+    $totalPrice += $productTotalAfterDiscount;
+    $totalDiscount += $discountAmount;
+}
+
+// Get user points
+$pointsStmt = $link->prepare("SELECT points FROM points WHERE users_id = ?");
+$pointsStmt->bind_param("i", $userId);
+$pointsStmt->execute();
+$pointsResult = $pointsStmt->get_result();
+$userPoints = $pointsResult->fetch_assoc()['points'];
+$pointsStmt->close();
+
+$pointsValue = $userPoints / 1000;
+
+$stmt->close();
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $firstName = $_POST['firstName'];
+    $lastName = $_POST['lastName'];
+    $username = $_POST['username'];
+    $email = $_POST['email'];
+    $address = $_POST['address'];
+    $address2 = $_POST['address2'];
+    $country = $_POST['country'];
+    $state = $_POST['state'];
+    $zip = $_POST['zip'];
+    $paymentMethod = $_POST['paymentMethod'];
+    $nameOnCard = $_POST['nameOnCard'];
+    $cardNumber = $_POST['cardNumber'];
+    $expiration = $_POST['expiration'];
+    $cvv = $_POST['cvv'];
+    $userId = $_SESSION['users_id'];
+
+    // Insert order
+    $stmt = $link->prepare("INSERT INTO orders (users_id, order_date, total_amount, shipping_method, is_express_shipping, is_paid) VALUES (?, NOW(), ?, ?, ?, ?)");
+    $stmt->bind_param("idssi", $userId, $totalAmount, $shippingMethod, $isExpressShipping, $isPaid);
+
+    $totalAmount = $totalPrice; // Calculate the total amount from the cart
+    $shippingMethod = 'Standard'; // Example value
+    $isExpressShipping = 0; // Example value
+    $isPaid = 1; // Example value, assuming payment is successful
+
+    $stmt->execute();
+    $orderId = $stmt->insert_id;
+    $stmt->close();
+
+    // Insert order items
+    $stmt = $link->prepare("INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)");
+    foreach ($cartItems as $item) {
+        $stmt->bind_param("iiid", $orderId, $item['id'], $item['quantity'], $item['price']);
+        $stmt->execute();
+    }
+    $stmt->close();
+
+    // Clear cart
+    $stmt = $link->prepare("DELETE FROM `cart-body` WHERE warenkorb_id = (SELECT id FROM `cart-header` WHERE users_id = ?)");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $stmt->close();
+
+    // Send email confirmation
+    $emailTemplate = [
+        'subject' => 'Order Confirmation',
+        'body' => '<p>Thank you for your order!</p><p>Your order ID is ' . $orderId . '</p>'
+    ];
+    sendEmail($email, $firstName, $emailTemplate);
+
+    header("Location: danke.php");
+    exit();
+}
+
+$link->close();
+?>
 <!doctype html>
 <html lang="de">
 <head>
