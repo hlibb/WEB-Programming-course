@@ -3,8 +3,37 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
 // Prüfen, ob der Benutzer eingeloggt ist
 $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
+
+$host = "localhost";
+$port = 3306;
+$username = "root";
+$password = "";
+$database = "web-programming";
+
+
+$link = new mysqli($host, $username, $password, $database);
+
+if ($link->connect_error) {
+    die("Connection failed: " . $link->connect_error);
+}
+
+// Fetch total items in cart if user is logged in
+$cartItemCount = 0;
+if ($isLoggedIn) {
+    $userId = $_SESSION['users_id'];
+    $stmt = $link->prepare("SELECT SUM(cb.quantity) AS total_items FROM `cart-body` cb
+                            JOIN `cart-header` ch ON cb.warenkorb_id = ch.id
+                            WHERE ch.users_id = ?");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $stmt->bind_result($cartItemCount);
+    $stmt->fetch();
+    $stmt->close();
+}
+
 ?>
 <a href="home.php"><img src="../assets/images/logo.png" class="logo"></a>
 <div class="text-right mt-2">
@@ -25,9 +54,11 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
                 <span class="text-white ml-3">User Online: <?php echo $onlineUsers; ?></span>
             </div>
             <div class="ml-auto">
-                <a href="cart.php" class="ml-3"><button type="button" class="btn btn-primary button-spacing">
-                        Warenkorb <span class="badge text-bg-secondary">x</span>
-                    </button></a>
+                <a href="cart.php" class="ml-3">
+                    <button type="button" class="btn btn-primary button-spacing">
+                        Warenkorb <span class="badge text-bg-secondary"><?php echo $cartItemCount; ?></span>
+                    </button>
+                </a>
             </div>
         </nav>
         <div class="collapse" id="navbarToggleExternalContent">
