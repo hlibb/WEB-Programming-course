@@ -78,7 +78,7 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
         <div class="carousel-inner">
             <div class="carousel-item active">
                 <a href="product_details.php?id=1"><img
-                            src="https://th.bing.com/th/id/OIP.6rsxXGY0IcuwUeMiVHA8vgAAAA?rs=1&pid=ImgDetMain"
+                            src="https://schreibundstil.de/cdn/shop/products/Montblanc-Kugelschreiber-Meisterstuck-Vergoldet-Classique-Schwarz_700x.jpg?v=1594057635"
                             class="d-block w-100" alt="1"></a>
             </div>
             <div class="carousel-item">
@@ -98,7 +98,7 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
             </div>
             <div class="carousel-item">
                 <a href="product_details.php?id=5"><img
-                            src="https://schreibundstil.de/collections/fullfederhalter-von-cleo-skribent/products/cleo-skribent-kolbenfuller-classic-palladium-gold-schwarz-1"
+                            src="https://schreibundstil.de/cdn/shop/products/Cleo-Skribent-Kolbenfueller-Classic-Palladium-Gold-Schwarz-1_700x.jpg?v=1594663723"
                             class="d-block w-100" alt="5"></a>
             </div>
             <div class="carousel-item">
@@ -118,7 +118,7 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
             </div>
             <div class="carousel-item">
                 <a href="product_details.php?id=9"><img
-                            src="https://schreibundstil.de/collections/faber-castell-fullfederhalter/products/faber-castell-fuller-ambition-birnbaum"
+                            src="https://schreibundstil.de/cdn/shop/products/Faber-Castell-Fueller-Ambition-Birnbaum_3_700x.jpg?v=1595129651"
                             class="d-block w-100" alt="9"></a>
             </div>
         </div>
