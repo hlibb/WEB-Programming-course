@@ -63,6 +63,7 @@ $userPoints = $pointsResult->fetch_assoc()['points'];
 $pointsStmt->close();
 
 $pointsValue = $userPoints / 1000;
+$totalPrice -= $pointsValue; // Subtract points value from total price
 
 $stmt->close();
 
@@ -106,6 +107,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Clear cart
     $stmt = $link->prepare("DELETE FROM `cart-body` WHERE warenkorb_id = (SELECT id FROM `cart-header` WHERE users_id = ?)");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $stmt->close();
+
+    // Reset user points and add 25 points for completed order
+    $stmt = $link->prepare("UPDATE points SET points = 25 WHERE users_id = ?");
     $stmt->bind_param("i", $userId);
     $stmt->execute();
     $stmt->close();
@@ -305,8 +312,8 @@ $link->close();
                     </li>
                 <?php endforeach; ?>
                 <li class="list-group-item d-flex justify-content-between">
-                    <span>Rabattcode</span>
-                    <strong><?php echo number_format($totalDiscount, 2); ?>€</strong>
+                    <span>Rabatt</span>
+                    <strong id="total-discount"><?php echo number_format($totalDiscount, 2); ?>€</strong>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
                     <span>Punktewert</span>
@@ -348,6 +355,10 @@ $link->close();
                 var response = JSON.parse(xhr.responseText);
                 if (response.success) {
                     document.getElementById('total-price').textContent = response.newTotalPrice + '€';
+                    var totalDiscountElement = document.getElementById('total-discount');
+                    var currentTotalDiscount = parseFloat(totalDiscountElement.textContent);
+                    var newTotalDiscount = currentTotalDiscount + parseFloat(response.discountAmount);
+                    totalDiscountElement.textContent = newTotalDiscount.toFixed(2) + '€';
                     alert('Promo code applied. Discount: ' + response.discountAmount + '€');
                 } else {
                     alert(response.message || 'An error occurred. Please try again.');

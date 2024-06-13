@@ -27,3 +27,6 @@ INSERT INTO `products` (`name`, `price`, `quantity`, `image_url`, `description`)
 
 INSERT INTO coupons (code, discount_percentage, is_active, expiration_date)
 VALUES ('DIMI20', 20.00, TRUE, '2024-12-31');
+
+INSERT INTO coupons (code, discount_percentage, is_active, expiration_date)
+VALUES ('DENIS69', 69.00, TRUE, '2024-12-31');

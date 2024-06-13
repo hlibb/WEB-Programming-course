@@ -1,49 +1,83 @@
 <?php
-session_start();
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 include_once 'include/db_connection.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $couponCode = $_POST['couponCode'];
+$response = [
+    'success' => false,
+    'message' => '',
+    'newTotalPrice' => 0,
+    'discountAmount' => 0
+];
+
+session_start();
+
+if (isset($_POST['couponCode']) && !empty($_POST['couponCode'])) {
+    $couponCode = trim($_POST['couponCode']);
     $userId = $_SESSION['users_id'];
 
-    // Überprüfen, ob der Gutscheincode existiert und gültig ist
-    $stmt = $link->prepare("SELECT discount_percentage FROM coupons WHERE code = ? AND expiry_date >= CURDATE()");
+    $stmt = $link->prepare("SELECT discount_percentage FROM coupons WHERE code = ?");
+    if ($stmt === false) {
+        $response['message'] = 'Prepare failed: ' . htmlspecialchars($link->error);
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit();
+    }
+
     $stmt->bind_param("s", $couponCode);
-    $stmt->execute();
+    if (!$stmt->execute()) {
+        $response['message'] = 'Execute failed: ' . htmlspecialchars($stmt->error);
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit();
+    }
+
     $stmt->bind_result($discountPercentage);
     $stmt->fetch();
     $stmt->close();
 
     if ($discountPercentage) {
-        // Berechnen Sie den neuen Gesamtpreis
-        $stmt = $link->prepare("SELECT p.price, cb.quantity FROM `cart-body` cb
+        $stmt = $link->prepare("SELECT SUM(p.price * cb.quantity) AS total
+                                FROM `cart-body` cb
                                 JOIN `cart-header` ch ON cb.warenkorb_id = ch.id
                                 JOIN `products` p ON cb.product_id = p.id
                                 WHERE ch.users_id = ?");
-        $stmt->bind_param("i", $userId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        $totalPrice = 0;
-        while ($row = $result->fetch_assoc()) {
-            $price = $row['price'];
-            $quantity = $row['quantity'];
-            $totalPrice += $price * $quantity;
+        if ($stmt === false) {
+            $response['message'] = 'Prepare failed: ' . htmlspecialchars($link->error);
+            header('Content-Type: application/json');
+            echo json_encode($response);
+            exit();
         }
+
+        $stmt->bind_param("i", $userId);
+        if (!$stmt->execute()) {
+            $response['message'] = 'Execute failed: ' . htmlspecialchars($stmt->error);
+            header('Content-Type: application/json');
+            echo json_encode($response);
+            exit();
+        }
+
+        $stmt->bind_result($totalPrice);
+        $stmt->fetch();
         $stmt->close();
 
-        $discountAmount = $totalPrice * ($discountPercentage / 100);
-        $newTotalPrice = $totalPrice - $discountAmount;
+        if ($totalPrice) {
+            $discountAmount = $totalPrice * ($discountPercentage / 100);
+            $newTotalPrice = $totalPrice - $discountAmount;
 
-        echo json_encode([
-            'success' => true,
-            'newTotalPrice' => number_format($newTotalPrice, 2),
-            'discountAmount' => number_format($discountAmount, 2)
-        ]);
+            $response['success'] = true;
+            $response['newTotalPrice'] = number_format($newTotalPrice, 2);
+            $response['discountAmount'] = number_format($discountAmount, 2);
+        } else {
+            $response['message'] = 'Could not calculate total price.';
+        }
     } else {
-        echo json_encode(['success' => false, 'message' => 'Invalid or expired coupon code.']);
+        $response['message'] = 'Invalid coupon code.';
     }
 } else {
-    echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
+    $response['message'] = 'Coupon code is required.';
 }
+
+header('Content-Type: application/json');
+echo json_encode($response);
 ?>
