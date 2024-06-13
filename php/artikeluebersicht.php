@@ -65,7 +65,7 @@ $link->close();
         <?php if (!empty($products)): ?>
             <?php foreach ($products as $product): ?>
                 <div class="product-card">
-                    <a href="products.php?id=<?php echo htmlspecialchars($product['id']); ?>">
+                    <a href="product_details.php?id=<?php echo htmlspecialchars($product['id']); ?>">
                         <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="Produktbild">
                     </a>
                     <h2><?php echo htmlspecialchars($product['name']); ?></h2>

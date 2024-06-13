@@ -1,83 +1,96 @@
 <?php
 include_once 'include/logged_in.php';
 include_once 'include/db_connection.php';
-include 'send_email.php';
 
-$usersId = $_SESSION['users_id']; // Benutzer-ID aus der Sitzung
-
-// Warenkorb-Kopf-ID abrufen
-$stmt = $link->prepare("SELECT id FROM `cart-header` WHERE users_id = ?");
-$stmt->bind_param("i", $usersId);
-$stmt->execute();
-$result = $stmt->get_result();
-if ($row = $result->fetch_assoc()) {
-    $cartId = $row['id'];
-
-    // Warenkorb-Artikel abrufen
-    $stmt = $link->prepare("SELECT cb.product_id, p.name, p.price, cb.quantity, cb.rabatt FROM `cart-body` cb JOIN products p ON cb.product_id = p.id WHERE cb.warenkorb_id = ?");
-    $stmt->bind_param("i", $cartId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    $cartItems = [];
-    $totalPrice = 0;
-    $totalDiscount = 0; // Gesamtrabatt initialisieren
-    while ($row = $result->fetch_assoc()) {
-        $cartItems[] = $row;
-        $discountedPrice = $row['price'] * (1 - $row['rabatt']);
-        $itemTotal = $discountedPrice * $row['quantity'];
-        $totalPrice += $itemTotal;
-        $totalDiscount += ($row['price'] * $row['quantity']) * $row['rabatt'];
-    }
-    $stmt->close();
-
-    // Benutzerpunkte abrufen
-    $stmt = $link->prepare("SELECT points FROM punkte WHERE users_id = ?");
-    $stmt->bind_param("i", $usersId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $userPoints = 0;
-    if ($row = $result->fetch_assoc()) {
-        $userPoints = $row['points'];
-    }
-    $stmt->close();
-
-    // Punkte-Rabatt berechnen
-    $pointsDiscount = 0;
-    $pointsDiscountValue = 0;
-    if (isset($_POST['use_points']) && $_POST['use_points'] == '1') {
-        $pointsDiscount = min($userPoints, $totalPrice * 10);
-        $pointsDiscountValue = $pointsDiscount * 0.10;
-        $totalPrice -= $pointsDiscountValue;
+function calculateDiscount($price, $quantity) {
+    if ($quantity >= 10) {
+        $discountRate = 0.20;
+    } elseif ($quantity >= 5) {
+        $discountRate = 0.10;
+    } else {
+        $discountRate = 0.00;
     }
 
-} else {
-    $cartItems = [];
-    $totalPrice = 0;
-    $totalDiscount = 0;
-    $userPoints = 0;
-    $pointsDiscount = 0;
-    $pointsDiscountValue = 0;
+    $discountAmount = $price * $quantity * $discountRate;
+    return [$discountAmount, $discountRate];
 }
 
+$userId = $_SESSION['users_id'];
+
+$stmt = $link->prepare("SELECT p.id, p.name, p.price, cb.quantity, (p.price * cb.quantity) AS product_total 
+                        FROM `cart-body` cb
+                        JOIN `cart-header` ch ON cb.warenkorb_id = ch.id
+                        JOIN `products` p ON cb.product_id = p.id
+                        WHERE ch.users_id = ?");
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$cartItems = [];
+$totalPrice = 0;
+$totalDiscount = 0;
+while ($row = $result->fetch_assoc()) {
+    $productId = $row['id'];
+    $price = $row['price'];
+    $quantity = $row['quantity'];
+    $productTotal = $row['product_total'];
+
+    list($discountAmount, $discountRate) = calculateDiscount($price, $quantity);
+    $discountDisplay = number_format($discountAmount, 2) . '€ (' . ($discountRate * 100) . '%)';
+    $productTotalAfterDiscount = $productTotal - $discountAmount;
+
+    $cartItems[] = [
+        'id' => $productId,
+        'name' => $row['name'],
+        'price' => $price,
+        'quantity' => $quantity,
+        'product_total' => $productTotalAfterDiscount,
+        'discount' => $discountDisplay
+    ];
+
+    $totalPrice += $productTotalAfterDiscount;
+    $totalDiscount += $discountAmount;
+}
+
+$stmt->close();
 $link->close();
 ?>
 <!doctype html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Warenkorb</title>
     <?php include '../php/include/headimport.php' ?>
-    <link rel="stylesheet" href="styles.css">
     <style>
-        .quantity-controls {
+        .quantity-wrapper {
             display: flex;
             align-items: center;
         }
-
-        .quantity-controls form {
+        .quantity-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .quantity-display {
+            width: 40px;
+            text-align: center;
             margin: 0 5px;
+            border: 1px solid #ddd;
+            padding: 5px;
+        }
+        .remove-button {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .total-price-row {
+            font-weight: bold;
+            text-align: right;
         }
     </style>
 </head>
@@ -85,76 +98,65 @@ $link->close();
 <?php include "include/navimport.php"; ?>
 <div class="container">
     <h1 class="mt-5">Ihr Warenkorb</h1>
-    <?php
-    if (isset($_GET['success']) && $_GET['success'] == 1) {
-        echo "<div class='alert alert-success'>Bezahlung erfolgreich! Eine Bestätigungs-E-Mail wurde gesendet.</div>";
-    }
-    ?>
-    <div class="table-container">
-        <table class="table table-bordered mt-3">
+    <?php if (count($cartItems) > 0): ?>
+        <table class="table mt-3">
             <thead>
             <tr>
-                <th>Produkt</th>
+                <th>Produktname</th>
                 <th>Preis</th>
                 <th>Menge</th>
                 <th>Rabatt</th>
-                <th>Gesamt</th>
-                <th>Aktion</th>
+                <th>Gesamtpreis</th>
+                <th>Aktionen</th>
             </tr>
             </thead>
             <tbody>
-            <?php
-            foreach ($cartItems as $item) {
-                $discount = $item['rabatt'];
-                $discountedPrice = $item['price'] * (1 - $discount);
-                $itemTotal = $discountedPrice * $item['quantity'];
-                echo "<tr>";
-                echo "<td>" . htmlspecialchars($item['name']) . "</td>";
-                echo "<td>" . htmlspecialchars($item['price']) . "€</td>";
-                echo "<td class='quantity-controls'>
-                        <button type='button' class='btn btn-sm btn-secondary minus-btn' data-article-id='" . htmlspecialchars($item['product_id']) . "'>-</button>
-                        <span>" . htmlspecialchars($item['quantity']) . "</span>
-                        <button type='button' class='btn btn-sm btn-secondary plus-btn' data-article-id='" . htmlspecialchars($item['product_id']) . "'>+</button>
-                      </td>";
-                echo "<td class='article-discount'>" . ($discount * 100) . "%</td>";
-                echo "<td class='article-total'>" . htmlspecialchars(number_format($itemTotal, 2)) . "€</td>";
-                echo "<td><button type='button' class='btn btn-danger remove-from-cart' data-article-id='" . htmlspecialchars($item['product_id']) . "'>&times;</button></td>";
-                echo "</tr>";
-            }
-            if ($pointsDiscount > 0): ?>
-                <tr>
-                    <td colspan="4" class="text-right"><strong>Punkterabatt:</strong></td>
-                    <td colspan="2"><strong><?php echo htmlspecialchars(number_format($pointsDiscountValue, 2)); ?> €</strong></td>
+            <?php foreach ($cartItems as $item): ?>
+                <tr data-product-id="<?php echo htmlspecialchars($item['id']); ?>">
+                    <td><?php echo htmlspecialchars($item['name']); ?></td>
+                    <td><?php echo htmlspecialchars($item['price']); ?>€</td>
+                    <td>
+                        <div class="quantity-wrapper">
+                            <button class="quantity-button decrease" data-product-id="<?php echo htmlspecialchars($item['id']); ?>">-</button>
+                            <span class="quantity-display" data-product-id="<?php echo htmlspecialchars($item['id']); ?>"><?php echo htmlspecialchars($item['quantity']); ?></span>
+                            <button class="quantity-button increase" data-product-id="<?php echo htmlspecialchars($item['id']); ?>">+</button>
+                        </div>
+                    </td>
+                    <td class="product-discount" data-product-id="<?php echo htmlspecialchars($item['id']); ?>"><?php echo $item['discount']; ?></td>
+                    <td class="product-total" data-product-id="<?php echo htmlspecialchars($item['id']); ?>"><?php echo number_format($item['product_total'], 2); ?>€</td>
+                    <td>
+                        <button class="remove-button" data-product-id="<?php echo htmlspecialchars($item['id']); ?>">X</button>
+                    </td>
                 </tr>
-            <?php endif; ?>
+            <?php endforeach; ?>
             <tr>
-                <td colspan="4" class="text-right"><strong>Gesamtrabatt:</strong></td>
-                <td colspan="2"><strong><?php echo htmlspecialchars(number_format($totalDiscount + $pointsDiscountValue, 2)); ?> €</strong></td>
+                <td colspan="4" class="total-price-row">Gesamtrabatt:</td>
+                <td class="total-price-row" id="total-discount"><?php echo number_format($totalDiscount, 2); ?>€</td>
+                <td></td>
             </tr>
             <tr>
-                <td colspan="4" class="text-right"><strong>Gesamtpreis:</strong></td>
-                <td colspan="2"><strong><?php echo htmlspecialchars(number_format($totalPrice, 2)); ?> €</strong></td>
+                <td colspan="4" class="total-price-row">
+                    Punkte-Rabatt:
+                    <input class="form-check-input" type="checkbox" id="use-points-checkbox">
+                    <label class="form-check-label" for="use-points-checkbox">
+                        Punkte verwenden
+                    </label>
+                </td>
+                <td class="total-price-row" id="points-discount">0€</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="4" class="total-price-row">Gesamtpreis:</td>
+                <td class="total-price-row" id="total-price"><?php echo number_format($totalPrice, 2); ?>€</td>
+                <td></td>
             </tr>
             </tbody>
         </table>
-    </div>
-
-    <!-- Punkte verwenden -->
-    <form method="post" action="">
-        <div class="form-group">
-            <input type="checkbox" id="use_points" name="use_points" value="1" <?php if (isset($_POST['use_points']) && $_POST['use_points'] == '1') echo 'checked'; ?>>
-            <label for="use_points">Punkte verwenden (Verfügbar: <?php echo $userPoints; ?> Punkte)</label>
-        </div>
-        <button type="submit" name="apply_points" class="btn btn-primary">Rabatt anwenden</button>
-    </form>
-
-    <!-- Bezahl-Formular -->
-    <form method="post" action="checkout.php">
-        <button type="submit" name="pay" class="btn btn-primary">Bezahlen</button>
-    </form>
+    <?php else: ?>
+        <p>Ihr Warenkorb ist leer.</p>
+    <?php endif; ?>
 </div>
 <?php include "include/footimport.php"; ?>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery einbinden -->
 <script src="cart.js"></script>
 </body>
 </html>

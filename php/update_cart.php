@@ -1,48 +1,102 @@
 <?php
-session_start();
+include_once 'include/logged_in.php';
 include_once 'include/db_connection.php';
 
-$response = array('success' => false);
+header('Content-Type: application/json');
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id']) && isset($_POST['quantity'])) {
-    $productId = $_POST['product_id'];
-    $quantity = $_POST['quantity'];
-    $usersId = $_SESSION['users_id']; // Benutzer-ID aus der Sitzung
-
-    // Warenkorb-Kopf-ID abrufen
-    $stmt = $link->prepare("SELECT id FROM `cart-header` WHERE users_id = ?");
-    $stmt->bind_param("i", $usersId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($row = $result->fetch_assoc()) {
-        $cartId = $row['id'];
-
-        // Warenkorb-Artikelmenge aktualisieren
-        if ($quantity > 0) {
-            $stmt = $link->prepare("UPDATE `cart-body` SET quantity = ? WHERE warenkorb_id = ? AND product_id = ?");
-            $stmt->bind_param("iii", $quantity, $cartId, $productId);
-        } else {
-            $stmt = $link->prepare("DELETE FROM `cart-body` WHERE warenkorb_id = ? AND product_id = ?");
-            $stmt->bind_param("ii", $cartId, $productId);
-        }
-        $stmt->execute();
-        $stmt->close();
-
-        // Gesamtsumme und Artikelanzahl neu berechnen
-        $stmt = $link->prepare("SELECT SUM(p.price * cb.quantity) AS total, SUM(cb.quantity) AS count FROM `cart-body` cb JOIN products p ON cb.product_id = p.id WHERE cb.warenkorb_id = ?");
-        $stmt->bind_param("i", $cartId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($row = $result->fetch_assoc()) {
-            $response['newTotal'] = $row['total'];
-            $response['cartCount'] = $row['count'];
-            $response['success'] = true;
-        }
-        $stmt->close();
+function calculateDiscount($price, $quantity) {
+    if ($quantity >= 10) {
+        $discountRate = 0.20;
+    } elseif ($quantity >= 5) {
+        $discountRate = 0.10;
+    } else {
+        $discountRate = 0.00;
     }
+
+    $discountAmount = $price * $quantity * $discountRate;
+    return [$discountAmount, $discountRate];
 }
 
-header('Content-Type: application/json');
-echo json_encode($response);
-exit();
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $userId = $_SESSION['users_id'];
+    $data = json_decode(file_get_contents("php://input"), true);
+    $productId = $data['product_id'] ?? null;
+    $quantity = $data['quantity'] ?? null;
+    $usePoints = $data['use_points'] ?? false;
+
+    if ($productId !== null && $quantity !== null) {
+        if ($quantity > 0) {
+            $stmt = $link->prepare("UPDATE `cart-body` cb 
+                                    JOIN `cart-header` ch ON cb.warenkorb_id = ch.id
+                                    SET cb.quantity = ? 
+                                    WHERE ch.users_id = ? AND cb.product_id = ?");
+            $stmt->bind_param("iii", $quantity, $userId, $productId);
+        } else {
+            $stmt = $link->prepare("DELETE cb 
+                                    FROM `cart-body` cb 
+                                    JOIN `cart-header` ch ON cb.warenkorb_id = ch.id
+                                    WHERE ch.users_id = ? AND cb.product_id = ?");
+            $stmt->bind_param("ii", $userId, $productId);
+        }
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    $stmt = $link->prepare("SELECT p.id, p.price, cb.quantity, (p.price * cb.quantity) AS product_total
+                            FROM `cart-body` cb
+                            JOIN `cart-header` ch ON cb.warenkorb_id = ch.id
+                            JOIN `products` p ON cb.product_id = p.id
+                            WHERE ch.users_id = ?");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $cartItems = [];
+    $total = 0;
+    $totalDiscount = 0;
+    while ($row = $result->fetch_assoc()) {
+        $productId = $row['id'];
+        $price = $row['price'];
+        $quantity = $row['quantity'];
+        $productTotal = $row['product_total'];
+
+        list($discountAmount, $discountRate) = calculateDiscount($price, $quantity);
+        $discountDisplay = number_format($discountAmount, 2) . '€ (' . ($discountRate * 100) . '%)';
+        $productTotalAfterDiscount = $productTotal - $discountAmount;
+
+        $cartItems[] = [
+            'id' => $productId,
+            'quantity' => $quantity,
+            'product_total' => $productTotalAfterDiscount,
+            'discount' => $discountDisplay
+        ];
+
+        $total += $productTotalAfterDiscount;
+        $totalDiscount += $discountAmount;
+    }
+
+    $pointsDiscount = 0;
+    if ($usePoints) {
+        $stmt = $link->prepare("SELECT points FROM points WHERE users_id = ?");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $points = $result->fetch_assoc()['points'];
+        $stmt->close();
+
+        $pointsDiscount = min($points / 1000, $total);
+        $total -= $pointsDiscount;
+    }
+
+    $stmt->close();
+
+    echo json_encode([
+        'total' => (float) $total,
+        'total_discount' => number_format($totalDiscount, 2) . '€',
+        'points_discount' => number_format($pointsDiscount, 2) . '€',
+        'cart_items' => $cartItems
+    ]);
+}
+
+$link->close();
 ?>

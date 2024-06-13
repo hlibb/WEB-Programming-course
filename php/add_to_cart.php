@@ -1,40 +1,40 @@
 <?php
-include_once 'include/db_connection.php';
-
 function addToCart($userId, $productId, $quantity, $link) {
-    // Check if the user has an existing cart header
+    // Check if cart-header already exists for the user
     $stmt = $link->prepare("SELECT id FROM `cart-header` WHERE users_id = ?");
     $stmt->bind_param("i", $userId);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    if ($row = $result->fetch_assoc()) {
-        // Cart header exists, use its ID
-        $cartId = $row['id'];
+    if ($result->num_rows > 0) {
+        // Get the cart-header id
+        $row = $result->fetch_assoc();
+        $cartHeaderId = $row['id'];
     } else {
-        // No cart header exists, create a new one
+        // Create a new cart-header
         $stmt = $link->prepare("INSERT INTO `cart-header` (users_id) VALUES (?)");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
-        $cartId = $stmt->insert_id;
+        $cartHeaderId = $stmt->insert_id;
     }
     $stmt->close();
 
-    // Check if the product is already in the cart
-    $stmt = $link->prepare("SELECT id, quantity FROM `cart-body` WHERE warenkorb_id = ? AND product_id = ?");
-    $stmt->bind_param("ii", $cartId, $productId);
+    // Check if product is already in the cart
+    $stmt = $link->prepare("SELECT quantity FROM `cart-body` WHERE warenkorb_id = ? AND product_id = ?");
+    $stmt->bind_param("ii", $cartHeaderId, $productId);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    if ($row = $result->fetch_assoc()) {
-        // Product is already in the cart, update the quantity
+    if ($result->num_rows > 0) {
+        // Update the quantity if product is already in the cart
+        $row = $result->fetch_assoc();
         $newQuantity = $row['quantity'] + $quantity;
-        $stmt = $link->prepare("UPDATE `cart-body` SET quantity = ? WHERE id = ?");
-        $stmt->bind_param("ii", $newQuantity, $row['id']);
+        $stmt = $link->prepare("UPDATE `cart-body` SET quantity = ? WHERE warenkorb_id = ? AND product_id = ?");
+        $stmt->bind_param("iii", $newQuantity, $cartHeaderId, $productId);
     } else {
-        // Product is not in the cart, insert a new row
+        // Insert into cart-body
         $stmt = $link->prepare("INSERT INTO `cart-body` (warenkorb_id, product_id, quantity) VALUES (?, ?, ?)");
-        $stmt->bind_param("iii", $cartId, $productId, $quantity);
+        $stmt->bind_param("iii", $cartHeaderId, $productId, $quantity);
     }
     $stmt->execute();
     $stmt->close();

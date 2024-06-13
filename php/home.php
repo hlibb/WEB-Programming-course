@@ -77,47 +77,47 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
     <div id="carouselExample" class="carousel slide">
         <div class="carousel-inner">
             <div class="carousel-item active">
-                <a href="../php/products.php?id=1"><img
+                <a href="product_details.php?id=1"><img
                             src="https://th.bing.com/th/id/OIP.6rsxXGY0IcuwUeMiVHA8vgAAAA?rs=1&pid=ImgDetMain"
                             class="d-block w-100" alt="1"></a>
             </div>
             <div class="carousel-item">
-                <a href="../php/products.php?id=2"><img
+                <a href="product_details.php?id=2"><img
                             src="https://schreibundstil.de/cdn/shop/products/Kaweco-Fueller-DIA2-Gold_3_700x.jpg?v=1594895630"
                             class="d-block w-100" alt="2"></a>
             </div>
             <div class="carousel-item">
-                <a href="../php/products.php?id=3"><img
+                <a href="product_details.php?id=3"><img
                             src="https://schreibundstil.de/cdn/shop/products/Lamy-Fueller-2000-Schwarz-3.1_700x.jpg?v=1613996674"
                             class="d-block w-100" alt="3"></a>
             </div>
             <div class="carousel-item">
-                <a href="../php/products.php?id=4"><img
+                <a href="product_details.php?id=4"><img
                             src="https://schreibundstil.de/cdn/shop/products/Waldmann-Fueller-Xetra-Vienna-Lack-Schwarz-11_700x.jpg?v=1593538004"
                             class="d-block w-100" alt="4"></a>
             </div>
             <div class="carousel-item">
-                <a href="../php/products.php?id=5"><img
+                <a href="product_details.php?id=5"><img
                             src="https://schreibundstil.de/collections/fullfederhalter-von-cleo-skribent/products/cleo-skribent-kolbenfuller-classic-palladium-gold-schwarz-1"
                             class="d-block w-100" alt="5"></a>
             </div>
             <div class="carousel-item">
-                <a href="../php/products.php?id=6"><img
+                <a href="product_details.php?id=6"><img
                             src="https://schreibundstil.de/cdn/shop/products/Caran-d_Ache-Fueller-Ecridor-Retro_3_700x.jpg?v=1595308676"
                             class="d-block w-100" alt="6"></a>
             </div>
             <div class="carousel-item">
-                <a href="../php/products.php?id=7"><img
+                <a href="product_details.php?id=7"><img
                             src="https://schreibundstil.de/cdn/shop/products/Diplomat_Fuller_ExcellenceA2_LackSchwarz_3_700x.jpg?v=1600063565"
                             class="d-block w-100" alt="7"></a>
             </div>
             <div class="carousel-item">
-                <a href="../php/products.php?id=8"><img
+                <a href="product_details.php?id=8"><img
                             src="https://schreibundstil.de/cdn/shop/products/Graf-von-Faber-Castell-Fueller-Guilloche-Olive-Green-02_700x.jpg?v=1594562957"
                             class="d-block w-100" alt="8"></a>
             </div>
             <div class="carousel-item">
-                <a href="../php/products.php?id=9"><img
+                <a href="product_details.php?id=9"><img
                             src="https://schreibundstil.de/collections/faber-castell-fullfederhalter/products/faber-castell-fuller-ambition-birnbaum"
                             class="d-block w-100" alt="9"></a>
             </div>
