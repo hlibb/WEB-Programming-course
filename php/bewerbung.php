@@ -53,7 +53,7 @@
 
 <div class="apply-container">
     <h2 class="apply-header">Bewerbung für <?php echo htmlspecialchars($_GET['job']); ?></h2>
-    <form class="apply-form" action="send_application.php" method="post">
+    <form class="apply-form" action="send_contact_form.php" method="post">
         <input type="hidden" name="job" value="<?php echo htmlspecialchars($_GET['job']); ?>">
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" required>
