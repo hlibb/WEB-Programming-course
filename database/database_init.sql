@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
     `shipping_method` VARCHAR(50),
     `is_express_shipping` BOOLEAN,
     `is_paid` BOOLEAN,
-    `is_returned` BOOLEAN,
+    `is_returned` BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (`users_id`) REFERENCES `users`(`id`)
 );
 
