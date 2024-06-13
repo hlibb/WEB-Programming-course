@@ -1,35 +1,14 @@
 <?php
-require_once 'include/db_connection.php';
-global $link;
+include_once 'include/db_connection.php';
 
-function jsonResponse($status, $message) {
-    echo json_encode(array($status => $message));
-    exit;
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email'])) {
+    $email = $_POST['email'];
+    $stmt = $link->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $stmt->store_result();
+    $response = array('exists' => $stmt->num_rows > 0);
+    echo json_encode($response);
+    $stmt->close();
 }
-
-header('Content-Type: application/json');
-
-if (isset($_POST['email'])) {
-    $email = trim($_POST['email']);
-
-    $sql = "SELECT * FROM users WHERE email = ?";
-    if ($stmt = mysqli_prepare($link, $sql)) {
-        mysqli_stmt_bind_param($stmt, "s", $email);
-        if (mysqli_stmt_execute($stmt)) {
-            mysqli_stmt_store_result($stmt);
-            if (mysqli_stmt_num_rows($stmt) >= 1) {
-                jsonResponse("exists", true);
-            } else {
-                jsonResponse("exists", false);
-            }
-        } else {
-            jsonResponse("error", "Query execution failed");
-        }
-        mysqli_stmt_close($stmt);
-    } else {
-        jsonResponse("error", "Statement preparation failed");
-    }
-    mysqli_close($link);
-} else {
-    jsonResponse("error", "Invalid request");
-}
+?>
