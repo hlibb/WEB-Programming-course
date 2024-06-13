@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const updateCart = () => {
-        const usePoints = document.getElementById('use-points-checkbox').checked;
+        const usePointsCheckbox = document.getElementById('use-points-checkbox');
+        const usePoints = usePointsCheckbox ? usePointsCheckbox.checked : false;
         fetch('update_cart.php', {
             method: 'POST',
             headers: {
@@ -13,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (typeof data.total === 'number') {
                     document.getElementById('total-price').innerText = data.total.toFixed(2) + '€';
                     document.getElementById('total-discount').innerText = data.total_discount;
-                    document.getElementById('points-discount').innerText = data.points_discount;
                 }
                 data.cart_items.forEach(item => {
                     const productId = item.id;
@@ -26,26 +26,25 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const applyPoints = () => {
-        const usePoints = document.getElementById('use-points-checkbox').checked;
         fetch('apply_points.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ use_points: usePoints })
+            body: JSON.stringify({ use_points: true })
         })
             .then(response => response.json())
             .then(data => {
-                if (typeof data.total === 'number') {
-                    document.getElementById('total-price').innerText = data.total.toFixed(2) + '€';
-                    document.getElementById('points-discount').innerText = data.points_discount;
+                if (data.points_value !== undefined) {
+                    document.getElementById('points-value').innerText = data.points_value.toFixed(2) + '€';
                 }
             })
             .catch(error => console.error('Error:', error));
     };
 
     const updateQuantity = (productId, quantity) => {
-        const usePoints = document.getElementById('use-points-checkbox').checked;
+        const usePointsCheckbox = document.getElementById('use-points-checkbox');
+        const usePoints = usePointsCheckbox ? usePointsCheckbox.checked : false;
         fetch('update_cart.php', {
             method: 'POST',
             headers: {
@@ -58,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (typeof data.total === 'number') {
                     document.getElementById('total-price').innerText = data.total.toFixed(2) + '€';
                     document.getElementById('total-discount').innerText = data.total_discount;
-                    document.getElementById('points-discount').innerText = data.points_discount;
                 }
                 data.cart_items.forEach(item => {
                     const productId = item.id;
@@ -71,7 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const removeFromCart = (productId) => {
-        const usePoints = document.getElementById('use-points-checkbox').checked;
+        const usePointsCheckbox = document.getElementById('use-points-checkbox');
+        const usePoints = usePointsCheckbox ? usePointsCheckbox.checked : false;
         fetch('remove_from_cart.php', {
             method: 'POST',
             headers: {
@@ -84,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (typeof data.total === 'number') {
                     document.getElementById('total-price').innerText = data.total.toFixed(2) + '€';
                     document.getElementById('total-discount').innerText = data.total_discount;
-                    document.getElementById('points-discount').innerText = data.points_discount;
                 }
                 document.querySelector(`tr[data-product-id="${productId}"]`).remove();
             })
@@ -117,11 +115,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    document.getElementById('use-points-checkbox').addEventListener('change', () => {
-        applyPoints();
-        updateCart();
-    });
+    const usePointsCheckbox = document.getElementById('use-points-checkbox');
+    if (usePointsCheckbox) {
+        usePointsCheckbox.addEventListener('change', () => {
+            applyPoints();
+            updateCart();
+        });
+    }
 
     // Initial cart update
     updateCart();
+    // Initial points fetch
+    applyPoints();
 });

@@ -52,6 +52,16 @@ while ($row = $result->fetch_assoc()) {
     $totalDiscount += $discountAmount;
 }
 
+// Get user points
+$pointsStmt = $link->prepare("SELECT points FROM points WHERE users_id = ?");
+$pointsStmt->bind_param("i", $userId);
+$pointsStmt->execute();
+$pointsResult = $pointsStmt->get_result();
+$userPoints = $pointsResult->fetch_assoc()['points'];
+$pointsStmt->close();
+
+$pointsValue = $userPoints / 1000;
+
 $stmt->close();
 $link->close();
 ?>
@@ -92,6 +102,14 @@ $link->close();
             font-weight: bold;
             text-align: right;
         }
+        .points-row {
+            display: flex;
+            align-items: center;
+        }
+        .form-check-input {
+            width: 20px;
+            height: 20px;
+        }
     </style>
 </head>
 <body>
@@ -130,19 +148,20 @@ $link->close();
                 </tr>
             <?php endforeach; ?>
             <tr>
-                <td colspan="4" class="total-price-row">Gesamtrabatt:</td>
+                <td><input class="form-check-input ms-2" type="checkbox" id="use-points-checkbox"></td>
+                <td>
+                    <div class="points-row">
+                        Punkte verwenden:
+                    </div>
+                </td>
+                <td></td>
+                <td class="total-price-row">Gesamtrabatt:</td>
                 <td class="total-price-row" id="total-discount"><?php echo number_format($totalDiscount, 2); ?>€</td>
                 <td></td>
             </tr>
             <tr>
-                <td colspan="4" class="total-price-row">
-                    Punkte-Rabatt:
-                    <input class="form-check-input" type="checkbox" id="use-points-checkbox">
-                    <label class="form-check-label" for="use-points-checkbox">
-                        Punkte verwenden
-                    </label>
-                </td>
-                <td class="total-price-row" id="points-discount">0€</td>
+                <td colspan="4" class="total-price-row">Punktewert:</td>
+                <td class="total-price-row" id="points-value"><?php echo number_format($pointsValue, 2); ?>€</td>
                 <td></td>
             </tr>
             <tr>
