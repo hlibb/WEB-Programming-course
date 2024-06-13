@@ -85,3 +85,10 @@ CREATE TABLE IF NOT EXISTS `order_items` (
     FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`),
     FOREIGN KEY (`product_id`) REFERENCES `products`(`id`)
 );
+
+-- Table for storing coupon information
+CREATE TABLE IF NOT EXISTS `coupons` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `code` VARCHAR(50) NOT NULL UNIQUE,
+    `discount_percentage` DECIMAL(5, 2) NOT NULL
+);
