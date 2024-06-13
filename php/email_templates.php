@@ -1,22 +1,22 @@
 <?php
-function getPaymentConfirmationEmail($recipientName, $cartItems, $totalPrice, $shippingMethod, $shippingCost) {
+function getPaymentConfirmationEmail($recipientName, $cartItems, $totalPrice, $shippingMethod, $shippingCost, $totalDiscount) {
     $subject = 'Payment Confirmation';
 
     $itemsHtml = '';
     foreach ($cartItems as $item) {
-        $discountedPrice = $item['unit_price'];
-        $itemTotal = $discountedPrice * $item['quantity'];
+        $discountRate = 0; // Set to 0% as the discount is applied to the total
+        $itemTotal = $item['product_total'];
         $itemsHtml .= "
             <tr>
-                <td>{$item['product_id']}</td>
+                <td>{$item['name']}</td>
                 <td>{$item['quantity']}</td>
-                <td>" . number_format($item['unit_price'], 2) . "€</td>
-                <td>0%</td>
+                <td>" . number_format($item['price'], 2) . "€</td>
+                <td>{$item['discount']}</td>
                 <td>" . number_format($itemTotal, 2) . "€</td>
             </tr>";
     }
 
-    $totalPriceWithShipping = $totalPrice + $shippingCost;
+    $totalPriceWithShipping = $totalPrice + $shippingCost - $totalDiscount;
 
     $body = "
     <!DOCTYPE html>
@@ -94,9 +94,9 @@ function getPaymentConfirmationEmail($recipientName, $cartItems, $totalPrice, $s
                         <tr>
                             <th>Produkt</th>
                             <th>Menge</th>
-                            <th>Preis</th>
+                            <th>Einzelpreis</th>
                             <th>Rabatt</th>
-                            <th>Gesamt</th>
+                            <th>Produktgesamt</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -104,6 +104,10 @@ function getPaymentConfirmationEmail($recipientName, $cartItems, $totalPrice, $s
                         <tr>
                             <td colspan='4'><strong>Versand: ({$shippingMethod})</strong></td>
                             <td><strong>" . number_format($shippingCost, 2) . "€</strong></td>
+                        </tr>
+                        <tr>
+                            <td colspan='4'><strong>Rabatt:</strong></td>
+                            <td><strong>-" . number_format($totalDiscount, 2) . "€</strong></td>
                         </tr>
                         <tr>
                             <td colspan='4'><strong>Gesamt:</strong></td>

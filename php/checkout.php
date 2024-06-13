@@ -1,6 +1,8 @@
 <?php
 include_once 'include/logged_in.php';
 include_once 'include/db_connection.php';
+include_once 'send_email.php';
+include_once 'email_templates.php';
 
 function calculateDiscount($price, $quantity) {
     if ($quantity >= 10) {
@@ -46,7 +48,9 @@ while ($row = $result->fetch_assoc()) {
         'price' => $price,
         'quantity' => $quantity,
         'product_total' => $productTotalAfterDiscount,
-        'discount' => $discountDisplay
+        'discount' => $discountDisplay,
+        'discount_rate' => $discountRate * 100,
+        'product_total_original' => $productTotal,
     ];
 
     $totalPrice += $productTotalAfterDiscount;
@@ -62,9 +66,6 @@ $userPoints = $pointsResult->fetch_assoc()['points'];
 $pointsStmt->close();
 
 $pointsValue = $userPoints / 1000;
-
-$stmt->close();
-$link->close();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $firstName = $_POST['firstName'];
@@ -109,6 +110,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bind_param("i", $userId);
     $stmt->execute();
     $stmt->close();
+
+    // Send confirmation email
+    $emailTemplate = getPaymentConfirmationEmail($firstName, $cartItems, $totalAmount, $shippingMethod, 0, $totalDiscount); // Assume shipping cost is 0 for this example
+    sendEmail($email, $firstName, $emailTemplate);
 
     header("Location: danke.php");
     exit();
