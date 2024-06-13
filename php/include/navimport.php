@@ -16,13 +16,19 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
 </div>
 <?php if ($isLoggedIn): ?>
     <div class="pos-f-t">
-        <nav class="navbar navbar-dark bg-dark">
-            <button class="navbar-toggler ml-2" type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <a href="cart.php"><button type="button" class="btn btn-primary button-spacing">
-                    Warenkorb <span class="badge text-bg-secondary">x</span>
-                </button></a>
+        <nav class="navbar navbar-dark bg-dark d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <button class="navbar-toggler ml-2" type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <?php include "fetch_online_users.php"; ?>
+                <span class="text-white ml-3">User Online: <?php echo $onlineUsers; ?></span>
+            </div>
+            <div class="ml-auto">
+                <a href="cart.php" class="ml-3"><button type="button" class="btn btn-primary button-spacing">
+                        Warenkorb <span class="badge text-bg-secondary">x</span>
+                    </button></a>
+            </div>
         </nav>
         <div class="collapse" id="navbarToggleExternalContent">
             <div class="bg-dark p-4">
@@ -42,5 +48,14 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
 <style>
     .button-spacing {
         margin: 0 5px; /* Abstand um die Buttons herum */
+    }
+    .navbar-toggler {
+        margin-right: 10px; /* Abstand zwischen Toggler und "User Online:" */
+    }
+    .ml-3 {
+        margin-left: 10px; /* Abstand zwischen "User Online:" und Warenkorb */
+    }
+    .ml-auto {
+        margin-left: auto; /* Automatischer linker Rand, um Warenkorb nach rechts zu schieben */
     }
 </style>

@@ -8,12 +8,6 @@ include_once 'include/logged_in.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Us</title>
     <?php include '../php/include/headimport.php' ?>
-    <style>
-        .container {
-            margin-left: 20%;
-            margin-right: 20%;
-        }
-    </style>
 </head>
 <body>
 <?php include '../php/include/navimport.php' ?>

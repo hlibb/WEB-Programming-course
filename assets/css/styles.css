@@ -1,27 +1,50 @@
+/* Optimierte allgemeine Stile */
 body {
   width: 100%;
   height: 100vh;
   margin: 0;
   background-color: #1b1b32;
   color: #f5f6f7;
-  font-family: Tahoma;
+  font-family: Tahoma, sans-serif;
   font-size: 16px;
+}
+
+a {
+  color: white;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+h1, p {
+  margin: 1em auto;
+  text-align: center;
+  font-family: 'Apple Chancery', sans-serif, cursive;
 }
 
 .logo {
   display: block;
   width: 20%;
   height: auto;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto;
 }
 
-h1, p {
-  margin: 1em auto;
-  text-align: center;
-  font-family: Apple Chancery, sans-serif, cursive;
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
+.carousel-inner img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  max-height: 500px;
+}
+
+/* Formulare */
 form {
   width: 60vw;
   max-width: 500px;
@@ -49,18 +72,13 @@ input, textarea, select {
   margin: 10px 0 0 0;
   width: 100%;
   min-height: 2em;
-}
-
-input, textarea {
   background-color: #0a0a23;
   border: 1px solid #0a0a23;
   color: #ffffff;
 }
 
-.inline {
-  width: unset;
-  margin: 0 0.5em 0 0;
-  vertical-align: middle;
+input[type="file"] {
+  padding: 1px 2px;
 }
 
 input[type="submit"] {
@@ -70,40 +88,24 @@ input[type="submit"] {
   height: 2em;
   font-size: 1.1rem;
   background-color: #3b3b4f;
-  border-color: white;
+  border: 1px solid white;
   min-width: 300px;
 }
 
-input[type="file"] {
-  padding: 1px 2px;
-}
-
+/* Inline-Elemente */
 .inline {
   display: inline;
+  width: unset;
+  margin: 0 0.5em 0 0;
+  vertical-align: middle;
 }
 
-a {
-  color: white;
-}
-
+/* Navigation */
 .pos-f-t .collapse ul li a {
   font-size: 20px;
 }
 
-.center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.carousel-inner img {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  max-height: 500px;
-}
-
-/* Neue Stile für die Produktkarten */
+/* Produktkarten */
 .product-grid {
   display: flex;
   flex-wrap: wrap;
@@ -173,13 +175,14 @@ a {
   cursor: pointer;
   transition: background-color 0.3s;
   height: 36px;
+  width: 100%;
 }
 
 .product-card button:hover {
   background-color: #575768;
 }
 
-/* Neue Stile für das Formular und Promo-Code */
+/* Formulare und Promo-Code */
 .form-container {
   background-color: #282847;
   padding: 20px;
@@ -204,12 +207,13 @@ a {
   background-color: #0a0a23;
 }
 
-/* Neue Stile für den Warenkorb */
+/* Warenkorb */
 .table-container {
   width: 80%;
   max-width: 800px;
   margin: 0 auto;
 }
+
 .table {
   background-color: #282847;
   color: #f5f6f7;
@@ -225,12 +229,13 @@ a {
   background-color: #3b3b4f;
 }
 
-.btn-secondary {
+/* Buttons */
+.btn-primary, .btn-secondary {
   background-color: #3b3b4f;
   border-color: #3b3b4f;
 }
 
-.btn-secondary:hover {
+.btn-primary:hover, .btn-secondary:hover {
   background-color: #575768;
   border-color: #575768;
 }
@@ -256,31 +261,33 @@ a {
   }
 }
 
-/* Anpassungen für Checkout-Formular */
-.container {
+/* Checkout-Formular */
+.checkout-container {
   background-color: #282847;
   padding: 20px;
   border-radius: 10px;
+  margin: 20px auto;
+  width: 80%;
+  max-width: 800px;
+  color: #f5f6f7;
+}
+
+.checkout-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-container {
+  margin-bottom: 40px;
 }
 
 .form-label {
   color: #f5f6f7;
 }
 
-.input-group-text {
+.input-group-text, .form-control, .form-check-input {
   background-color: #0a0a23;
   color: #ffffff;
-  border: 1px solid #0a0a23;
-}
-
-.form-control {
-  background-color: #0a0a23;
-  border: 1px solid #0a0a23;
-  color: #ffffff;
-}
-
-.form-check-input {
-  background-color: #0a0a23;
   border: 1px solid #0a0a23;
 }
 
@@ -288,27 +295,43 @@ a {
   color: #f5f6f7;
 }
 
+.cart-summary {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  color: #1b1b32;
+}
+
 .list-group-item {
+  background-color: #ffffff;
+  color: #1b1b32;
+}
+
+.promo-code-group .input-group {
+  width: 100%;
+}
+
+/* Grundlegende Stile */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  flex: 1; /* Container nimmt den verfügbaren Platz ein */
+}
+
+.footer-container {
   background-color: #282847;
+  border-radius: 15px;
+  padding: 20px;
+  margin: 20px auto;
   color: #f5f6f7;
-}
-
-.btn-primary {
-  background-color: #3b3b4f;
-  border-color: #3b3b4f;
-}
-
-.btn-primary:hover {
-  background-color: #575768;
-  border-color: #575768;
-}
-
-.btn-secondary {
-  background-color: #575768;
-  border-color: #575768;
-}
-
-.btn-secondary:hover {
-  background-color: #6f6f7f;
-  border-color: #6f6f7f;
+  width: 80%; /* oder eine andere Breite deiner Wahl */
+  text-align: center;
 }

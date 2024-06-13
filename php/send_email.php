@@ -2,10 +2,10 @@
 // send_email.php
 
 // Include PHPMailer classes
-require 'phpmailer/src/PHPMailer.php';
-require 'phpmailer/src/SMTP.php';
-require 'phpmailer/src/Exception.php';
-require 'email_templates.php'; // Include the email templates
+require_once 'phpmailer/src/PHPMailer.php';
+require_once 'phpmailer/src/SMTP.php';
+require_once 'phpmailer/src/Exception.php';
+require_once 'email_templates.php'; // Include the email templates
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -20,7 +20,7 @@ function sendEmail($recipientEmail, $recipientName, $emailTemplate) {
         $mail->Username = 'webprogrammierung27@gmail.com'; // SMTP username
         $mail->Password = 'eiih ilpp viyx xdzu'; // SMTP password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-        $mail->Port = 465;        
+        $mail->Port = 465;
 
         // Recipients
         $mail->setFrom('webprogrammierung27@gmail.com', 'Ink & Inspiration');
