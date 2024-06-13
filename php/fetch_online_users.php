@@ -15,8 +15,5 @@ if (!isset($_SESSION['unique_user'])) {
 }
 
 //Online nutzer abfragen
-$onlineUsersCount = $_SESSION['online_users'];
-
-//Nutzerzahl senden
-echo $onlineUsersCount;
+$onlineUsers = $_SESSION['online_users'];
 ?>
