@@ -311,10 +311,27 @@ input[type="submit"] {
   width: 100%;
 }
 
+/* Grundlegende Stile */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  flex: 1; /* Container nimmt den verfügbaren Platz ein */
+}
+
 .footer-container {
-  background-color: #282847; /* Hintergrundfarbe des Feldes */
-  border-radius: 15px; /* Abrundung der Ecken */
-  padding: 20px; /* Innenabstand */
-  margin: 20px; /* Außenabstand */
-  color: #f5f6f7; /* Textfarbe im Footer */
+  background-color: #282847;
+  border-radius: 15px;
+  padding: 20px;
+  margin: 20px auto;
+  color: #f5f6f7;
+  width: 80%; /* oder eine andere Breite deiner Wahl */
+  text-align: center;
 }

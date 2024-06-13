@@ -8,14 +8,14 @@
                 <h5>Firmeninformationen</h5>
                 <ul class="list-unstyled">
                     <li><a href="about.php">About Us</a></li>
-                    <li><a href="#">Karriere</a></li>
+                    <li><a href="karriere.php">Karriere</a></li>
                     <li><a href="#">Presse</a></li>
                 </ul>
             </div>
             <div class="col-md-4 footer-section">
                 <h5>Kundenservice</h5>
                 <ul class="list-unstyled">
-                    <li><a href="#">Kontakt</a></li>
+                    <li><a href="kontakt.php">Kontakt</a></li>
                     <li><a href="anfahrt.php">Anfahrt</a></li>
                     <li><a href="#">Rückgabe</a></li>
                 </ul>
