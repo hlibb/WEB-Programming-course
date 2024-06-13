@@ -1,11 +1,4 @@
 <?php
-require_once 'phpmailer/src/PHPMailer.php';
-require_once 'phpmailer/src/SMTP.php';
-require_once 'phpmailer/src/Exception.php';
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
 function getPaymentConfirmationEmail($recipientName, $cartItems, $totalPrice, $shippingMethod, $shippingCost, $totalDiscount) {
     $subject = 'Payment Confirmation';
 
@@ -204,7 +197,6 @@ function getRegistrationEmail($recipientName, $username, $temporaryPassword) {
 
     return ['subject' => $subject, 'body' => $body];
 }
-
 function getResetPasswordEmail($recipientName, $newPassword) {
     $subject = 'Passwort zurückgesetzt';
 
@@ -276,147 +268,213 @@ function getResetPasswordEmail($recipientName, $newPassword) {
     return ['subject' => $subject, 'body' => $body];
 }
 
-function getContactEmail($name, $email, $subject, $message) {
-    $subject = 'Neue Kontaktanfrage: ' . $subject;
+require_once 'phpmailer/src/PHPMailer.php';
+require_once 'phpmailer/src/SMTP.php';
+require_once 'phpmailer/src/Exception.php';
 
-    $body = "
-    <!DOCTYPE html>
-    <html lang='de'>
-    <head>
-        <meta charset='UTF-8'>
-        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-        <title>Kontaktanfrage</title>
-        <style>
-            body {
-                width: 100%;
-                margin: 0;
-                background-color: #282847;
-                color: #f5f6f7;
-                font-family: Tahoma, sans-serif;
-                font-size: 16px;
-            }
-            .container {
-                max-width: 600px;
-                margin: 0 auto;
-                padding: 20px;
-                border: 1px solid #3b3f7;
-                background-color: #282847;
-                color: #f5f6f7;
-            }
-            .header {
-                background-color: #3b3b4f;
-                color: #fff;
-                padding: 10px;
-                text-align: center;
-            }
-            .content {
-                margin: 20px 0;
-            }
-            .footer {
-                background-color: #3b3b4f;
-                color: #fff;
-                text-align: center;
-                padding: 10px;
-                font-size: 0.8em;
-            }
-            h1, p {
-                margin: 1em auto;
-                text-align: center;
-                font-family: Apple Chancery, sans-serif, cursive;
-            }
-        </style>
-    </head>
-    <body>
-        <div class='container'>
-            <div class='header'>
-                <h1 style='color: #fff;'>Kontaktanfrage</h1>
-            </div>
-            <div class='content'>
-                <p>Eine neue Kontaktanfrage wurde gesendet.</p>
-                <p><strong>Name:</strong> $name</p>
-                <p><strong>E-Mail:</strong> $email</p>
-                <p><strong>Betreff:</strong> $subject</p>
-                <p><strong>Nachricht:</strong> $message</p>
-            </div>
-            <div class='footer'>
-                <p>&copy; 2024 Ihr Unternehmen. Alle Rechte vorbehalten.</p>
-            </div>
-        </div>
-    </body>
-    </html>";
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-    return ['subject' => $subject, 'body' => $body];
+if (!function_exists('getPaymentConfirmationEmail')) {
+    function getPaymentConfirmationEmail($recipientName, $cartItems, $totalPrice, $shippingMethod, $shippingCost, $totalDiscount)
+    {
+        $subject = 'Payment Confirmation';
+        // Der restliche Code bleibt unverändert
+    }
 }
 
-function getApplicationEmail($job, $name, $email, $cover_letter) {
-    $subject = 'Neue Bewerbung für ' . $job;
-
-    $body = "
-    <!DOCTYPE html>
-    <html lang='de'>
-    <head>
-        <meta charset='UTF-8'>
-        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-        <title>Neue Bewerbung</title>
-        <style>
-            body {
-                width: 100%;
-                margin: 0;
-                background-color: #282847;
-                color: #f5f6f7;
-                font-family: Tahoma, sans-serif;
-                font-size: 16px;
-            }
-            .container {
-                max-width: 600px;
-                margin: 0 auto;
-                padding: 20px;
-                border: 1px solid #3b3f7;
-                background-color: #282847;
-                color: #f5f6f7;
-            }
-            .header {
-                background-color: #3b3b4f;
-                color: #fff;
-                padding: 10px;
-                text-align: center;
-            }
-            .content {
-                margin: 20px 0;
-            }
-            .footer {
-                background-color: #3b3b4f;
-                color: #fff;
-                text-align: center;
-                padding: 10px;
-                font-size: 0.8em;
-            }
-            h1, p {
-                margin: 1em auto;
-                text-align: center;
-                font-family: Apple Chancery, sans-serif, cursive;
-            }
-        </style>
-    </head>
-    <body>
-        <div class='container'>
-            <div class='header'>
-                <h1 style='color: #fff;'>Neue Bewerbung</h1>
-            </div>
-            <div class='content'>
-                <p>Eine neue Bewerbung für die Position <strong>$job</strong> wurde eingereicht.</p>
-                <p><strong>Name:</strong> $name</p>
-                <p><strong>E-Mail:</strong> $email</p>
-                <p><strong>Anschreiben:</strong></p>
-                <p>$cover_letter</p>
-            </div>
-            <div class='footer'>
-                <p>&copy; 2024 Ihr Unternehmen. Alle Rechte vorbehalten.</p>
-            </div>
-        </div>
-    </body>
-    </html>";
-
-    return ['subject' => $subject, 'body' => $body];
+if (!function_exists('getRegistrationEmail')) {
+    function getRegistrationEmail($recipientName, $username, $temporaryPassword)
+    {
+        $subject = 'Account Registration';
+        // Der restliche Code bleibt unverändert
+    }
 }
-?>
+
+if (!function_exists('getResetPasswordEmail')) {
+    function getResetPasswordEmail($recipientName, $newPassword)
+    {
+        $subject = 'Passwort zurückgesetzt';
+        // Der restliche Code bleibt unverändert
+    }
+}
+
+if (!function_exists('getContactEmail')) {
+    function getContactEmail($name, $email, $subject, $message)
+    {
+        $subject = 'Neue Kontaktanfrage: ' . $subject;
+
+        $body = "
+        <!DOCTYPE html>
+        <html lang='de'>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Kontaktanfrage</title>
+            <style>
+                body {
+                    width: 100%;
+                    margin: 0;
+                    background-color: #282847;
+                    color: #f5f6f7;
+                    font-family: Tahoma, sans-serif;
+                    font-size: 16px;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    border: 1px solid #3b3f7;
+                    background-color: #282847;
+                    color: #f5f6f7;
+                }
+                .header {
+                    background-color: #3b3b4f;
+                    color: #fff;
+                    padding: 10px;
+                    text-align: center;
+                }
+                .content {
+                    margin: 20px 0;
+                }
+                .footer {
+                    background-color: #3b3b4f;
+                    color: #fff;
+                    text-align: center;
+                    padding: 10px;
+                    font-size: 0.8em;
+                }
+                h1, p {
+                    margin: 1em auto;
+                    text-align: center;
+                    font-family: Apple Chancery, sans-serif, cursive;
+                }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1 style='color: #fff;'>Kontaktanfrage</h1>
+                </div>
+                <div class='content'>
+                    <p>Eine neue Kontaktanfrage wurde gesendet.</p>
+                    <p><strong>Name:</strong> $name</p>
+                    <p><strong>E-Mail:</strong> $email</p>
+                    <p><strong>Betreff:</strong> $subject</p>
+                    <p><strong>Nachricht:</strong> $message</p>
+                </div>
+                <div class='footer'>
+                    <p>&copy; 2024 Ihr Unternehmen. Alle Rechte vorbehalten.</p>
+                </div>
+            </div>
+        </body>
+        </html>";
+
+        return ['subject' => $subject, 'body' => $body];
+    }
+}
+
+require_once 'phpmailer/src/PHPMailer.php';
+require_once 'phpmailer/src/SMTP.php';
+require_once 'phpmailer/src/Exception.php';
+
+if (!function_exists('getPaymentConfirmationEmail')) {
+    function getPaymentConfirmationEmail($recipientName, $cartItems, $totalPrice, $shippingMethod, $shippingCost, $totalDiscount)
+    {
+        $subject = 'Payment Confirmation';
+        // Der restliche Code bleibt unverändert
+    }
+}
+
+if (!function_exists('getRegistrationEmail')) {
+    function getRegistrationEmail($recipientName, $username, $temporaryPassword)
+    {
+        $subject = 'Account Registration';
+        // Der restliche Code bleibt unverändert
+    }
+}
+
+if (!function_exists('getResetPasswordEmail')) {
+    function getResetPasswordEmail($recipientName, $newPassword)
+    {
+        $subject = 'Passwort zurückgesetzt';
+        // Der restliche Code bleibt unverändert
+    }
+}
+
+if (!function_exists('getApplicationEmail')) {
+    function getApplicationEmail($job, $name, $email, $cover_letter) {
+        $subject = 'Neue Bewerbung für ' . $job;
+
+        $body = "
+        <!DOCTYPE html>
+        <html lang='de'>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Neue Bewerbung</title>
+            <style>
+                body {
+                    width: 100%;
+                    margin: 0;
+                    background-color: #282847;
+                    color: #f5f6f7;
+                    font-family: Tahoma, sans-serif;
+                    font-size: 16px;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    border: 1px solid #3b3f7;
+                    background-color: #282847;
+                    color: #f5f6f7;
+                }
+                .header {
+                    background-color: #3b3b4f;
+                    color: #fff;
+                    padding: 10px;
+                    text-align: center;
+                }
+                .content {
+                    margin: 20px 0;
+                }
+                .footer {
+                    background-color: #3b3b4f;
+                    color: #fff;
+                    text-align: center;
+                    padding: 10px;
+                    font-size: 0.8em;
+                }
+                h1, p {
+                    margin: 1em auto;
+                    text-align: center;
+                    font-family: Apple Chancery, sans-serif, cursive;
+                }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1 style='color: #fff;'>Neue Bewerbung</h1>
+                </div>
+                <div class='content'>
+                    <p>Eine neue Bewerbung für die Position <strong>$job</strong> wurde eingereicht.</p>
+                    <p><strong>Name:</strong> $name</p>
+                    <p><strong>E-Mail:</strong> $email</p>
+                    <p><strong>Anschreiben:</strong></p>
+                    <p>$cover_letter</p>
+                </div>
+                <div class='footer'>
+                    <p>&copy; 2024 Ihr Unternehmen. Alle Rechte vorbehalten.</p>
+                </div>
+            </div>
+        </body>
+        </html>";
+
+        return ['subject' => $subject, 'body' => $body];
+    }
+}
+
+
+
