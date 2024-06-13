@@ -2,6 +2,7 @@
 session_start();
 include_once 'include/db_connection.php';
 require_once '../extern/google_auth/PHPGangsta/GoogleAuthenticator.php';
+include 'send_email.php'; // Include the send email function
 
 $ga = new PHPGangsta_GoogleAuthenticator();
 
@@ -84,12 +85,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $secret = $ga->createSecret();
         $qrCodeUrl = $ga->getQRCodeGoogleUrl('YourAppName', $secret, 'YourAppName');
 
+        // Store the secret in the database
+        $update_secret_sql = "UPDATE users SET secret = ? WHERE id = ?";
+        if ($update_secret_stmt = mysqli_prepare($link, $update_secret_sql)) {
+            mysqli_stmt_bind_param($update_secret_stmt, "si", $secret, $id);
+            if (!mysqli_stmt_execute($update_secret_stmt)) {
+                echo "Oops! Something went wrong while saving the secret. Please try again later.";
+            }
+            mysqli_stmt_close($update_secret_stmt);
+        }
+
         // Store user data and QR code URL in the session
         $_SESSION['user_data'] = [
             'email' => $email,
             'qrCodeUrl' => $qrCodeUrl,
             'secret' => $secret
         ];
+
+        // Send registration email
+        $emailTemplate = getRegistrationEmail($name, $username, $randomPassword);
+        sendEmail($email, $name, $emailTemplate);
 
         // Redirect to show_qr_code.php with the QR code URL as a parameter
         header("Location: show_qr_code.php?qr=" . urlencode($qrCodeUrl));
