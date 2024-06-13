@@ -17,7 +17,7 @@
                 <ul class="list-unstyled">
                     <li><a href="kontakt.php">Kontakt</a></li>
                     <li><a href="anfahrt.php">Anfahrt</a></li>
-                    <li><a href="#">Rückgabe</a></li>
+                    <li><a href="rueckgabe.php">Rückgabe</a></li>
                 </ul>
             </div>
             <div class="col-md-4 footer-section">

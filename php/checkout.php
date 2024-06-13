@@ -306,7 +306,7 @@ $link->close();
                     </li>
                 <?php endforeach; ?>
                 <li class="list-group-item d-flex justify-content-between">
-                    <span>Promo code</span>
+                    <span>Rabattcode</span>
                     <strong><?php echo number_format($totalDiscount, 2); ?>€</strong>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
@@ -315,14 +315,14 @@ $link->close();
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
                     <span>Total (EUR)</span>
-                    <strong><?php echo number_format($totalPrice, 2); ?>€</strong>
+                    <strong id="total-price"><?php echo number_format($totalPrice, 2); ?>€</strong>
                 </li>
             </ul>
 
-            <form class="card p-2 promo-code-group">
+            <form id="promo-form" class="card p-2 promo-code-group">
                 <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Promo code">
-                    <button type="submit" class="btn btn-secondary">Redeem</button>
+                    <input type="text" class="form-control" id="promo-code-input" placeholder="Promo code">
+                    <button type="button" class="btn btn-secondary" id="apply-promo">Redeem</button>
                 </div>
             </form>
         </div>
@@ -331,5 +331,33 @@ $link->close();
 <?php include "include/footimport.php"; ?>
 <script src="https://getbootstrap.com/docs/5.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="form-validation.js"></script>
+<script>
+    document.getElementById('apply-promo').addEventListener('click', function(e) {
+        e.preventDefault();
+        const promoCode = document.getElementById('promo-code-input').value;
+
+        fetch('apply_coupon.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'coupon_code=' + encodeURIComponent(promoCode)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('total-price').innerText = data.new_total_price.toFixed(2) + '€';
+                    document.querySelector('.promo-code-group .form-control').value = promoCode;
+                    alert('Gutscheincode erfolgreich angewendet!');
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.');
+            });
+    });
+</script>
 </body>
 </html>
