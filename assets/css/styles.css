@@ -255,3 +255,60 @@ a {
     padding: 0 10px;
   }
 }
+
+/* Anpassungen für Checkout-Formular */
+.container {
+  background-color: #282847;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.form-label {
+  color: #f5f6f7;
+}
+
+.input-group-text {
+  background-color: #0a0a23;
+  color: #ffffff;
+  border: 1px solid #0a0a23;
+}
+
+.form-control {
+  background-color: #0a0a23;
+  border: 1px solid #0a0a23;
+  color: #ffffff;
+}
+
+.form-check-input {
+  background-color: #0a0a23;
+  border: 1px solid #0a0a23;
+}
+
+.form-check-label {
+  color: #f5f6f7;
+}
+
+.list-group-item {
+  background-color: #282847;
+  color: #f5f6f7;
+}
+
+.btn-primary {
+  background-color: #3b3b4f;
+  border-color: #3b3b4f;
+}
+
+.btn-primary:hover {
+  background-color: #575768;
+  border-color: #575768;
+}
+
+.btn-secondary {
+  background-color: #575768;
+  border-color: #575768;
+}
+
+.btn-secondary:hover {
+  background-color: #6f6f7f;
+  border-color: #6f6f7f;
+}

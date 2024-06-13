@@ -171,6 +171,14 @@ $link->close();
             </tr>
             </tbody>
         </table>
+        <tr>
+            <td colspan="4"></td>
+            <td>
+                <a href="checkout.php" class="btn btn-primary">Zur Kasse</a>
+            </td>
+            <td></td>
+        </tr>
+
     <?php else: ?>
         <p>Ihr Warenkorb ist leer.</p>
     <?php endif; ?>
