@@ -1,6 +1,7 @@
 <?php
 session_start();
 include_once 'include/db_connection.php';
+include_once 'add_to_cart.php'; // Include the add_to_cart function
 
 // Überprüfen, ob ein Suchbegriff eingegeben wurde
 $searchTerm = '';
@@ -26,6 +27,18 @@ while ($row = $result->fetch_assoc()) {
 }
 
 $stmt->close();
+
+// Hinzufügen zum Warenkorb
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['users_id'])) {
+    $userId = $_SESSION['users_id'];
+    $productId = $_POST['product_id'];
+    $quantity = $_POST['quantity'];
+
+    addToCart($userId, $productId, $quantity, $link);
+    header("Location: cart.php");
+    exit();
+}
+
 $link->close();
 ?>
 <!doctype html>
@@ -58,7 +71,7 @@ $link->close();
                     <h2><?php echo htmlspecialchars($product['name']); ?></h2>
                     <p><?php echo htmlspecialchars($product['price']); ?>€</p>
                     <?php if (isset($_SESSION['users_id'])): ?>
-                        <form method="post" action="shopping_cart.php">
+                        <form method="post" action="">
                             <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product['id']); ?>">
                             <div class="quantity-wrapper">
                                 <input type="number" name="quantity" value="1" min="1" class="quantity-input">
