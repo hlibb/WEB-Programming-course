@@ -63,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $id = $stmt->insert_id;
 
         // Insert default points for the new user
-        $stmt = $link->prepare("INSERT INTO punkte (users_id, points) VALUES (?, 100)");
+        $stmt = $link->prepare("INSERT INTO points (users_id, points) VALUES (?, 100)");
         if ($stmt === false) {
             die("Prepare failed: " . $link->error);
         }

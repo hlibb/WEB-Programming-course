@@ -23,7 +23,7 @@ function display_cart($link) {
     $stmt->close();
 
     // Benutzerpunkte abrufen
-    $stmt = $link->prepare("SELECT points FROM punkte WHERE users_id = ?");
+    $stmt = $link->prepare("SELECT points FROM points WHERE users_id = ?");
     $stmt->bind_param("i", $usersId);
     $stmt->execute();
     $result = $stmt->get_result();

@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['use_points'])) {
     $stmt->close();
 
     // Fetch user points
-    $stmt = $link->prepare("SELECT points FROM punkte WHERE users_id = ?");
+    $stmt = $link->prepare("SELECT points FROM points WHERE users_id = ?");
     $stmt->bind_param("i", $usersId);
     $stmt->execute();
     $stmt->bind_result($points);

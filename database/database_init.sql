@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `logs` (
     FOREIGN KEY (`users_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS `punkte` (
+CREATE TABLE IF NOT EXISTS `points` (
     `users_id` INT NOT NULL,
     `points` INT NOT NULL DEFAULT 100,
     PRIMARY KEY (`users_id`),

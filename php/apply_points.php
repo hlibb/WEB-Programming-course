@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['use_points'])) {
         $cartId = $row['id'];
 
         // Benutzerpunkte abrufen
-        $stmt = $link->prepare("SELECT points FROM punkte WHERE users_id = ?");
+        $stmt = $link->prepare("SELECT points FROM points WHERE users_id = ?");
         $stmt->bind_param("i", $usersId);
         $stmt->execute();
         $result = $stmt->get_result();

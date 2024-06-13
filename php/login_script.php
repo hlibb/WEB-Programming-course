@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
 
             // Add 5 points to the user's account
-            $update_points_sql = "UPDATE punkte SET points = points + 5 WHERE users_id = ?";
+            $update_points_sql = "UPDATE points SET points = points + 5 WHERE users_id = ?";
             if ($update_points_stmt = $link->prepare($update_points_sql)) {
                 $update_points_stmt->bind_param("i", $user['id']);
                 $update_points_stmt->execute();

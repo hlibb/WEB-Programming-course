@@ -62,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['checkout'])) {
     }
 
     // Punkte aktualisieren
-    $update_points_sql = "UPDATE punkte SET points = points + 25 WHERE users_id = ?";
+    $update_points_sql = "UPDATE points SET points = points + 25 WHERE users_id = ?";
     if ($update_points_stmt = $link->prepare($update_points_sql)) {
         $update_points_stmt->bind_param("i", $usersId);
         $update_points_stmt->execute();
