@@ -24,7 +24,7 @@ if ($link->connect_error) {
 $cartItemCount = 0;
 if ($isLoggedIn) {
     $userId = $_SESSION['users_id'];
-    $stmt = $link->prepare("SELECT SUM(cb.quantity) AS total_items FROM `cart-body` cb
+    $stmt = $link->prepare("SELECT count(*) AS total_items FROM `cart-body` cb
                             JOIN `cart-header` ch ON cb.warenkorb_id = ch.id
                             WHERE ch.users_id = ?");
     $stmt->bind_param("i", $userId);
@@ -34,11 +34,23 @@ if ($isLoggedIn) {
     $stmt->close();
 }
 
+$userPoints = 0;
+if ($isLoggedIn) {
+    $userId = $_SESSION['users_id'];
+    $stmt = $link->prepare("SELECT points FROM points WHERE users_id = ?");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $stmt->bind_result($userPoints);
+    $stmt->fetch();
+    $stmt->close();
+}
+
+
 ?>
 <a href="home.php"><img src="../assets/images/logo.png" class="logo"></a>
 <div class="text-right mt-2">
     <?php if ($isLoggedIn): ?>
-        <a href="include/logout.php" class="btn btn-danger button-spacing">Logout</a>
+        Aktueller Punktestand: <?php echo $userPoints; ?><a href="include/logout.php" class="btn btn-danger button-spacing">Logout</a>
     <?php else: ?>
         <a href="login.php" class="btn btn-primary button-spacing">Login</a>
     <?php endif; ?>

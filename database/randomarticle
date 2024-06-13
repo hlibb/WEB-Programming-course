@@ -25,5 +25,5 @@ INSERT INTO `products` (`name`, `price`, `quantity`, `image_url`, `description`)
 INSERT INTO `products` (`name`, `price`, `quantity`, `image_url`, `description`) VALUES
 ('Faber-Castell', 110, 69, 'https://schreibundstil.de/cdn/shop/products/Faber-Castell-Fueller-Ambition-Birnbaum_3_700x.jpg?v=1595129651', 'Füller Ambition Birnbaum');
 
-INSERT INTO `coupons` (`code`, `discount_percentage`) VALUES
-('DIMI20', 0.20);
+INSERT INTO coupons (code, discount_percentage, is_active, expiration_date)
+VALUES ('DIMI20', 20.00, TRUE, '2024-12-31');

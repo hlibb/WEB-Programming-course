@@ -89,7 +89,9 @@ CREATE TABLE IF NOT EXISTS `order_items` (
 
 -- Table for storing coupon information
 CREATE TABLE IF NOT EXISTS `coupons` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `code` VARCHAR(50) NOT NULL UNIQUE,
-    `discount_percentage` DECIMAL(5, 2) NOT NULL
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(255) NOT NULL,
+    discount_percentage DECIMAL(5,2) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    expiration_date DATE
 );
