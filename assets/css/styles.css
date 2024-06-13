@@ -311,3 +311,10 @@ input[type="submit"] {
   width: 100%;
 }
 
+.footer-container {
+  background-color: #282847; /* Hintergrundfarbe des Feldes */
+  border-radius: 15px; /* Abrundung der Ecken */
+  padding: 20px; /* Innenabstand */
+  margin: 20px; /* Außenabstand */
+  color: #f5f6f7; /* Textfarbe im Footer */
+}
