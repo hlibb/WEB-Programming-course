@@ -1,7 +1,9 @@
 <?php
-global $link;
+session_start();
 include_once 'include/db_connection.php';
-require 'send_email.php'; // Include the send email function
+require_once '../extern/google_auth/PHPGangsta/GoogleAuthenticator.php';
+
+$ga = new PHPGangsta_GoogleAuthenticator();
 
 function generateRandomPassword($length = 12) {
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()';
@@ -14,13 +16,12 @@ function generateRandomPassword($length = 12) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-
     $name = $_POST['name'];
     $surname = $_POST['surname'];
-    $username = $_POST["username"];
-    $email = $_POST["email"];
-    $screen_resolution = $_POST["screen_resolution"];
-    $operating_system = $_POST["operating_system"];
+    $username = $_POST['username'];
+    $email = $_POST['email'];
+    $screen_resolution = $_POST['screen_resolution'];
+    $operating_system = $_POST['operating_system'];
 
     $name = htmlspecialchars($name);
     $surname = htmlspecialchars($surname);
@@ -79,13 +80,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             mysqli_stmt_close($update_stmt);
         }
 
-        $emailTemplate = getRegistrationEmail($name, $username, $randomPassword);
-        sendEmail($email, $name, $emailTemplate);
+        // Generate the QR code and secret
+        $secret = $ga->createSecret();
+        $qrCodeUrl = $ga->getQRCodeGoogleUrl('YourAppName', $secret, 'YourAppName');
 
-        header("Location: ../index.html");
-        $stmt->close();
-        $link->close();
+        // Store user data and QR code URL in the session
+        $_SESSION['user_data'] = [
+            'email' => $email,
+            'qrCodeUrl' => $qrCodeUrl,
+            'secret' => $secret
+        ];
+
+        // Redirect to show_qr_code.php with the QR code URL as a parameter
+        header("Location: show_qr_code.php?qr=" . urlencode($qrCodeUrl));
         exit();
     }
 }
-?>
