@@ -19,7 +19,7 @@ function calculateDiscount($price, $quantity) {
 $userId = $_SESSION['users_id'];
 
 // Fetch cart items
-$stmt = $link->prepare("SELECT p.id, p.name, p.price, cb.quantity, (p.price * cb.quantity) AS product_total 
+$stmt = $link->prepare("SELECT p.id, p.name, p.price, cb.quantity, cb.rabatt, (p.price * cb.quantity) AS product_total 
                         FROM `cart-body` cb
                         JOIN `cart-header` ch ON cb.warenkorb_id = ch.id
                         JOIN `products` p ON cb.product_id = p.id
@@ -36,8 +36,9 @@ while ($row = $result->fetch_assoc()) {
     $price = $row['price'];
     $quantity = $row['quantity'];
     $productTotal = $row['product_total'];
+    $discountRate = $row['rabatt'] / 100;
 
-    list($discountAmount, $discountRate) = calculateDiscount($price, $quantity);
+    $discountAmount = $price * $quantity * $discountRate;
     $discountDisplay = number_format($discountAmount, 2) . '€ (' . ($discountRate * 100) . '%)';
     $productTotalAfterDiscount = $productTotal - $discountAmount;
 
@@ -55,14 +56,16 @@ while ($row = $result->fetch_assoc()) {
 }
 
 // Get user points
-$pointsStmt = $link->prepare("SELECT points FROM points WHERE users_id = ?");
+$pointsStmt = $link->prepare("SELECT points, is_active FROM points WHERE users_id = ?");
 $pointsStmt->bind_param("i", $userId);
 $pointsStmt->execute();
 $pointsResult = $pointsStmt->get_result();
-$userPoints = $pointsResult->fetch_assoc()['points'];
+$pointsData = $pointsResult->fetch_assoc();
 $pointsStmt->close();
 
-$pointsValue = $userPoints / 1000;
+$userPoints = $pointsData['points'];
+$pointsActive = $pointsData['is_active'];
+$pointsValue = $pointsActive ? $userPoints / 1000 : 0;
 $totalPrice -= $pointsValue; // Subtract points value from total price
 
 $stmt->close();

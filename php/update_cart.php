@@ -25,12 +25,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $usePoints = $data['use_points'] ?? false;
 
     if ($productId !== null && $quantity !== null) {
+        list($discountAmount, $discountRate) = calculateDiscount(0, $quantity); // Preis nicht erforderlich, nur Rabattprozentsatz
+        $discountRatePercent = $discountRate * 100;
+
         if ($quantity > 0) {
             $stmt = $link->prepare("UPDATE `cart-body` cb 
                                     JOIN `cart-header` ch ON cb.warenkorb_id = ch.id
-                                    SET cb.quantity = ? 
+                                    SET cb.quantity = ?, cb.rabatt = ? 
                                     WHERE ch.users_id = ? AND cb.product_id = ?");
-            $stmt->bind_param("iii", $quantity, $userId, $productId);
+            $stmt->bind_param("idii", $quantity, $discountRatePercent, $userId, $productId);
         } else {
             $stmt = $link->prepare("DELETE cb 
                                     FROM `cart-body` cb 
@@ -42,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->close();
     }
 
-    $stmt = $link->prepare("SELECT p.id, p.price, cb.quantity, (p.price * cb.quantity) AS product_total
+    $stmt = $link->prepare("SELECT p.id, p.price, cb.quantity, cb.rabatt, (p.price * cb.quantity) AS product_total
                             FROM `cart-body` cb
                             JOIN `cart-header` ch ON cb.warenkorb_id = ch.id
                             JOIN `products` p ON cb.product_id = p.id
@@ -59,9 +62,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $price = $row['price'];
         $quantity = $row['quantity'];
         $productTotal = $row['product_total'];
+        $discountRatePercent = $row['rabatt'] / 100;
 
-        list($discountAmount, $discountRate) = calculateDiscount($price, $quantity);
-        $discountDisplay = number_format($discountAmount, 2) . '€ (' . ($discountRate * 100) . '%)';
+        $discountAmount = $price * $quantity * $discountRatePercent;
+        $discountDisplay = number_format($discountAmount, 2) . '€ (' . ($discountRatePercent * 100) . '%)';
         $productTotalAfterDiscount = $productTotal - $discountAmount;
 
         $cartItems[] = [

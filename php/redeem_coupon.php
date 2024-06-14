@@ -37,7 +37,8 @@ if (isset($_POST['couponCode']) && !empty($_POST['couponCode'])) {
     $stmt->close();
 
     if ($discountPercentage) {
-        $stmt = $link->prepare("SELECT SUM(p.price * cb.quantity) AS total
+        // Fetch the current total price after applying product discounts
+        $stmt = $link->prepare("SELECT SUM((p.price * cb.quantity) - (p.price * cb.quantity * (cb.rabatt / 100))) AS total
                                 FROM `cart-body` cb
                                 JOIN `cart-header` ch ON cb.warenkorb_id = ch.id
                                 JOIN `products` p ON cb.product_id = p.id
@@ -60,6 +61,19 @@ if (isset($_POST['couponCode']) && !empty($_POST['couponCode'])) {
         $stmt->bind_result($totalPrice);
         $stmt->fetch();
         $stmt->close();
+
+        // Check if points are active and apply points discount if applicable
+        $pointsStmt = $link->prepare("SELECT points, is_active FROM points WHERE users_id = ?");
+        $pointsStmt->bind_param("i", $userId);
+        $pointsStmt->execute();
+        $pointsResult = $pointsStmt->get_result();
+        $pointsData = $pointsResult->fetch_assoc();
+        $pointsStmt->close();
+
+        $userPoints = $pointsData['points'];
+        $pointsActive = $pointsData['is_active'];
+        $pointsValue = $pointsActive ? $userPoints / 1000 : 0;
+        $totalPrice -= $pointsValue; // Subtract points value from total price
 
         if ($totalPrice) {
             $discountAmount = $totalPrice * ($discountPercentage / 100);
