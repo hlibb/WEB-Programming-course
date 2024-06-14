@@ -151,7 +151,6 @@ $link->close();
                             <th>Artikel</th>
                             <th>Menge</th>
                             <th>Preis</th>
-                            <th>Gesamt</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -160,7 +159,6 @@ $link->close();
                                 <td><?php echo htmlspecialchars($item['product_name']); ?></td>
                                 <td><?php echo htmlspecialchars($item['quantity']); ?></td>
                                 <td><?php echo htmlspecialchars($item['unit_price']); ?>€</td>
-                                <td><?php echo number_format($itemTotal, 2); ?>€</td>
                             </tr>
                         <?php endforeach; ?>
                         </tbody>
