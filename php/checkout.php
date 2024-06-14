@@ -55,6 +55,8 @@ while ($row = $result->fetch_assoc()) {
     $totalDiscount += $discountAmount;
 }
 
+$stmt->close();
+
 // Get user points
 $pointsStmt = $link->prepare("SELECT points, is_active FROM points WHERE users_id = ?");
 $pointsStmt->bind_param("i", $userId);
@@ -66,9 +68,8 @@ $pointsStmt->close();
 $userPoints = $pointsData['points'];
 $pointsActive = $pointsData['is_active'];
 $pointsValue = $pointsActive ? $userPoints / 1000 : 0;
-$totalPrice -= $pointsValue; // Subtract points value from total price
 
-$stmt->close();
+$totalPriceAfterPoints = $totalPrice - $pointsValue; // Subtract points value from total price
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $firstName = $_POST['firstName'];
@@ -98,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $shippingCost = 7.5;
     }
 
-    $totalAmount = $totalPrice + $shippingCost;
+    $totalAmount = $totalPriceAfterPoints + $shippingCost;
 
     // Insert order
     $stmt = $link->prepare("INSERT INTO orders (users_id, order_date, total_amount, shipping_method, is_express_shipping, is_paid) VALUES (?, NOW(), ?, ?, ?, ?)");
@@ -132,10 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->close();
 
     // Send email confirmation
-    $emailTemplate = [
-        'subject' => 'Order Confirmation',
-        'body' => '<p>Thank you for your order!</p><p>Your order ID is ' . $orderId . '</p>'
-    ];
+    $emailTemplate = getPaymentConfirmationEmail($firstName, $cartItems, $totalPriceAfterPoints, $shippingMethod, $shippingCost, $totalDiscount);
     sendEmail($email, $firstName, $emailTemplate);
 
     header("Location: danke.php");
@@ -357,11 +355,11 @@ $link->close();
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
                     <span>Gesamt (EUR)</span>
-                    <strong id="total-price-with-shipping"><?php echo number_format($totalPrice, 2); ?>€</strong>
+                    <strong id="total-price-with-shipping"><?php echo number_format($totalPriceAfterPoints, 2); ?>€</strong>
                 </li>
             </ul>
 
-            <form class="card p-2 promo-code-group">
+            <form class="card p-2 promo-code-group" style="width:100%">
                 <div class="input-group">
                     <input type="text" class="form-control" placeholder="Promo code" id="promo-code-input">
                     <button type="button" class="btn btn-secondary" id="redeem-btn">Redeem</button>
@@ -377,6 +375,7 @@ $link->close();
     function updateShippingCost() {
         var shippingMethod = document.getElementById('shipping-method').value;
         var subtotalPrice = parseFloat(document.getElementById('subtotal-price').textContent.replace('€', '').replace(',', '.'));
+        var pointsValue = parseFloat(document.getElementById('points-value').textContent.replace('€', '').replace(',', '.'));
         var shippingCost = 0;
 
         if (shippingMethod === 'DHL') {
@@ -388,7 +387,7 @@ $link->close();
         }
 
         document.getElementById('shipping-cost').textContent = shippingCost.toFixed(2).replace('.', ',') + '€';
-        var totalPriceWithShipping = subtotalPrice + shippingCost;
+        var totalPriceWithShipping = subtotalPrice + shippingCost - pointsValue;
         document.getElementById('total-price-with-shipping').textContent = totalPriceWithShipping.toFixed(2).replace('.', ',') + '€';
     }
 
@@ -410,7 +409,7 @@ $link->close();
             if (xhr.readyState === 4 && xhr.status === 200) {
                 var response = JSON.parse(xhr.responseText);
                 if (response.success) {
-                    document.getElementById('total-price').textContent = response.newTotalPrice + '€';
+                    document.getElementById('subtotal-price').textContent = response.newTotalPrice + '€';
                     var totalDiscountElement = document.getElementById('total-discount');
                     var currentTotalDiscount = parseFloat(totalDiscountElement.textContent.replace('€', '').replace(',', '.'));
                     var newTotalDiscount = currentTotalDiscount + parseFloat(response.discountAmount.replace(',', '.'));

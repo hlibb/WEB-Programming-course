@@ -97,7 +97,7 @@ $link->close();
                         <form method="post" action="process_return.php" class="return-form">
                             <input type="hidden" name="order_id" value="<?php echo htmlspecialchars($order['id']); ?>">
                             <div class="mb-3">
-                                <label for="reason" class="form-label">Grund für die Rückgabe</label>
+                                <label for="reason" class="form-label" style="color: black">Grund für die Rückgabe</label>
                                 <textarea class="form-control reason-textarea" id="reason" name="reason" rows="2" required></textarea>
                             </div>
                             <button type="submit" class="btn btn-danger">Rückgabe</button>
