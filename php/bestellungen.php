@@ -38,8 +38,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reorder'])) {
         $stmt = $link->prepare("INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("iiid", $newOrderId, $item['product_id'], $item['quantity'], $item['unit_price']);
         $stmt->execute();
-        $stmt->close();
     }
+    $stmt->close();
 
     // Benutzerinformationen aus der Datenbank abrufen
     $stmt = $link->prepare("SELECT email, name FROM users WHERE id = ?");
@@ -65,7 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reorder'])) {
     $totalDiscount = $_SESSION['total_discount'] ?? 0;
 
     // E-Mail-Vorlage abrufen
-    $emailTemplate = getPaymentConfirmationEmail($recipientName, $orderItems, $totalPrice, $newOrder['shipping_method'], $shippingCost, $totalDiscount);
+    $emailTemplate = getPaymentConfirmationEmail1($recipientName, $orderItems, $totalPrice, $newOrder['shipping_method'], $shippingCost, $totalDiscount);
 
     // E-Mail senden
     sendEmail($recipientEmail, $recipientName, $emailTemplate);
