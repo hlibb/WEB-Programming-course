@@ -6,10 +6,17 @@ function generateRandomPassword($length = 12) {
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()';
     $charactersLength = strlen($characters);
     $randomPassword = '';
-    for ($i = 0; $i < $length; $i++) {
+
+    // Ensure the password contains at least one uppercase letter, one lowercase letter, and one digit
+    $randomPassword .= $characters[rand(10, 35)]; // Lowercase letter
+    $randomPassword .= $characters[rand(36, 61)]; // Uppercase letter
+    $randomPassword .= $characters[rand(0, 9)];  // Digit
+
+    for ($i = 3; $i < $length; $i++) {
         $randomPassword .= $characters[rand(0, $charactersLength - 1)];
     }
-    return $randomPassword;
+
+    return str_shuffle($randomPassword); // Shuffle to ensure randomness
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {

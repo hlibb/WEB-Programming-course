@@ -16,6 +16,8 @@ function generateRandomPassword($length = 12) {
     return $randomPassword;
 }
 
+$errorMessage = '';
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $_POST['name'];
     $surname = $_POST['surname'];
@@ -23,92 +25,99 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $screen_resolution = $_POST['screen_resolution'];
     $operating_system = $_POST['operating_system'];
+    $password = $_POST['password'];
 
-    $name = htmlspecialchars($name);
-    $surname = htmlspecialchars($surname);
-    $username = htmlspecialchars($username);
-    $email = filter_var($email, FILTER_SANITIZE_EMAIL);
-
-    $randomPassword = generateRandomPassword();
-    $hashedPassword = password_hash($randomPassword, PASSWORD_DEFAULT);
-
-    if ($link->connect_error) {
-        die("Connection failed: " . $link->connect_error);
-    }
-
-    $stmt = $link->prepare("SELECT * FROM users WHERE email = ?");
-    if ($stmt === false) {
-        die("Prepare failed: " . $link->error);
-    }
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($result->num_rows > 0) {
-        die("Email already exists.");
-    }
-
-    $stmt = $link->prepare("INSERT INTO users (name, surname, username, email, password, password_status, screen_resolution, operating_system) VALUES (?, ?, ?, ?, ?, 'temporary', ?, ?)");
-    if ($stmt === false) {
-        die("Prepare failed: " . $link->error);
-    }
-
-    $bind = $stmt->bind_param("sssssss", $name, $surname, $username, $email, $hashedPassword, $screen_resolution, $operating_system);
-    if ($bind === false) {
-        die("Bind failed: " . $stmt->error);
-    }
-    $exec = $stmt->execute();
-    if ($exec === false) {
-        die("Execute failed: " . $stmt->error);
+    // Passwortanforderungen überprüfen
+    $passwordRegex = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{9,}$/';
+    if (!preg_match($passwordRegex, $password)) {
+        $errorMessage = "Kennwort muss mindestens 9 Zeichen lang sein und einen Großbuchstaben, Kleinbuchstaben und eine Zahl enthalten.";
     } else {
-        $id = $stmt->insert_id;
+        $name = htmlspecialchars($name);
+        $surname = htmlspecialchars($surname);
+        $username = htmlspecialchars($username);
+        $email = filter_var($email, FILTER_SANITIZE_EMAIL);
 
-        // Insert default points for the new user
-        $stmt = $link->prepare("INSERT INTO points (users_id, points) VALUES (?, 100)");
+        $randomPassword = generateRandomPassword();
+        $hashedPassword = password_hash($randomPassword, PASSWORD_DEFAULT);
+
+        if ($link->connect_error) {
+            die("Connection failed: " . $link->connect_error);
+        }
+
+        $stmt = $link->prepare("SELECT * FROM users WHERE email = ?");
         if ($stmt === false) {
             die("Prepare failed: " . $link->error);
         }
-        $stmt->bind_param("i", $id);
-        if ($stmt->execute() === false) {
-            die("Execute failed: " . $stmt->error);
-        }
-
-        $update_sql = "UPDATE users SET login_timestamp = NOW() WHERE id = ?";
-        if ($update_stmt = mysqli_prepare($link, $update_sql)) {
-            mysqli_stmt_bind_param($update_stmt, "i", $id);
-            if (!mysqli_stmt_execute($update_stmt)) {
-                echo "Oops! Something went wrong. Please try again later.";
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $errorMessage = "Email already exists.";
+        } else {
+            $stmt = $link->prepare("INSERT INTO users (name, surname, username, email, password, password_status, screen_resolution, operating_system) VALUES (?, ?, ?, ?, ?, 'temporary', ?, ?)");
+            if ($stmt === false) {
+                die("Prepare failed: " . $link->error);
             }
-            mysqli_stmt_close($update_stmt);
-        }
 
-        // Generate the QR code and secret
-        $secret = $ga->createSecret();
-        $qrCodeUrl = $ga->getQRCodeGoogleUrl('YourAppName', $secret, 'YourAppName');
-
-        // Store the secret in the database
-        $update_secret_sql = "UPDATE users SET secret = ? WHERE id = ?";
-        if ($update_secret_stmt = mysqli_prepare($link, $update_secret_sql)) {
-            mysqli_stmt_bind_param($update_secret_stmt, "si", $secret, $id);
-            if (!mysqli_stmt_execute($update_secret_stmt)) {
-                echo "Oops! Something went wrong while saving the secret. Please try again later.";
+            $bind = $stmt->bind_param("sssssss", $name, $surname, $username, $email, $hashedPassword, $screen_resolution, $operating_system);
+            if ($bind === false) {
+                die("Bind failed: " . $stmt->error);
             }
-            mysqli_stmt_close($update_secret_stmt);
+            $exec = $stmt->execute();
+            if ($exec === false) {
+                die("Execute failed: " . $stmt->error);
+            } else {
+                $id = $stmt->insert_id;
+
+                // Insert default points for the new user
+                $stmt = $link->prepare("INSERT INTO points (users_id, points) VALUES (?, 100)");
+                if ($stmt === false) {
+                    die("Prepare failed: " . $link->error);
+                }
+                $stmt->bind_param("i", $id);
+                if ($stmt->execute() === false) {
+                    die("Execute failed: " . $stmt->error);
+                }
+
+                $update_sql = "UPDATE users SET login_timestamp = NOW() WHERE id = ?";
+                if ($update_stmt = mysqli_prepare($link, $update_sql)) {
+                    mysqli_stmt_bind_param($update_stmt, "i", $id);
+                    if (!mysqli_stmt_execute($update_stmt)) {
+                        echo "Oops! Something went wrong. Please try again later.";
+                    }
+                    mysqli_stmt_close($update_stmt);
+                }
+
+                // Generate the QR code and secret
+                $secret = $ga->createSecret();
+                $qrCodeUrl = $ga->getQRCodeGoogleUrl('YourAppName', $secret, 'YourAppName');
+
+                // Store the secret in the database
+                $update_secret_sql = "UPDATE users SET secret = ? WHERE id = ?";
+                if ($update_secret_stmt = mysqli_prepare($link, $update_secret_sql)) {
+                    mysqli_stmt_bind_param($update_secret_stmt, "si", $secret, $id);
+                    if (!mysqli_stmt_execute($update_secret_stmt)) {
+                        echo "Oops! Something went wrong while saving the secret. Please try again later.";
+                    }
+                    mysqli_stmt_close($update_secret_stmt);
+                }
+
+                // Store user data and QR code URL in the session
+                $_SESSION['user_data'] = [
+                    'email' => $email,
+                    'qrCodeUrl' => $qrCodeUrl,
+                    'secret' => $secret
+                ];
+
+                // Send registration email
+                $emailTemplate = getRegistrationEmail($name, $username, $randomPassword);
+                sendEmail($email, $name, $emailTemplate);
+
+                // Redirect to show_qr_code.php with the QR code URL as a parameter
+                header("Location: show_qr_code.php?qr=" . urlencode($qrCodeUrl));
+                exit();
+            }
         }
-
-        // Store user data and QR code URL in the session
-        $_SESSION['user_data'] = [
-            'email' => $email,
-            'qrCodeUrl' => $qrCodeUrl,
-            'secret' => $secret
-        ];
-
-        // Send registration email
-        $emailTemplate = getRegistrationEmail($name, $username, $randomPassword);
-        sendEmail($email, $name, $emailTemplate);
-
-        // Redirect to show_qr_code.php with the QR code URL as a parameter
-        header("Location: show_qr_code.php?qr=" . urlencode($qrCodeUrl));
-        exit();
     }
 }
 ?>

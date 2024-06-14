@@ -5,6 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php include '../php/include/headimport.php' ?>
+    <script>
+        function validateForm() {
+            var password = document.getElementById('password').value;
+            var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{9,}$/;
+
+            if (!passwordRegex.test(password)) {
+                alert('Kennwort muss mindestens 9 Zeichen lang sein und einen Großbuchstaben, Kleinbuchstaben und eine Zahl enthalten.');
+                return false;
+            }
+            return true;
+        }
+    </script>
     <style>
         .center-button {
             display: flex;

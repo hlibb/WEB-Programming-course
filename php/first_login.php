@@ -23,7 +23,6 @@ header("Location: home.php");
 exit();
 ?>
 
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -76,7 +75,7 @@ exit();
         <p><strong>Secret: <?= $secret ?></strong></p>
         <a href="login.php">Weiter zum Login</a>
     <?php else: ?>
-        <form action="first_login.php" method="post">
+        <form action="first_login_process.php" method="post" onsubmit="return validateForm()">
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" class="form-control" required>
@@ -91,7 +90,22 @@ exit();
             </div>
             <button type="submit" class="btn btn-primary">Speichern</button>
         </form>
+        <?php if (isset($_GET['error'])): ?>
+            <p style="color: red;"><?= htmlspecialchars($_GET['error']) ?></p>
+        <?php endif; ?>
     <?php endif; ?>
 </div>
+<script>
+    function validateForm() {
+        var password = document.getElementById('newpassword').value;
+        var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{9,}$/;
+
+        if (!passwordRegex.test(password)) {
+            alert('Kennwort muss mindestens 9 Zeichen lang sein und einen Großbuchstaben, Kleinbuchstaben und eine Zahl enthalten.');
+            return false;
+        }
+        return true;
+    }
+</script>
 </body>
 </html>
