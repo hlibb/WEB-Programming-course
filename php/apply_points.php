@@ -9,14 +9,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $usePoints = json_decode(file_get_contents("php://input"), true)['use_points'] ?? false;
 
     // Get user points
-    $pointsStmt = $link->prepare("SELECT points FROM points WHERE users_id = ?");
+    $pointsStmt = $link->prepare("SELECT points, is_active FROM points WHERE users_id = ?");
     $pointsStmt->bind_param("i", $userId);
     $pointsStmt->execute();
     $pointsResult = $pointsStmt->get_result();
-    $points = $pointsResult->fetch_assoc()['points'];
+    $pointsData = $pointsResult->fetch_assoc();
+    $points = $pointsData['points'];
     $pointsStmt->close();
 
     $pointsValue = $points / 1000;
+
+    // Update is_active if use_points is true, else set it to false
+    $isActive = $usePoints ? 0 : 1;
+    $updateStmt = $link->prepare("UPDATE points SET is_active = ? WHERE users_id = ?");
+    $updateStmt->bind_param("ii", $isActive, $userId);
+    $updateStmt->execute();
+    $updateStmt->close();
 
     echo json_encode([
         'points' => $points,

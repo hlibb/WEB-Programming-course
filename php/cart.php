@@ -17,6 +17,11 @@ function calculateDiscount($price, $quantity) {
 
 $userId = $_SESSION['users_id'];
 
+$resetStmt = $link->prepare("UPDATE points SET is_active = FALSE WHERE users_id = ?");
+$resetStmt->bind_param("i", $userId);
+$resetStmt->execute();
+$resetStmt->close();
+
 $stmt = $link->prepare("SELECT p.id, p.name, p.price, cb.quantity, (p.price * cb.quantity) AS product_total 
                         FROM `cart-body` cb
                         JOIN `cart-header` ch ON cb.warenkorb_id = ch.id
@@ -109,7 +114,7 @@ $link->close();
                 </tr>
             <?php endforeach; ?>
             <tr>
-                <td><input class="form-check-input ms-2" type="checkbox" id="use-points-checkbox"></td>
+                <td><input class="form-check-input ms-2" type="checkbox" id="use-points-checkbox" onchange="applyPoints()"></td>
                 <td>
                     <div class="points-row">
                         Punkte verwenden:
