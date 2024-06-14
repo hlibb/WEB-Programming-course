@@ -80,6 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $country = $_POST['country'];
     $state = $_POST['state'];
     $zip = $_POST['zip'];
+    $shippingMethod = $_POST['shippingMethod'];
     $paymentMethod = $_POST['paymentMethod'];
     $nameOnCard = $_POST['nameOnCard'];
     $cardNumber = $_POST['cardNumber'];
@@ -87,13 +88,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $cvv = $_POST['cvv'];
     $userId = $_SESSION['users_id'];
 
+    // Calculate shipping cost
+    $shippingCost = 0;
+    if ($shippingMethod === 'DHL') {
+        $shippingCost = 4.5;
+    } else if ($shippingMethod === 'DHL Express') {
+        $shippingCost = 10.5;
+    } else if ($shippingMethod === 'LPD') {
+        $shippingCost = 7.5;
+    }
+
+    $totalAmount = $totalPrice + $shippingCost;
+
     // Insert order
     $stmt = $link->prepare("INSERT INTO orders (users_id, order_date, total_amount, shipping_method, is_express_shipping, is_paid) VALUES (?, NOW(), ?, ?, ?, ?)");
     $stmt->bind_param("idssi", $userId, $totalAmount, $shippingMethod, $isExpressShipping, $isPaid);
 
-    $totalAmount = $totalPrice; // Calculate the total amount from the cart
-    $shippingMethod = 'Standard'; // Example value
-    $isExpressShipping = 0; // Example value
+    $isExpressShipping = ($shippingMethod === 'DHL Express') ? 1 : 0; // Example value
     $isPaid = 1; // Example value, assuming payment is successful
 
     $stmt->execute();
@@ -226,6 +237,20 @@ $link->close();
                             Zip code required.
                         </div>
                     </div>
+
+                    <!-- New shipping options -->
+                    <div class="col-12">
+                        <label for="shipping-method" class="form-label">Shipping Method</label>
+                        <select class="form-select" id="shipping-method" name="shippingMethod" required>
+                            <option value="">Choose...</option>
+                            <option value="DHL">DHL - 4,5€</option>
+                            <option value="DHL Express">DHL Express - 10,5€</option>
+                            <option value="LPD">LPD - 7,5€</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a valid shipping method.
+                        </div>
+                    </div>
                 </div>
 
                 <hr class="my-4">
@@ -323,8 +348,16 @@ $link->close();
                     <strong id="points-value"><?php echo number_format($pointsValue, 2); ?>€</strong>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
-                    <span>Total (EUR)</span>
-                    <strong id="total-price"><?php echo number_format($totalPrice, 2); ?>€</strong>
+                    <span>Zwischensumme (EUR)</span>
+                    <strong id="subtotal-price"><?php echo number_format($totalPrice, 2); ?>€</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Versand</span>
+                    <strong id="shipping-cost">0,00€</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Gesamt (EUR)</span>
+                    <strong id="total-price-with-shipping"><?php echo number_format($totalPrice, 2); ?>€</strong>
                 </li>
             </ul>
 
@@ -341,6 +374,26 @@ $link->close();
 <script src="https://getbootstrap.com/docs/5.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="form-validation.js"></script>
 <script>
+    function updateShippingCost() {
+        var shippingMethod = document.getElementById('shipping-method').value;
+        var subtotalPrice = parseFloat(document.getElementById('subtotal-price').textContent.replace('€', '').replace(',', '.'));
+        var shippingCost = 0;
+
+        if (shippingMethod === 'DHL') {
+            shippingCost = 4.5;
+        } else if (shippingMethod === 'DHL Express') {
+            shippingCost = 10.5;
+        } else if (shippingMethod === 'LPD') {
+            shippingCost = 7.5;
+        }
+
+        document.getElementById('shipping-cost').textContent = shippingCost.toFixed(2).replace('.', ',') + '€';
+        var totalPriceWithShipping = subtotalPrice + shippingCost;
+        document.getElementById('total-price-with-shipping').textContent = totalPriceWithShipping.toFixed(2).replace('.', ',') + '€';
+    }
+
+    document.getElementById('shipping-method').addEventListener('change', updateShippingCost);
+
     document.getElementById('redeem-btn').addEventListener('click', function() {
         var couponCode = document.getElementById('promo-code-input').value;
 
@@ -359,9 +412,10 @@ $link->close();
                 if (response.success) {
                     document.getElementById('total-price').textContent = response.newTotalPrice + '€';
                     var totalDiscountElement = document.getElementById('total-discount');
-                    var currentTotalDiscount = parseFloat(totalDiscountElement.textContent);
-                    var newTotalDiscount = currentTotalDiscount + parseFloat(response.discountAmount);
-                    totalDiscountElement.textContent = newTotalDiscount.toFixed(2) + '€';
+                    var currentTotalDiscount = parseFloat(totalDiscountElement.textContent.replace('€', '').replace(',', '.'));
+                    var newTotalDiscount = currentTotalDiscount + parseFloat(response.discountAmount.replace(',', '.'));
+                    totalDiscountElement.textContent = newTotalDiscount.toFixed(2).replace('.', ',') + '€';
+                    updateShippingCost();  // Recalculate shipping cost after discount
                     alert('Promo code applied. Discount: ' + response.discountAmount + '€');
                 } else {
                     alert(response.message || 'An error occurred. Please try again.');
@@ -371,6 +425,9 @@ $link->close();
 
         xhr.send('couponCode=' + encodeURIComponent(couponCode));
     });
+
+    // Initial update of shipping cost
+    updateShippingCost();
 </script>
 </body>
 </html>
