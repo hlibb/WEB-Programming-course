@@ -18,7 +18,7 @@ function sendEmail($recipientEmail, $recipientName, $emailTemplate) {
         $mail->Host = 'smtp.gmail.com'; // Set the SMTP server to send through
         $mail->SMTPAuth = true;
         $mail->Username = 'webprogrammierung27@gmail.com'; // SMTP username
-        $mail->Password = 'eiih ilpp viyx xdzu'; // SMTP password
+        $mail->Password = 'ffff ffff ffff ffff'; // SMTP password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         $mail->Port = 465;
 
