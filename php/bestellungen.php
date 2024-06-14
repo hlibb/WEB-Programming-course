@@ -151,7 +151,6 @@ $link->close();
                             <th>Artikel</th>
                             <th>Menge</th>
                             <th>Preis</th>
-                            <th>Rabatt</th>
                             <th>Gesamt</th>
                         </tr>
                         </thead>
@@ -161,12 +160,6 @@ $link->close();
                                 <td><?php echo htmlspecialchars($item['product_name']); ?></td>
                                 <td><?php echo htmlspecialchars($item['quantity']); ?></td>
                                 <td><?php echo htmlspecialchars($item['unit_price']); ?>€</td>
-                                <td><?php echo isset($item['rabatt']) ? htmlspecialchars($item['rabatt']) . '%' : '0%'; ?></td>
-                                <?php
-                                $rabatt = isset($item['rabatt']) ? $item['rabatt'] : 0;
-                                $discountedPrice = $item['unit_price'] * (1 - $rabatt / 100);
-                                $itemTotal = $discountedPrice * $item['quantity'];
-                                ?>
                                 <td><?php echo number_format($itemTotal, 2); ?>€</td>
                             </tr>
                         <?php endforeach; ?>
