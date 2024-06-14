@@ -7,8 +7,13 @@ $ga = new PHPGangsta_GoogleAuthenticator();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $emailOrUsername = $_POST['email_or_username'];
-    $password = $_POST['password'];
+    $hashedPassword = $_POST['hashed_password'] ?? null;
     $totpCode = $_POST['totp_code'];
+
+    if ($hashedPassword === null) {
+        header("Location: login.php?error=Fehler bei der Passwortübertragung.");
+        exit();
+    }
 
     $stmt = $link->prepare("SELECT * FROM users WHERE email = ? OR username = ?");
     $stmt->bind_param("ss", $emailOrUsername, $emailOrUsername);
@@ -16,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
 
-    if ($user && password_verify($password, $user['password'])) {
+    if ($user && hash_equals($hashedPassword, $user['password'])) {
         $secret = $user['secret'];
         $checkResult = $ga->verifyCode($secret, $totpCode, 2); // 2 = 2*30sec clock tolerance
 

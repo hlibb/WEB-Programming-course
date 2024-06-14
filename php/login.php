@@ -6,15 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php include '../php/include/headimport.php' ?>
     <script>
-        function validateForm() {
-            var password = document.getElementById('password').value;
-            var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{9,}$/;
+        async function hashPassword(password) {
+            const msgUint8 = new TextEncoder().encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-512', msgUint8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
 
-            if (!passwordRegex.test(password)) {
-                alert('Kennwort muss mindestens 9 Zeichen lang sein und einen Großbuchstaben, Kleinbuchstaben und eine Zahl enthalten.');
-                return false;
-            }
-            return true;
+        async function validateForm(event) {
+            event.preventDefault();
+            const passwordInput = document.getElementById('password');
+            const hashedPasswordInput = document.createElement('input');
+            hashedPasswordInput.type = 'hidden';
+            hashedPasswordInput.name = 'hashed_password';
+            hashedPasswordInput.value = await hashPassword(passwordInput.value);
+            passwordInput.parentNode.appendChild(hashedPasswordInput);
+            passwordInput.value = ''; // Clear the plain text password
+            event.target.submit();
         }
     </script>
     <style>
@@ -34,12 +43,12 @@
                 <a href="artikeluebersicht.php"><button class="btn btn-secondary">Produkte ansehen</button></a>
             </div>
             <p class="text-warning">Für weitere Funktionen bitte einloggen</p>
-            <form action="login_script.php" method="post">
+            <form action="login_script.php" method="post" onsubmit="validateForm(event)">
                 <div class="form-group">E-mail oder Benutzername
                     <input type="text" name="email_or_username" class="form-control" required>
                 </div>
                 <div class="form-group">Passwort
-                    <input type="password" name="password" class="form-control" required>
+                    <input type="password" id="password" name="password" class="form-control" required>
                 </div>
                 <div class="form-group">TOTP Code
                     <input type="text" name="totp_code" class="form-control" required>
