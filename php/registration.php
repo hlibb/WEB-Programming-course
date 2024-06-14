@@ -41,6 +41,16 @@
 </form>
 
 <script>
+    function validateForm() {
+        const password = document.getElementById('password').value;
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{9,}$/;
+        if (!passwordRegex.test(password)) {
+            alert('Kennwort muss mindestens 9 Zeichen lang sein und einen Großbuchstaben, Kleinbuchstaben und eine Zahl enthalten.');
+            return false;
+        }
+        return true;
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
         var form = document.getElementById("registrationForm");
         var usernameInput = document.getElementById("username");

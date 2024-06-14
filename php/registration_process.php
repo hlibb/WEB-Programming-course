@@ -25,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $screen_resolution = $_POST['screen_resolution'];
     $operating_system = $_POST['operating_system'];
-    $password = $_POST['password'];
+    $password = $_POST['password']; // Empfange das Passwort im Klartext
 
     // Passwortanforderungen überprüfen
     $passwordRegex = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{9,}$/';
@@ -37,8 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $username = htmlspecialchars($username);
         $email = filter_var($email, FILTER_SANITIZE_EMAIL);
 
-        $randomPassword = generateRandomPassword();
-        $hashedPassword = password_hash($randomPassword, PASSWORD_DEFAULT);
+        $randomPassword = generateRandomPassword(); // Generiere ein temporäres Passwort
 
         if ($link->connect_error) {
             die("Connection failed: " . $link->connect_error);
@@ -54,6 +53,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($result->num_rows > 0) {
             $errorMessage = "Email already exists.";
         } else {
+            // Hash das temporäre Passwort
+            $hashedPassword = password_hash($randomPassword, PASSWORD_DEFAULT);
+
             $stmt = $link->prepare("INSERT INTO users (name, surname, username, email, password, password_status, screen_resolution, operating_system) VALUES (?, ?, ?, ?, ?, 'temporary', ?, ?)");
             if ($stmt === false) {
                 die("Prepare failed: " . $link->error);
@@ -119,5 +121,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
     }
+}
+
+if (!empty($errorMessage)) {
+    // Render the form with the error message
+    include 'registration.php';
 }
 ?>
