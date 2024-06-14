@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS `cart-header` (
     `users_id` INT NOT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (`users_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
-);
+); --
 
 CREATE TABLE IF NOT EXISTS `cart-body` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
