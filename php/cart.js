@@ -26,12 +26,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const applyPoints = () => {
+        const usePointsCheckbox = document.getElementById('use-points-checkbox');
+        const usePoints = usePointsCheckbox ? usePointsCheckbox.checked : false;
         fetch('apply_points.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ use_points: true })
+            body: JSON.stringify({ use_points: usePoints })
         })
             .then(response => response.json())
             .then(data => {

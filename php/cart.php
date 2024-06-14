@@ -17,6 +17,7 @@ function calculateDiscount($price, $quantity) {
 
 $userId = $_SESSION['users_id'];
 
+// Set is_active to false for the current user on page load
 $resetStmt = $link->prepare("UPDATE points SET is_active = FALSE WHERE users_id = ?");
 $resetStmt->bind_param("i", $userId);
 $resetStmt->execute();
@@ -114,7 +115,7 @@ $link->close();
                 </tr>
             <?php endforeach; ?>
             <tr>
-                <td><input class="form-check-input ms-2" type="checkbox" id="use-points-checkbox" onchange="applyPoints()"></td>
+                <td><input class="form-check-input ms-2" type="checkbox" id="use-points-checkbox"></td>
                 <td>
                     <div class="points-row">
                         Punkte verwenden:
