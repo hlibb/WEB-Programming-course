@@ -4,18 +4,6 @@
     <meta charset="UTF-8">
     <title>Accounterstellung</title>
     <?php include '../php/include/headimport.php' ?>
-    <script>
-        function validateForm() {
-            var password = document.getElementById('password').value;
-            var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{9,}$/;
-
-            if (!passwordRegex.test(password)) {
-                alert('Kennwort muss mindestens 9 Zeichen lang sein und einen Großbuchstaben, Kleinbuchstaben und eine Zahl enthalten.');
-                return false;
-            }
-            return true;
-        }
-    </script>
 </head>
 <body>
 <h1>Accounterstellung</h1>

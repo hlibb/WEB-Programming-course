@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS `logs` (
 CREATE TABLE IF NOT EXISTS `points` (
     `users_id` INT NOT NULL,
     `points` INT NOT NULL DEFAULT 100,
+    is_active BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY (`users_id`),
     FOREIGN KEY (`users_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 );
