@@ -8,10 +8,10 @@
 <body>
 <h1>Accounterstellung</h1>
 <p>Bitte füllen Sie das Formular zur Accounterstellung aus.</p>
-<?php if (!empty($errorMessage)): ?>
-    <p style="color: red;"><?php echo $errorMessage; ?></p>
+<?php if (isset($_GET['error'])): ?>
+    <p style="color: red;"><?php echo htmlspecialchars($_GET['error']); ?></p>
 <?php endif; ?>
-<form id="registrationForm" method="post" action='registration_process.php' onsubmit="return validateForm()">
+<form id="registrationForm" method="post" action='registration_process.php' onsubmit="return validateForm(event)">
     <fieldset>
         <label for="vorname">Vorname:
             <input id="name" name="name" type="text" required/>
@@ -51,6 +51,7 @@
     }
 
     async function validateForm(event) {
+        event.preventDefault(); // Stop form submission
         const password = document.getElementById('password').value;
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{9,}$/;
         if (!passwordRegex.test(password)) {
@@ -63,6 +64,8 @@
         document.getElementById('hashed_password').value = hashedPassword;
         document.getElementById('password').value = '';
 
+        // Resume form submission
+        event.target.submit();
         return true;
     }
 
@@ -133,7 +136,7 @@
             }
         });
 
-        form.addEventListener("submit", function (event) {
+        form.addEventListener("submit", async function (event) {
             document.getElementById("screen_resolution").value = window.screen.width + "x" + window.screen.height;
 
             var userAgent = window.navigator.userAgent;
