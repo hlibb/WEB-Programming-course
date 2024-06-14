@@ -29,6 +29,14 @@
         </div>
         <button type="submit" class="btn btn-primary">Passwort zurücksetzen</button>
     </form>
+    <?php
+    if (isset($_GET['error'])) {
+        echo "<p class='text-danger'>" . htmlspecialchars($_GET['error']) . "</p>";
+    }
+    if (isset($_GET['message'])) {
+        echo "<p class='text-success'>" . htmlspecialchars($_GET['message']) . "</p>";
+    }
+    ?>
 </div>
 </body>
 </html>

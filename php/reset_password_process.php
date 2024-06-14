@@ -29,15 +29,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($user) {
         $randomPassword = generateRandomPassword();
-        $hashedPassword = password_hash($randomPassword, PASSWORD_DEFAULT);
+        $hashedPassword = hash('sha512', $randomPassword); // Hashing the password
 
         $stmt = $link->prepare("UPDATE users SET password = ?, password_status = 'temporary' WHERE email = ?");
         $stmt->bind_param("ss", $hashedPassword, $email);
         $stmt->execute();
         $stmt->close();
 
-        $emailTemplate = getResetPasswordEmail($user['name'], $randomPassword);
-        sendEmail($email, $user['name'], $emailTemplate);
+        $emailTemplate = getResetPasswordEmail($user['name'], $randomPassword); // Assuming this function generates the email template
+        sendEmail($email, $user['name'], $emailTemplate); // Send the email with the new password
 
         header("Location: login.php?message=Ein neues Passwort wurde an Ihre E-Mail-Adresse gesendet.");
         exit();

@@ -374,8 +374,8 @@ $link->close();
 <script>
     function updateShippingCost() {
         var shippingMethod = document.getElementById('shipping-method').value;
-        var subtotalPrice = parseFloat(document.getElementById('subtotal-price').textContent.replace('€', '').replace(',', '.'));
-        var pointsValue = parseFloat(document.getElementById('points-value').textContent.replace('€', '').replace(',', '.'));
+        var subtotalPrice = parseFloat(document.getElementById('subtotal-price').textContent.replace('€', '').replace(/\./g, '').replace(',', '.'));
+        var pointsValue = parseFloat(document.getElementById('points-value').textContent.replace('€', '').replace(/\./g, '').replace(',', '.'));
         var shippingCost = 0;
 
         if (shippingMethod === 'DHL') {
@@ -386,10 +386,26 @@ $link->close();
             shippingCost = 7.5;
         }
 
-        document.getElementById('shipping-cost').textContent = shippingCost.toFixed(2).replace('.', ',') + '€';
+        // Ensure subtotalPrice is multiplied correctly
+        subtotalPrice *= 1000;
+
+        // Update the shipping cost in the UI
+        document.getElementById('shipping-cost').textContent = shippingCost.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '€';
+
+        // Calculate the total price with shipping
         var totalPriceWithShipping = subtotalPrice + shippingCost - pointsValue;
-        document.getElementById('total-price-with-shipping').textContent = totalPriceWithShipping.toFixed(2).replace('.', ',') + '€';
+
+        // Update the total price with shipping in the UI
+        document.getElementById('total-price-with-shipping').textContent = totalPriceWithShipping.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '€';
     }
+
+
+
+
+
+
+
+
 
     document.getElementById('shipping-method').addEventListener('change', updateShippingCost);
 
